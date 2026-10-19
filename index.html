@@ -1,0 +1,529 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>محفظة الكريبتو | Crypto Portfolio</title>
+<style>
+:root {
+  --bg:#0b1120; --panel:#121c2e; --line:#26344b;
+  --text:#edf3ff; --muted:#91a2bd; --green:#39d98a;
+  --red:#ff6b7a; --blue:#72a7ff;
+}
+*{box-sizing:border-box}
+body {
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:Tahoma,Arial,sans-serif;line-height:1.7;
+}
+.wrap{width:min(1120px,94%);margin:28px auto 60px}
+header{display:flex;justify-content:space-between;align-items:center;
+  gap:15px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-size:25px;margin:0}
+h2{font-size:17px;margin:0 0 12px}
+p{margin:5px 0}
+.muted{color:var(--muted);font-size:13px}
+.live{color:var(--green);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.panel,.stat{background:var(--panel);border:1px solid var(--line);
+  border-radius:16px;padding:18px;min-width:0}
+.stat .label{font-size:13px;color:var(--muted)}
+.stat .value{font-size:clamp(21px,3vw,30px);font-weight:700;
+  direction:ltr;text-align:right;overflow-wrap:anywhere}
+.green{color:var(--green)}.red{color:var(--red)}
+.toolbar{display:flex;justify-content:space-between;gap:12px;
+  align-items:center;flex-wrap:wrap;margin:24px 0 12px}
+button,input{font:inherit}
+button{border:0;border-radius:9px;padding:10px 15px;cursor:pointer;
+  background:#315de8;color:white;font-weight:bold}
+button:disabled{opacity:.5;cursor:wait}
+button.secondary{background:#26354c}
+button.danger{background:#592635;padding:7px 10px}
+input{width:100%;min-width:0;border:1px solid var(--line);
+  border-radius:9px;padding:10px;background:#0b1424;color:var(--text)}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
+.form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;align-items:end}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.search{max-width:280px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th,td{text-align:right;padding:13px 10px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-size:12px;font-weight:normal}
+td{font-size:14px}
+.coin{font-weight:bold;direction:ltr;text-align:right}
+.sub{font-size:12px;color:var(--muted)}
+.pill{font-size:11px;padding:3px 7px;border-radius:7px;
+  background:#26354c;color:var(--muted)}
+.notice{padding:12px;border-radius:10px;background:#1b2940;
+  color:#c8d8f5;font-size:13px;margin-top:12px}
+.status{font-size:12px;color:var(--muted);margin-top:8px}
+footer{margin-top:18px;color:var(--muted);font-size:12px}
+a{color:var(--blue)}
+@media(max-width:760px){
+ .grid{grid-template-columns:1fr}
+ .form{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .wrap{margin-top:18px}
+ .panel{padding:13px}
+ h1{font-size:21px}
+}
+@media(max-width:420px){.form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>◈ محفظة الكريبتو</h1>
+    <p class="muted">متابعة قيمة عملاتك بالدولار والجنيه المصري</p>
+  </div>
+  <div>
+    <span class="live">● LIVE PRICES</span>
+    <div id="lastUpdate" class="muted">في انتظار الأسعار...</div>
+  </div>
+</header>
+
+<section class="grid">
+  <div class="stat">
+    <div class="label">إجمالي المحفظة بالدولار</div>
+    <div class="value" id="totalUsd">$0.00</div>
+    <div class="muted">حسب أسعار Binance Spot</div>
+  </div>
+  <div class="stat">
+    <div class="label">إجمالي المحفظة بالجنيه</div>
+    <div class="value" id="totalEgp">—</div>
+    <div class="muted">باستخدام سعر بيع USDT على P2P</div>
+  </div>
+  <div class="stat">
+    <div class="label">سعر بيع USDT / EGP</div>
+    <div class="value" id="p2pPrice">—</div>
+    <div id="p2pStatus" class="status">جاري محاولة جلب السعر...</div>
+  </div>
+</section>
+
+<div class="toolbar">
+  <h2>عملاتي</h2>
+  <div class="actions">
+    <button class="secondary" id="refreshBtn" onclick="refreshAll(true)">
+      تحديث الأسعار ↻
+    </button>
+  </div>
+</div>
+
+<section class="panel">
+  <h2>إضافة عملة إلى المحفظة</h2>
+  <form id="addForm" class="form">
+    <div>
+      <label for="symbol">رمز العملة</label>
+      <input id="symbol" placeholder="مثال: BTC أو DOGE"
+        autocomplete="off" required maxlength="20">
+    </div>
+    <div>
+      <label for="quantity">الكمية اللي تمتلكها</label>
+      <input id="quantity" type="number" min="0" step="any"
+        placeholder="مثال: 0.25" required>
+    </div>
+    <div>
+      <label for="cost">سعر شرائك بالدولار (اختياري)</label>
+      <input id="cost" type="number" min="0" step="any"
+        placeholder="مثال: 0.50">
+    </div>
+    <button type="submit">+ إضافة العملة</button>
+  </form>
+  <p class="muted">اكتب رمز العملة فقط، بدون USDT. لو العملة موجودة بالفعل، هتتجمع الكمية مع الكمية السابقة.</p>
+</section>
+
+<div class="toolbar">
+  <h2>تفاصيل المحفظة</h2>
+  <input id="search" class="search" placeholder="ابحث عن عملة...">
+</div>
+
+<section class="panel table-wrap">
+<table>
+<thead>
+<tr>
+  <th>العملة</th>
+  <th>الكمية</th>
+  <th>السعر بالدولار</th>
+  <th>القيمة بالدولار</th>
+  <th>القيمة بالجنيه</th>
+  <th>الربح / الخسارة</th>
+  <th>حذف</th>
+</tr>
+</thead>
+<tbody id="coinRows"></tbody>
+</table>
+<div id="empty" class="notice">
+  محفظتك فاضية. أضف أول عملة من النموذج بالأعلى.
+</div>
+<div id="error" class="notice" hidden></div>
+</section>
+
+<div class="notice">
+  <strong>ملاحظات مهمة</strong>
+  <p>• الأسعار مأخوذة من سوق Binance Spot لزوج العملة مقابل USDT، وليست سعر بيع مضمونًا.</p>
+  <p>• سعر P2P يتغير حسب عروض التجار وحدود الصفقة ووسيلة الدفع. السعر المعروض تقديري وليس ضمانًا أنك هتبيع كل الكمية به.</p>
+  <p>• بيانات المحفظة محفوظة محليًا على نفس المتصفح والجهاز. مسح بيانات الموقع قد يحذفها.</p>
+  <p>• الموقع للمتابعة فقط، ولا ينفذ صفقات ولا يحتاج مفاتيح API أو كلمة مرور Binance.</p>
+</div>
+
+<footer>
+  أسعار السوق العامة من Binance. التحديث تلقائي كل 5 ثوانٍ للعملات،
+  ومحاولة تحديث P2P كل 30 ثانية.
+  <br>
+  <a href="https://p2p.binance.com/" target="_blank" rel="noopener">فتح Binance P2P</a>
+  ·
+  <a href="https://www.binance.com/" target="_blank" rel="noopener">Binance</a>
+</footer>
+</div>
+
+<script>
+"use strict";
+
+const STORAGE_KEY = "cryptoPortfolioEGP_v1";
+const PRICE_INTERVAL = 5000;
+const P2P_INTERVAL = 30000;
+
+let coins = loadCoins();
+let prices = {};
+let p2pPrice = null;
+let p2pUpdatedAt = null;
+let refreshing = false;
+
+function loadCoins() {
+  try {
+    const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    if (!Array.isArray(data)) return [];
+    return data.filter(c =>
+      c && typeof c.symbol === "string" &&
+      Number.isFinite(Number(c.quantity)) &&
+      Number(c.quantity) >= 0
+    ).map(c => ({
+      symbol: c.symbol.toUpperCase(),
+      quantity: Number(c.quantity),
+      cost: c.cost == null || c.cost === "" ? null : Number(c.cost)
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function saveCoins() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(coins));
+}
+
+function fmt(n, max = 2) {
+  if (!Number.isFinite(n)) return "—";
+  return n.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: max
+  });
+}
+
+function money(n, currency) {
+  if (!Number.isFinite(n)) return "—";
+  return currency + " " + fmt(n, 2);
+}
+
+function safeText(s) {
+  return String(s).replace(/[&<>"']/g, ch => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;",
+    '"':"&quot;", "'":"&#39;"
+  }[ch]));
+}
+
+function setError(message) {
+  const el = document.getElementById("error");
+  el.textContent = message;
+  el.hidden = !message;
+}
+
+function setStatus(message) {
+  document.getElementById("p2pStatus").textContent = message;
+}
+
+function saveAndRender() {
+  saveCoins();
+  render();
+}
+
+function getUsdValue(coin) {
+  const p = prices[coin.symbol];
+  if (Number.isFinite(p) && p > 0) return p * coin.quantity;
+  return null;
+}
+
+function render() {
+  const total = coins.reduce((sum, c) => {
+    const v = getUsdValue(c);
+    return sum + (v === null ? 0 : v);
+  }, 0);
+
+  const hasMissing = coins.some(c => getUsdValue(c) === null);
+  document.getElementById("totalUsd").textContent =
+    (hasMissing ? "≈ " : "") + money(total, "$");
+
+  document.getElementById("totalEgp").textContent =
+    p2pPrice ? money(total * p2pPrice, "EGP") : "غير متاح";
+
+  document.getElementById("p2pPrice").textContent =
+    p2pPrice ? fmt(p2pPrice, 4) + " EGP" : "غير متاح";
+
+  const search = document.getElementById("search").value.trim().toUpperCase();
+  const filtered = coins.filter(c => c.symbol.includes(search));
+  const tbody = document.getElementById("coinRows");
+  tbody.innerHTML = "";
+
+  document.getElementById("empty").hidden = coins.length > 0;
+
+  filtered.forEach((c) => {
+    const price = prices[c.symbol];
+    const value = getUsdValue(c);
+    const egp = value !== null && p2pPrice ? value * p2pPrice : null;
+    const pnl = c.cost !== null && c.cost > 0 && value !== null
+      ? (price - c.cost) * c.quantity : null;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>
+        <div class="coin">${safeText(c.symbol)}</div>
+        <div class="sub">${safeText(c.symbol)} / USDT</div>
+      </td>
+      <td>${fmt(c.quantity, 8)}</td>
+      <td>${price ? "$" + fmt(price, 8) : "تحميل..."}</td>
+      <td>${value !== null ? money(value, "$") : "غير متاح"}</td>
+      <td>${egp !== null ? money(egp, "EGP") : "—"}</td>
+      <td class="${pnl === null ? "" : pnl >= 0 ? "green" : "red"}">
+        ${pnl === null ? "—" : (pnl >= 0 ? "+" : "") + money(pnl, "$")}
+      </td>
+      <td><button class="danger" data-delete="${safeText(c.symbol)}">حذف</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (coins.length && !filtered.length) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="7">لا توجد عملات مطابقة للبحث.</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+document.getElementById("coinRows").addEventListener("click", e => {
+  const btn = e.target.closest("[data-delete]");
+  if (!btn) return;
+  const symbol = btn.dataset.delete;
+  if (!confirm("هل تريد حذف " + symbol + " من المحفظة؟")) return;
+  coins = coins.filter(c => c.symbol !== symbol);
+  delete prices[symbol];
+  saveAndRender();
+});
+
+document.getElementById("search").addEventListener("input", render);
+
+document.getElementById("addForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const symbol = document.getElementById("symbol").value
+    .trim().toUpperCase().replace(/\s/g, "");
+  const quantity = Number(document.getElementById("quantity").value);
+  const costText = document.getElementById("cost").value.trim();
+  const cost = costText === "" ? null : Number(costText);
+
+  if (!/^[A-Z0-9]{2,20}$/.test(symbol)) {
+    alert("اكتب رمز عملة صحيح، مثل BTC أو DOGE.");
+    return;
+  }
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    alert("اكتب كمية أكبر من صفر.");
+    return;
+  }
+  if (cost !== null && (!Number.isFinite(cost) || cost <= 0)) {
+    alert("سعر الشراء لازم يكون أكبر من صفر أو اتركه فارغًا.");
+    return;
+  }
+
+  const existing = coins.find(c => c.symbol === symbol);
+  if (existing) {
+    const oldQty = existing.quantity;
+    const newQty = oldQty + quantity;
+    if (existing.cost !== null && cost !== null) {
+      existing.cost = ((existing.cost * oldQty) + (cost * quantity)) / newQty;
+    } else if (existing.cost === null && cost !== null) {
+      existing.cost = cost;
+    } else if (cost === null) {
+      // Keep existing average cost.
+    }
+    existing.quantity = newQty;
+  } else {
+    coins.push({ symbol, quantity, cost });
+  }
+
+  e.target.reset();
+  saveAndRender();
+  await refreshCoin(symbol);
+});
+
+async function fetchJson(url, options = {}, timeoutMs = 9000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      cache: "no-store"
+    });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    return await response.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchSpotPrice(symbol) {
+  // Public market-data endpoint; no API key required.
+  const url = "https://data-api.binance.vision/api/v3/ticker/price?symbol="
+    + encodeURIComponent(symbol + "USDT");
+  const data = await fetchJson(url);
+  const price = Number(data.price);
+  if (!Number.isFinite(price) || price <= 0) {
+    throw new Error("Invalid price");
+  }
+  return price;
+}
+
+async function refreshCoin(symbol) {
+  try {
+    prices[symbol] = await fetchSpotPrice(symbol);
+    setError("");
+  } catch (err) {
+    console.warn("Price unavailable for", symbol, err);
+    if (!prices[symbol]) {
+      setError("تعذر جلب سعر بعض العملات. تأكد من رمز العملة أو جرّب لاحقًا. "
+        + "قد تمنع الشبكة الاتصال بواجهة Binance.");
+    }
+  }
+  render();
+}
+
+async function refreshAll(manual = false) {
+  if (refreshing) return;
+  refreshing = true;
+  const btn = document.getElementById("refreshBtn");
+  if (manual) {
+    btn.disabled = true;
+    btn.textContent = "جاري التحديث...";
+  }
+
+  try {
+    await Promise.all(coins.map(c => refreshCoin(c.symbol)));
+    document.getElementById("lastUpdate").textContent =
+      "آخر تحديث: " + new Date().toLocaleTimeString("ar-EG");
+  } finally {
+    refreshing = false;
+    btn.disabled = false;
+    btn.textContent = "تحديث الأسعار ↻";
+    render();
+  }
+}
+
+function extractP2PPrice(data) {
+  // Public quote endpoint may change its response schema.
+  const candidates = [
+    data?.data?.price,
+    data?.data?.sellPrice,
+    data?.price,
+    data?.data?.buyPrice
+  ];
+  for (const v of candidates) {
+    const n = Number(v);
+    if (v !== undefined && v !== null && Number.isFinite(n) && n > 0) {
+      return n;
+    }
+  }
+  return null;
+}
+
+async function refreshP2P() {
+  setStatus("جاري جلب سعر البيع...");
+  const errors = [];
+
+  // First try Binance's public C2C quote-price endpoint.
+  try {
+    const url = "https://www.binance.com/bapi/c2c/v1/public/c2c/agent/quote-price"
+      + "?fiat=EGP&asset=USDT&tradeType=SELL";
+    const data = await fetchJson(url);
+    const price = extractP2PPrice(data);
+    if (price) {
+      p2pPrice = price;
+      p2pUpdatedAt = Date.now();
+      setStatus("سعر بيع USDT · تحديث " +
+        new Date(p2pUpdatedAt).toLocaleTimeString("ar-EG"));
+      render();
+      return;
+    }
+    errors.push("لم يُرجع مصدر الأسعار سعرًا معروفًا");
+  } catch (err) {
+    errors.push("واجهة السعر: " + err.message);
+  }
+
+  // Fallback: request public sell-side ads and estimate from returned offers.
+  // Direct browser access may fail because of CORS or Binance restrictions.
+  try {
+    const url = "https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search";
+    const body = {
+      page: 1,
+      rows: 10,
+      payTypes: [],
+      publisherType: null,
+      asset: "USDT",
+      tradeType: "SELL",
+      fiat: "EGP"
+    };
+    const data = await fetchJson(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    const list = Array.isArray(data?.data) ? data.data : [];
+    const pricesFound = list
+      .map(item => Number(item?.adv?.price))
+      .filter(n => Number.isFinite(n) && n > 0)
+      .sort((a, b) => b - a);
+
+    if (pricesFound.length) {
+      // Estimate a sell-side reference from the returned ads.
+      // This is NOT a guaranteed executable price for the user's amount.
+      p2pPrice = pricesFound[Math.floor(pricesFound.length / 2)];
+      p2pUpdatedAt = Date.now();
+      setStatus("سعر استرشادي من عروض P2P · تحديث " +
+        new Date(p2pUpdatedAt).toLocaleTimeString("ar-EG"));
+      render();
+      return;
+    }
+    errors.push("لا توجد عروض قابلة للقراءة");
+  } catch (err) {
+    errors.push("واجهة الإعلانات: " + err.message);
+  }
+
+  // Never invent a price. Retain the last valid value but mark it stale.
+  if (p2pPrice !== null && p2pUpdatedAt) {
+    setStatus("تعذر التحديث؛ آخر سعر معروف من " +
+      new Date(p2pUpdatedAt).toLocaleTimeString("ar-EG"));
+  } else {
+    setStatus("غير متاح: قد يكون الاتصال محجوبًا من المتصفح.");
+  }
+  console.warn("P2P price unavailable:", errors);
+  render();
+}
+
+async function init() {
+  render();
+  await Promise.all([refreshAll(), refreshP2P()]);
+  setInterval(() => refreshAll(), PRICE_INTERVAL);
+  setInterval(() => refreshP2P(), P2P_INTERVAL);
+}
+
+init();
+</script>
+</body>
+</html>
