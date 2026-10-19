@@ -238,11 +238,6 @@ tbody tr:last-child td{border-bottom:0}
 (() => {
 "use strict";
 
-/* STORAGE
-   The app attempts to find an existing portfolio array in localStorage.
-   New data is saved under coinfolio_glass_v2. Keep a browser backup before
-   replacing your previous app if its storage format was customized.
-*/
 const STORAGE_KEY = "coinfolio_glass_v2";
 const $ = id => document.getElementById(id);
 const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
@@ -538,7 +533,6 @@ async function resolveLogo(asset) {
     }
   } catch(error) {
     console.warn("Logo lookup failed for",asset.symbol,error);
-    // Keep a clean symbol badge when an external logo cannot be found.
   }
 }
 async function resolveAllLogos() {
@@ -618,30 +612,60 @@ function connectLivePrices() {
   }
 }
 
-/* Binance P2P buy-side USDT/EGP estimate.
-   Binance may block direct browser requests through CORS. If that happens,
-   the UI clearly marks the rate unavailable instead of inventing a price.
-*/
+/* Binance P2P rate using the original SELL-side USDT/EGP method. */
 async function fetchP2PRate() {
-  const payload={
-    page:1,rows:10,asset:"USDT",fiat:"EGP",tradeType:"BUY",
-    payTypes:[],publisherType:null,merchantCheck:false
+  const payload = {
+    page: 1,
+    rows: 10,
+    asset: "USDT",
+    fiat: "EGP",
+    tradeType: "SELL",
+    payTypes: [],
+    publisherType: null,
+    merchantCheck: false
   };
+
   try {
-    const response=await fetch("https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search",{
-      method:"POST",headers:{"Content-Type":"application/json","Accept":"*/*"},
-      body:JSON.stringify(payload),cache:"no-store"
-    });
-    if(!response.ok) throw new Error("P2P HTTP "+response.status);
-    const data=await response.json();
-    const ads=(data.data||[]).map(item=>num(item.adv?.price)).filter(p=>p>0).sort((a,b)=>a-b);
-    if(!ads.length) throw new Error("No P2P ads returned");
-    state.usdEgp=ads[Math.floor(ads.length/2)];
-    p2pSource="Binance P2P · USDT/EGP estimate";
-    persist();render();
-  } catch(error) {
-    p2pSource=state.usdEgp>0?"Last saved rate · P2P refresh blocked":"P2P unavailable (browser access blocked)";
-    console.warn("Binance P2P could not be accessed directly",error);
+    const response = await fetch(
+      "https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "*/*"
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store"
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Binance P2P HTTP " + response.status);
+    }
+
+    const data = await response.json();
+
+    const ads = (data.data || [])
+      .map(item => num(item.adv?.price))
+      .filter(price => price > 0)
+      .sort((a, b) => a - b);
+
+    if (!ads.length) {
+      throw new Error("No P2P ads returned");
+    }
+
+    /* Use the middle price from the sorted ads, as in the old code. */
+    state.usdEgp = ads[Math.floor(ads.length / 2)];
+    p2pSource = "Binance P2P · USDT/EGP estimate";
+
+    persist();
+    render();
+  } catch (error) {
+    p2pSource = state.usdEgp > 0
+      ? "Last saved rate · P2P refresh blocked"
+      : "P2P unavailable (browser access blocked)";
+
+    console.warn("Binance P2P could not be accessed directly", error);
     render();
   }
 }
