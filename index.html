@@ -538,59 +538,68 @@
       }
     }
 
-    async function fetchP2PRate() {
-      if (state.p2pBusy) return;
-      state.p2pBusy = true;
-      setText("p2pStatus", "Updating...");
-      try {
-        const response = await fetchWithTimeout(P2P_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify({
-            page: 1,
-            rows: 20,
-            payTypes: [],
-            countries: [],
-            publisherType: null,
-            asset: "USDT",
-            fiat: "EGP",
-            tradeType: "BUY"
-          })
-        }, 10000);
 
-        if (!response.ok) throw new Error("P2P HTTP " + response.status);
-        const data = await response.json();
-        const ads = Array.isArray(data.data) ? data.data : [];
-        const offers = ads
-          .map(item => Number(item && item.adv && item.adv.price))
-          .filter(p => Number.isFinite(p) && p > 0)
-          .sort((a, b) => a - b);
+async function fetchP2PRate() {
+  if (state.p2pBusy) return;
 
-        if (!offers.length) throw new Error("No P2P offers received");
+  state.p2pBusy = true;
+  setText("p2pStatus", "Updating...");
 
-        state.p2pRate = offers[0];
-        state.lastP2PTime = new Date();
-        setText("p2pRate", money(state.p2pRate, "EGP"));
-        setText("p2pStatus", "Quote received");
-        setText("p2pUpdated", state.lastP2PTime.toLocaleTimeString());
-        setText("p2pNote",
-          "Lowest price in the returned ads for buying USDT. Available payment methods, merchant limits and actual offers may differ.");
-        render();
-      } catch (err) {
-        console.warn("P2P quote unavailable:", err);
-        setText("p2pStatus", "Unavailable");
-        setText("p2pUpdated", "No fresh quote");
-        setText("p2pNote",
-          "The browser may be blocked by Binance P2P CORS or the service may be unavailable. EGP values will appear when a valid quote is received.");
-        if (state.p2pRate === null) setText("p2pRate", "EGP --");
-        render();
-      } finally {
-        state.p2pBusy = false;
-      }
+  try {
+    const response = await fetch(P2P_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        page: 1,
+        rows: 10,
+        payTypes: [],
+        countries: [],
+        publisherType: null,
+        asset: "USDT",
+        fiat: "EGP",
+        tradeType: "BUY"
+      }),
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
     }
+
+    const data = await response.json();
+    const offers = (data.data || [])
+      .map(item => Number(item.adv?.price))
+      .filter(price => Number.isFinite(price) && price > 0)
+      .sort((a, b) => a - b);
+
+    if (!offers.length) {
+      throw new Error("No P2P offers");
+    }
+
+    state.p2pRate = offers[0];
+    state.lastP2PTime = new Date();
+
+    setText("p2pRate", money(state.p2pRate, "EGP"));
+    setText("p2pStatus", "Quote received");
+    setText("p2pUpdated", state.lastP2PTime.toLocaleTimeString());
+    setText("p2pNote", "Lowest returned Binance P2P offer for buying USDT.");
+    render();
+  } catch (error) {
+    console.error("Binance P2P error:", error);
+    setText("p2pStatus", "Request failed");
+    setText("p2pNote", "Binance P2P did not respond. Check the browser Console for the exact error.");
+    if (state.p2pRate === null) {
+      setText("p2pRate", "EGP --");
+      setText("p2pUpdated", "No fresh quote");
+    }
+  } finally {
+    state.p2pBusy = false;
+  }
+}
+
 
     function render() {
       const body = $("portfolioBody");
