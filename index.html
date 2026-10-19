@@ -1,176 +1,162 @@
 
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Coinfolio — Crypto Portfolio</title>
 <style>
-:root {
-  color-scheme: dark;
-  --bg:#080b12; --panel:#101622; --panel2:#151d2b;
-  --border:#253044; --text:#edf2fc; --muted:#8e9bb1;
-  --green:#28d99a; --red:#ff647c; --blue:#7b9cff;
-}
+:root{color-scheme:dark;--bg:#080b12;--panel:#101622;--panel2:#151d2b;--border:#253044;--text:#edf2fc;--muted:#8e9bb1;--green:#28d99a;--red:#ff647c;--blue:#7b9cff}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
-button,input,select{font:inherit}
-button{cursor:pointer}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif}
+button,input{font:inherit}
+button{cursor:pointer;border:1px solid var(--border);border-radius:10px;padding:10px 14px;background:var(--panel2);color:var(--text)}
+button.primary{background:var(--green);color:#06130e;border-color:var(--green);font-weight:700}
+button.danger{color:var(--red)}
+button:disabled{opacity:.55;cursor:wait}
 .wrap{max-width:1150px;margin:auto;padding:24px 18px 50px}
 header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:26px}
 .brand{display:flex;align-items:center;gap:12px}
 .logo{width:45px;height:45px;border-radius:14px;background:linear-gradient(135deg,#7b9cff,#28d99a);display:grid;place-items:center;color:#07111b;font-size:24px;font-weight:bold}
 h1{font-size:24px;margin:0 0 5px}
+h2{font-size:18px;margin:0}
 .subtitle,.muted{color:var(--muted);font-size:13px}
 .status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
-button{border:1px solid var(--border);border-radius:10px;padding:10px 14px;background:var(--panel2);color:var(--text)}
-button.primary{background:var(--green);color:#06130e;border-color:var(--green);font-weight:bold}
-button.danger{color:var(--red)}
-button:disabled{opacity:.5;cursor:wait}
 .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}
 .card,.panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;min-width:0}
 .card .label{color:var(--muted);font-size:13px;margin-bottom:12px}
-.big{font-size:clamp(20px,3vw,29px);font-weight:bold;overflow-wrap:anywhere;direction:ltr;text-align:right}
+.big{font-size:clamp(20px,3vw,29px);font-weight:bold;overflow-wrap:anywhere}
 .subvalue{color:var(--muted);font-size:13px;margin-top:8px}
 .green{color:var(--green)}.red{color:var(--red)}
 .ratebox{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#101c20;border:1px solid #20473d;border-radius:14px;padding:16px;margin-bottom:20px}
-.ratevalue{font-size:22px;font-weight:bold;direction:ltr}
+.ratevalue{font-size:22px;font-weight:bold}
 .rate-note{font-size:12px;color:var(--muted);margin-top:6px}
 .sectionhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
-h2{font-size:18px;margin:0}
-.panel{margin-bottom:20px}
 .formgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px}
-.field input{width:100%;background:#080e18;border:1px solid var(--border);border-radius:9px;padding:12px;color:var(--text);outline:none;direction:ltr}
+.field input{width:100%;background:#080e18;border:1px solid var(--border);border-radius:9px;padding:12px;color:var(--text);outline:none}
 .field input:focus{border-color:var(--blue)}
 .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
 .tablewrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:780px}
-th,td{padding:15px 12px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+th,td{padding:15px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
 th{font-size:12px;color:var(--muted);font-weight:normal}
 td{font-size:13px}
 .coin{display:flex;align-items:center;gap:10px}
 .coinicon{width:36px;height:36px;border-radius:12px;background:var(--panel2);display:grid;place-items:center;font-size:12px;font-weight:bold;color:var(--blue)}
-.coinname{font-weight:bold;direction:ltr;text-align:right}
-.coinqty{color:var(--muted);font-size:11px;margin-top:4px;direction:ltr;text-align:right}
-.num{direction:ltr;text-align:right}
+.coinname{font-weight:bold}
+.coinqty{color:var(--muted);font-size:11px;margin-top:4px}
+.num{text-align:left;font-variant-numeric:tabular-nums}
 .empty{text-align:center;color:var(--muted);padding:35px 10px}
 .smallbtn{padding:7px 10px;font-size:12px}
+.panel{margin-bottom:20px}
+#notice,#errorBox{font-size:12px;margin-top:12px;line-height:1.7}
+#notice{color:var(--muted)}
+#errorBox{display:none;color:var(--red)}
 .footer{text-align:center;color:var(--muted);font-size:12px;line-height:1.8;margin-top:24px}
-#errorBox{display:none;margin-top:12px;color:var(--red);font-size:12px;line-height:1.7}
-#notice{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.7}
-@media(max-width:760px){
- .cards{grid-template-columns:1fr}
- .formgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
- .wrap{padding:17px 12px 35px}
- .card,.panel{padding:16px}
-}
+@media(max-width:760px){.cards{grid-template-columns:1fr}.formgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:17px 12px 35px}.card,.panel{padding:16px}}
 @media(max-width:420px){.formgrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div class="brand">
-      <div class="logo">₿</div>
-      <div>
-        <h1>Coinfolio</h1>
-        <div class="subtitle">محفظتك الرقمية — أسعار مباشرة</div>
-      </div>
-    </div>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">جاري الاتصال...</span></div>
-      <button id="refreshButton">↻ تحديث الأسعار</button>
-    </div>
-  </header>
-
-  <section class="cards">
-    <div class="card">
-      <div class="label">إجمالي المحفظة بالدولار</div>
-      <div class="big" id="totalUsd">$0.00</div>
-      <div class="subvalue" id="coinCount">0 عملة</div>
-    </div>
-    <div class="card">
-      <div class="label">إجمالي المحفظة بالجنيه المصري</div>
-      <div class="big" id="totalEgp">—</div>
-      <div class="subvalue">حسب سعر USDT P2P المتاح</div>
-    </div>
-    <div class="card">
-      <div class="label">الربح / الخسارة غير المحققة</div>
-      <div class="big" id="totalPL">$0.00</div>
-      <div class="subvalue" id="totalPLPercent">أدخل متوسط الشراء لحساب النتيجة</div>
-    </div>
-  </section>
-
-  <section class="ratebox">
+<header>
+  <div class="brand">
+    <div class="logo">₿</div>
     <div>
-      <div class="muted">سعر USDT مقابل الجنيه — Binance P2P</div>
-      <div class="ratevalue" id="p2pRate">جاري التحميل...</div>
-      <div class="rate-note" id="p2pUpdated">محاولة جلب السعر المباشر</div>
+      <h1>Coinfolio</h1>
+      <div class="subtitle">Your crypto portfolio, at a glance.</div>
     </div>
-    <button id="p2pRefresh">تحديث سعر الجنيه</button>
-  </section>
-
-  <section class="panel">
-    <div class="sectionhead">
-      <h2>إضافة عملة للمحفظة</h2>
-      <span class="muted">مثال: BTC أو ETH أو SOL</span>
-    </div>
-    <form id="coinForm">
-      <div class="formgrid">
-        <div class="field">
-          <label for="symbol">رمز العملة</label>
-          <input id="symbol" placeholder="BTC" required maxlength="20" autocomplete="off">
-        </div>
-        <div class="field">
-          <label for="quantity">الكمية</label>
-          <input id="quantity" type="number" min="0.00000001" step="any" placeholder="0.5" required>
-        </div>
-        <div class="field">
-          <label for="buyPrice">متوسط سعر الشراء بالدولار (اختياري)</label>
-          <input id="buyPrice" type="number" min="0" step="any" placeholder="65000">
-        </div>
-        <div class="field" style="display:flex;align-items:end">
-          <button class="primary" type="submit" style="width:100%">+ إضافة العملة</button>
-        </div>
-      </div>
-    </form>
-    <div id="notice">الأسعار تُجلب من Binance Spot. بيانات المحفظة تُحفظ محليًا في نفس المتصفح.</div>
-    <div id="errorBox"></div>
-  </section>
-
-  <section class="panel">
-    <div class="sectionhead">
-      <h2>عملاتي</h2>
-      <div class="actions" style="margin:0">
-        <button id="exportButton">تصدير CSV</button>
-        <button id="clearButton" class="danger">مسح المحفظة</button>
-      </div>
-    </div>
-    <div class="tablewrap">
-      <table>
-        <thead>
-          <tr>
-            <th>العملة</th>
-            <th>السعر بالدولار</th>
-            <th>القيمة بالدولار</th>
-            <th>القيمة بالجنيه</th>
-            <th>متوسط الشراء</th>
-            <th>الربح / الخسارة</th>
-            <th>إجراء</th>
-          </tr>
-        </thead>
-        <tbody id="portfolioBody"></tbody>
-      </table>
-      <div id="emptyState" class="empty">محفظتك فارغة. أضف أول عملة من النموذج بالأعلى.</div>
-    </div>
-  </section>
-
-  <div class="footer">
-    الأسعار ليست توصية استثمارية. أسعار Binance P2P تختلف حسب عروض التجار وطرق الدفع.<br>
-    Coinfolio — يتم حفظ بيانات المحفظة على جهازك فقط.
   </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Connecting...</span></div>
+    <button id="refreshButton">↻ Refresh Prices</button>
+  </div>
+</header>
+
+<section class="cards">
+  <div class="card">
+    <div class="label">Total Portfolio Value</div>
+    <div class="big" id="totalUsd">$0.00</div>
+    <div class="subvalue" id="coinCount">0 assets</div>
+  </div>
+  <div class="card">
+    <div class="label">Total Value in EGP</div>
+    <div class="big" id="totalEgp">—</div>
+    <div class="subvalue">Based on the available USDT P2P rate</div>
+  </div>
+  <div class="card">
+    <div class="label">Unrealized Profit / Loss</div>
+    <div class="big" id="totalPL">$0.00</div>
+    <div class="subvalue" id="totalPLPercent">Add purchase prices to calculate P/L</div>
+  </div>
+</section>
+
+<section class="ratebox">
+  <div>
+    <div class="muted">Binance P2P — USDT / EGP</div>
+    <div class="ratevalue" id="p2pRate">Loading...</div>
+    <div class="rate-note" id="p2pUpdated">Fetching the latest rate</div>
+  </div>
+  <button id="p2pRefresh">Refresh P2P Rate</button>
+</section>
+
+<section class="panel">
+  <div class="sectionhead">
+    <h2>Add Asset</h2>
+    <span class="muted">Example: BTC, ETH, SOL</span>
+  </div>
+  <form id="coinForm">
+    <div class="formgrid">
+      <div class="field">
+        <label for="symbol">Coin Symbol</label>
+        <input id="symbol" placeholder="BTC" required maxlength="20" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="quantity">Quantity</label>
+        <input id="quantity" type="number" min="0.00000001" step="any" placeholder="0.5" required>
+      </div>
+      <div class="field">
+        <label for="buyPrice">Average Buy Price (USD)</label>
+        <input id="buyPrice" type="number" min="0" step="any" placeholder="65000">
+      </div>
+      <div class="field" style="display:flex;align-items:end">
+        <button class="primary" type="submit" style="width:100%">+ Add Asset</button>
+      </div>
+    </div>
+  </form>
+  <div id="notice">Live prices are fetched from Binance Spot. Portfolio data is saved in this browser.</div>
+  <div id="errorBox"></div>
+</section>
+
+<section class="panel">
+  <div class="sectionhead">
+    <h2>My Portfolio</h2>
+    <div class="actions" style="margin:0">
+      <button id="exportButton">Export CSV</button>
+      <button id="clearButton" class="danger">Clear Portfolio</button>
+    </div>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Asset</th><th>Price (USD)</th><th>Value (USD)</th>
+          <th>Value (EGP)</th><th>Avg. Buy Price</th><th>Profit / Loss</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="portfolioBody"></tbody>
+    </table>
+    <div id="emptyState" class="empty">Your portfolio is empty. Add your first asset above.</div>
+  </div>
+</section>
+
+<div class="footer">
+  Prices are for informational purposes only and are not investment advice.<br>
+  Binance P2P rates vary by merchant, payment method, and available offers.<br>
+  Coinfolio — Your portfolio data is stored locally in your browser.
+</div>
 </div>
 
 <script>
@@ -192,14 +178,12 @@ function loadPortfolio() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     if (!Array.isArray(saved)) return [];
-    return saved.filter(c =>
-      c && typeof c.symbol === "string" &&
-      Number(c.quantity) > 0
-    ).map(c => ({
-      symbol: c.symbol.toUpperCase(),
-      quantity: Number(c.quantity),
-      buyPrice: Number(c.buyPrice) || 0
-    }));
+    return saved.filter(c => c && typeof c.symbol === "string" && Number(c.quantity) > 0)
+      .map(c => ({
+        symbol: c.symbol.toUpperCase(),
+        quantity: Number(c.quantity),
+        buyPrice: Number(c.buyPrice) || 0
+      }));
   } catch {
     return [];
   }
@@ -209,24 +193,20 @@ function savePortfolio() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.portfolio));
   } catch {
-    showError("تعذر حفظ المحفظة في المتصفح.");
+    showError("Unable to save portfolio data in this browser.");
   }
 }
 
 function money(value, currency = "USD") {
   if (!Number.isFinite(value)) return "—";
   return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2
+    style: "currency", currency,
+    maximumFractionDigits: 2, minimumFractionDigits: 2
   }).format(value);
 }
 
 function number(value, digits = 8) {
-  return new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: digits
-  }).format(value);
+  return new Intl.NumberFormat("en-US", { maximumFractionDigits: digits }).format(value);
 }
 
 function showError(message) {
@@ -243,10 +223,7 @@ async function fetchWithTimeout(url, options = {}, ms = 12000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), ms);
   try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal
-    });
+    const response = await fetch(url, { ...options, signal: controller.signal });
     if (!response.ok) throw new Error("HTTP " + response.status);
     return await response.json();
   } finally {
@@ -254,7 +231,6 @@ async function fetchWithTimeout(url, options = {}, ms = 12000) {
   }
 }
 
-/* Binance Spot live prices */
 async function fetchPrices() {
   if (state.priceBusy) return;
   state.priceBusy = true;
@@ -262,17 +238,15 @@ async function fetchPrices() {
 
   try {
     const symbols = [...new Set(state.portfolio.map(c => c.symbol + "USDT"))];
-
     if (!symbols.length) {
       state.prices = {};
       render();
-      setStatus(true, "جاهز");
+      setStatus(true, "Ready");
       return;
     }
 
     const url = "https://api.binance.com/api/v3/ticker/price?symbols=" +
       encodeURIComponent(JSON.stringify(symbols));
-
     const data = await fetchWithTimeout(url, {}, 12000);
     const newPrices = {};
 
@@ -286,23 +260,18 @@ async function fetchPrices() {
     render();
 
     const missing = state.portfolio.filter(c => !state.prices[c.symbol]);
-    if (missing.length) {
-      setStatus(true, "بعض العملات غير متاحة");
-    } else {
-      setStatus(true, "الأسعار محدثة");
-    }
+    setStatus(true, missing.length ? "Some assets unavailable" : "Prices updated");
     showError("");
   } catch (error) {
     console.error("Binance Spot error:", error);
-    setStatus(false, "تعذر تحديث الأسعار");
-    showError("لم نستطع جلب أسعار Binance. جرّب التحديث مرة أخرى.");
+    setStatus(false, "Price update failed");
+    showError("Unable to fetch Binance prices. Please try again.");
   } finally {
     state.priceBusy = false;
     $("refreshButton").disabled = false;
   }
 }
 
-/* Extract a plausible rate from Binance P2P responses */
 function extractP2PPrice(data) {
   const candidates = [
     data?.data?.price,
@@ -317,13 +286,11 @@ function extractP2PPrice(data) {
   }
 
   const ads = Array.isArray(data?.data) ? data.data : [];
-  const prices = ads
-    .map(item => Number(item?.adv?.price))
+  const prices = ads.map(item => Number(item?.adv?.price))
     .filter(p => Number.isFinite(p) && p > 0)
     .sort((a, b) => a - b);
 
-  if (prices.length) return prices[Math.floor(prices.length / 2)];
-  return null;
+  return prices.length ? prices[Math.floor(prices.length / 2)] : null;
 }
 
 function updateP2PRate(price, source) {
@@ -331,27 +298,19 @@ function updateP2PRate(price, source) {
 
   state.p2pRate = price;
   state.lastP2PTime = new Date();
-
   $("p2pRate").textContent = money(price, "EGP") + " / USDT";
   $("p2pUpdated").textContent =
-    "آخر تحديث: " + state.lastP2PTime.toLocaleTimeString("ar-EG") +
+    "Last updated: " + state.lastP2PTime.toLocaleTimeString("en-US") +
     (source ? " • " + source : "");
-
   render();
   return true;
 }
 
-/*
- * P2P can be blocked by browser CORS rules.
- * Try Binance quote endpoint first, then the public ad-search endpoint.
- */
 async function fetchP2PRate() {
   if (state.p2pBusy) return;
   state.p2pBusy = true;
   $("p2pRefresh").disabled = true;
-  $("p2pUpdated").textContent = "جاري محاولة جلب سعر P2P...";
-
-  let lastError = null;
+  $("p2pUpdated").textContent = "Fetching Binance P2P rate...";
 
   try {
     const quoteUrl =
@@ -361,13 +320,11 @@ async function fetchP2PRate() {
     try {
       const quoteData = await fetchWithTimeout(quoteUrl, {}, 8000);
       const quotePrice = extractP2PPrice(quoteData);
-
       if (quotePrice && updateP2PRate(quotePrice, "Binance P2P")) {
         showError("");
         return;
       }
     } catch (error) {
-      lastError = error;
       console.warn("P2P quote endpoint failed:", error);
     }
 
@@ -375,43 +332,31 @@ async function fetchP2PRate() {
       "https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search";
 
     const payload = {
-      page: 1,
-      rows: 10,
-      payTypes: [],
-      publisherType: null,
-      asset: "USDT",
-      tradeType: "SELL",
-      fiat: "EGP"
+      page: 1, rows: 10, payTypes: [], publisherType: null,
+      asset: "USDT", tradeType: "SELL", fiat: "EGP"
     };
 
-    try {
-      const data = await fetchWithTimeout(searchUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      }, 10000);
+    const data = await fetchWithTimeout(searchUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }, 10000);
 
-      const price = extractP2PPrice(data);
-
-      if (price && updateP2PRate(price, "Binance P2P")) {
-        showError("");
-        return;
-      }
-
-      throw new Error("لم يرجع Binance أي عروض أسعار.");
-    } catch (error) {
-      lastError = error;
-      console.warn("P2P ad-search endpoint failed:", error);
+    const price = extractP2PPrice(data);
+    if (price && updateP2PRate(price, "Binance P2P")) {
+      showError("");
+      return;
     }
 
-    $("p2pRate").textContent = "غير متاح";
+    throw new Error("No P2P offers returned.");
+  } catch (error) {
+    console.error("Binance P2P error:", error);
+    $("p2pRate").textContent = "Unavailable";
     $("p2pUpdated").textContent =
-      "تعذر الاتصال المباشر بـ Binance P2P. قد يكون الاتصال محجوبًا من المتصفح.";
+      "Could not connect directly to Binance P2P.";
     showError(
-      "سعر الجنيه لم يصل من Binance P2P. لو أسعار العملات تعمل وسعر الجنيه لا يعمل، " +
-      "فغالبًا السبب قيود الاتصال من المتصفح، وليس بيانات محفظتك."
+      "The EGP rate could not be loaded. Binance may be blocking direct browser requests. " +
+      "Your portfolio is still saved."
     );
   } finally {
     state.p2pBusy = false;
@@ -419,69 +364,63 @@ async function fetchP2PRate() {
   }
 }
 
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[ch]);
+}
+
 function render() {
   let totalUsd = 0;
-  let totalCost = 0;
-  let hasBuyPrice = false;
   let html = "";
 
   for (const coin of state.portfolio) {
     const price = Number(state.prices[coin.symbol]) || 0;
     const value = price * coin.quantity;
-    const cost = coin.buyPrice * coin.quantity;
     const hasPrice = price > 0;
     const hasCost = coin.buyPrice > 0;
-    const pl = hasPrice && hasCost ? value - cost : null;
+    const pl = hasPrice && hasCost ? value - coin.buyPrice * coin.quantity : null;
+    const egp = state.p2pRate !== null ? value * state.p2pRate : null;
 
     totalUsd += value;
-    if (hasCost) {
-      totalCost += cost;
-      hasBuyPrice = true;
-    }
-
-    const egp = state.p2pRate !== null ? value * state.p2pRate : null;
     const plClass = pl === null ? "" : pl >= 0 ? "green" : "red";
 
     html += `
       <tr>
-        <td>
-          <div class="coin">
-            <div class="coinicon">${escapeHtml(coin.symbol.slice(0, 3))}</div>
-            <div>
-              <div class="coinname">${escapeHtml(coin.symbol)}</div>
-              <div class="coinqty">${number(coin.quantity)} units</div>
-            </div>
-          </div>
-        </td>
+        <td><div class="coin">
+          <div class="coinicon">${escapeHtml(coin.symbol.slice(0,3))}</div>
+          <div><div class="coinname">${escapeHtml(coin.symbol)}</div>
+          <div class="coinqty">${number(coin.quantity)} units</div></div>
+        </div></td>
         <td class="num">${hasPrice ? money(price) : "—"}</td>
         <td class="num">${hasPrice ? money(value) : "—"}</td>
-        <td class="num">${egp !== null && hasPrice ? money(egp, "EGP") : "—"}</td>
+        <td class="num">${egp !== null && hasPrice ? money(egp,"EGP") : "—"}</td>
         <td class="num">${hasCost ? money(coin.buyPrice) : "—"}</td>
         <td class="num ${plClass}">${pl === null ? "—" : money(pl)}</td>
         <td>
-          <button class="smallbtn" data-edit="${escapeHtml(coin.symbol)}">تعديل</button>
-          <button class="smallbtn danger" data-delete="${escapeHtml(coin.symbol)}">حذف</button>
+          <button class="smallbtn" data-edit="${escapeHtml(coin.symbol)}">Edit</button>
+          <button class="smallbtn danger" data-delete="${escapeHtml(coin.symbol)}">Delete</button>
         </td>
       </tr>`;
   }
 
   $("portfolioBody").innerHTML = html;
   $("emptyState").style.display = state.portfolio.length ? "none" : "block";
-  $("coinCount").textContent = state.portfolio.length + " عملة";
-
+  $("coinCount").textContent = state.portfolio.length + " assets";
   $("totalUsd").textContent = money(totalUsd);
-  $("totalEgp").textContent =
-    state.p2pRate === null ? "—" : money(totalUsd * state.p2pRate, "EGP");
+  $("totalEgp").textContent = state.p2pRate === null
+    ? "—" : money(totalUsd * state.p2pRate, "EGP");
 
   let totalPL = 0;
-  let pricedCost = 0;
+  let totalCost = 0;
   let hasPL = false;
 
   for (const coin of state.portfolio) {
     const price = Number(state.prices[coin.symbol]) || 0;
     if (price > 0 && coin.buyPrice > 0) {
       totalPL += (price - coin.buyPrice) * coin.quantity;
-      pricedCost += coin.buyPrice * coin.quantity;
+      totalCost += coin.buyPrice * coin.quantity;
       hasPL = true;
     }
   }
@@ -490,17 +429,9 @@ function render() {
   $("totalPL").className = "big " +
     (!hasPL ? "" : totalPL >= 0 ? "green" : "red");
 
-  $("totalPLPercent").textContent = hasPL && pricedCost > 0
-    ? (totalPL >= 0 ? "+" : "") +
-      ((totalPL / pricedCost) * 100).toFixed(2) + "% من تكلفة الشراء"
-    : "أدخل متوسط الشراء لحساب النتيجة";
-}
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, ch => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;",
-    '"': "&quot;", "'": "&#39;"
-  })[ch]);
+  $("totalPLPercent").textContent = hasPL && totalCost > 0
+    ? (totalPL >= 0 ? "+" : "") + (totalPL / totalCost * 100).toFixed(2) + "% of cost"
+    : "Add purchase prices to calculate P/L";
 }
 
 $("coinForm").addEventListener("submit", event => {
@@ -511,17 +442,15 @@ $("coinForm").addEventListener("submit", event => {
   const buyPrice = Number($("buyPrice").value) || 0;
 
   if (!/^[A-Z0-9]{2,20}$/.test(symbol)) {
-    showError("اكتب رمز عملة صحيحًا، مثل BTC أو ETH أو SOL.");
+    showError("Enter a valid coin symbol, such as BTC, ETH, or SOL.");
     return;
   }
-
   if (!Number.isFinite(quantity) || quantity <= 0) {
-    showError("اكتب كمية أكبر من صفر.");
+    showError("Enter a quantity greater than zero.");
     return;
   }
-
   if (!Number.isFinite(buyPrice) || buyPrice < 0) {
-    showError("متوسط الشراء غير صحيح.");
+    showError("Enter a valid purchase price.");
     return;
   }
 
@@ -530,10 +459,9 @@ $("coinForm").addEventListener("submit", event => {
   if (existing) {
     const oldQuantity = existing.quantity;
     const newQuantity = oldQuantity + quantity;
-
     if (buyPrice > 0) {
       existing.buyPrice = oldQuantity * existing.buyPrice > 0
-        ? ((oldQuantity * existing.buyPrice) + (quantity * buyPrice)) / newQuantity
+        ? (oldQuantity * existing.buyPrice + quantity * buyPrice) / newQuantity
         : buyPrice;
     }
     existing.quantity = newQuantity;
@@ -554,8 +482,7 @@ $("portfolioBody").addEventListener("click", event => {
 
   if (deleteButton) {
     const symbol = deleteButton.dataset.delete;
-    if (!confirm("حذف " + symbol + " من المحفظة؟")) return;
-
+    if (!confirm("Delete " + symbol + " from your portfolio?")) return;
     state.portfolio = state.portfolio.filter(c => c.symbol !== symbol);
     delete state.prices[symbol];
     savePortfolio();
@@ -564,28 +491,24 @@ $("portfolioBody").addEventListener("click", event => {
   }
 
   if (editButton) {
-    const symbol = editButton.dataset.edit;
-    const coin = state.portfolio.find(c => c.symbol === symbol);
+    const coin = state.portfolio.find(c => c.symbol === editButton.dataset.edit);
     if (!coin) return;
 
-    const quantity = prompt("الكمية الجديدة لـ " + symbol, String(coin.quantity));
+    const quantity = prompt("New quantity for " + coin.symbol, String(coin.quantity));
     if (quantity === null) return;
-
     const newQuantity = Number(quantity);
+
     if (!Number.isFinite(newQuantity) || newQuantity <= 0) {
-      alert("اكتب كمية صحيحة أكبر من صفر.");
+      alert("Enter a valid quantity greater than zero.");
       return;
     }
 
-    const buy = prompt(
-      "متوسط سعر الشراء بالدولار (اكتب 0 لو مش عايز تحسب الربح والخسارة)",
-      String(coin.buyPrice)
-    );
+    const buy = prompt("Average buy price in USD (0 to disable P/L)", String(coin.buyPrice));
     if (buy === null) return;
-
     const newBuy = Number(buy);
+
     if (!Number.isFinite(newBuy) || newBuy < 0) {
-      alert("اكتب سعر شراء صحيحًا.");
+      alert("Enter a valid purchase price.");
       return;
     }
 
@@ -601,14 +524,11 @@ $("refreshButton").addEventListener("click", async () => {
   await fetchP2PRate();
 });
 
-$("p2pRefresh").addEventListener("click", () => {
-  fetchP2PRate();
-});
+$("p2pRefresh").addEventListener("click", fetchP2PRate);
 
 $("clearButton").addEventListener("click", () => {
   if (!state.portfolio.length) return;
-  if (!confirm("متأكد إنك عايز تمسح كل العملات من المحفظة؟")) return;
-
+  if (!confirm("Are you sure you want to clear your entire portfolio?")) return;
   state.portfolio = [];
   state.prices = {};
   savePortfolio();
@@ -625,15 +545,10 @@ $("exportButton").addEventListener("click", () => {
     const price = Number(state.prices[coin.symbol]) || 0;
     const value = price * coin.quantity;
     rows.push([
-      coin.symbol,
-      coin.quantity,
-      price || "",
-      price ? value : "",
+      coin.symbol, coin.quantity, price || "", price ? value : "",
       price && state.p2pRate !== null ? value * state.p2pRate : "",
       coin.buyPrice || "",
-      price > 0 && coin.buyPrice > 0
-        ? value - coin.buyPrice * coin.quantity
-        : ""
+      price > 0 && coin.buyPrice > 0 ? value - coin.buyPrice * coin.quantity : ""
     ]);
   }
 
