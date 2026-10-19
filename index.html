@@ -1,839 +1,663 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b0e14">
-  <title>Coinfolio — Crypto Portfolio</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #0b0e14;
-      --panel: #121722;
-      --panel2: #171e2b;
-      --border: #283142;
-      --text: #edf2fa;
-      --muted: #8d9ab0;
-      --green: #20c997;
-      --red: #ff667a;
-      --yellow: #f3c969;
-      --blue: #7c9cff;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
-    }
-    button, input { font: inherit; }
-    button { cursor: pointer; }
-    .container { max-width: 1240px; margin: auto; padding: 28px 20px 50px; }
-    header {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; flex-wrap: wrap; margin-bottom: 26px;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .logo {
-      display: grid; place-items: center; width: 44px; height: 44px;
-      background: #203d36; color: var(--green); border-radius: 14px;
-      font-weight: 900; font-size: 22px;
-    }
-    h1 { font-size: 23px; margin: 0; letter-spacing: -.6px; }
-    .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; }
-    .status {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 9px 12px; background: var(--panel); border: 1px solid var(--border);
-      border-radius: 999px; color: var(--muted); font-size: 12px;
-    }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); }
-    .dot.live { background: var(--green); box-shadow: 0 0 9px #20c99755; }
-    .dot.error { background: var(--red); }
-    .summary {
-      display: grid; grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 14px; margin-bottom: 18px;
-    }
-    .card, .section {
-      background: var(--panel); border: 1px solid var(--border); border-radius: 17px;
-    }
-    .card { padding: 19px; min-width: 0; }
-    .card-label { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
-    .card-value { font-size: clamp(19px, 2.3vw, 27px); font-weight: 750; overflow-wrap: anywhere; }
-    .card-foot { color: var(--muted); font-size: 12px; margin-top: 9px; }
-    .green { color: var(--green); }
-    .red { color: var(--red); }
-    .yellow { color: var(--yellow); }
-    .section { padding: 20px; margin-top: 18px; }
-    .section-head {
-      display: flex; justify-content: space-between; align-items: center;
-      flex-wrap: wrap; gap: 13px; margin-bottom: 18px;
-    }
-    h2 { font-size: 16px; margin: 0; }
-    .actions { display: flex; gap: 9px; flex-wrap: wrap; }
-    .btn {
-      padding: 10px 13px; border: 1px solid var(--border); border-radius: 10px;
-      color: var(--text); background: var(--panel2); font-size: 13px;
-    }
-    .btn:hover { filter: brightness(1.15); }
-    .btn-primary { background: var(--green); color: #07150f; border-color: var(--green); font-weight: 750; }
-    .btn-danger { color: var(--red); }
-    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
-    input {
-      width: 100%; min-width: 0; padding: 12px 13px;
-      background: #0d121b; border: 1px solid var(--border); border-radius: 10px;
-      color: var(--text); outline: none;
-    }
-    input:focus { border-color: var(--blue); }
-    .search { max-width: 300px; }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 770px; }
-    th {
-      text-align: left; padding: 13px 12px; color: var(--muted);
-      font-size: 11px; font-weight: 650; text-transform: uppercase;
-      letter-spacing: .5px; border-bottom: 1px solid var(--border);
-    }
-    td { padding: 15px 12px; border-bottom: 1px solid #222b39; font-size: 13px; white-space: nowrap; }
-    tr:last-child td { border-bottom: 0; }
-    .coin-name { display: flex; align-items: center; gap: 10px; }
-    .coin-icon {
-      display: grid; place-items: center; width: 36px; height: 36px;
-      background: #202a3b; color: var(--blue); border-radius: 12px;
-      font-size: 11px; font-weight: 800;
-    }
-    .coin-symbol { font-weight: 750; }
-    .coin-full { color: var(--muted); font-size: 11px; margin-top: 3px; }
-    .price-cell { font-weight: 700; }
-    .empty { color: var(--muted); text-align: center; padding: 30px; }
-    .form-grid {
-      display: grid; grid-template-columns: 1fr 1fr 1fr auto;
-      gap: 12px; align-items: end;
-    }
-    .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-    .message { min-height: 20px; margin-top: 12px; color: var(--yellow); font-size: 12px; }
-    .p2p-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .p2p-box { padding: 17px; border-radius: 13px; background: var(--panel2); }
-    .p2p-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-    .p2p-value { font-size: 24px; font-weight: 750; overflow-wrap: anywhere; }
-    .note { color: var(--muted); font-size: 12px; line-height: 1.7; margin-top: 12px; }
-    footer { color: var(--muted); font-size: 11px; text-align: center; padding: 22px 0 0; line-height: 1.8; }
-    @media (max-width: 850px) {
-      .summary { grid-template-columns: repeat(2, minmax(0,1fr)); }
-      .form-grid { grid-template-columns: 1fr 1fr; }
-      .form-grid .btn { min-height: 43px; }
-    }
-    @media (max-width: 480px) {
-      .container { padding: 20px 12px 35px; }
-      .section { padding: 14px; }
-      .summary { gap: 9px; }
-      .card { padding: 14px; }
-      .card-label { font-size: 12px; }
-      .card-value { font-size: 20px; }
-      .form-grid, .p2p-grid { grid-template-columns: 1fr; }
-      .search { max-width: none; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coinfolio — Crypto Portfolio</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg:#080b12; --panel:#101622; --panel2:#151d2b;
+  --border:#253044; --text:#edf2fc; --muted:#8e9bb1;
+  --green:#28d99a; --red:#ff647c; --blue:#7b9cff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.wrap{max-width:1150px;margin:auto;padding:24px 18px 50px}
+header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:26px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:45px;height:45px;border-radius:14px;background:linear-gradient(135deg,#7b9cff,#28d99a);display:grid;place-items:center;color:#07111b;font-size:24px;font-weight:bold}
+h1{font-size:24px;margin:0 0 5px}
+.subtitle,.muted{color:var(--muted);font-size:13px}
+.status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+button{border:1px solid var(--border);border-radius:10px;padding:10px 14px;background:var(--panel2);color:var(--text)}
+button.primary{background:var(--green);color:#06130e;border-color:var(--green);font-weight:bold}
+button.danger{color:var(--red)}
+button:disabled{opacity:.5;cursor:wait}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.card,.panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;min-width:0}
+.card .label{color:var(--muted);font-size:13px;margin-bottom:12px}
+.big{font-size:clamp(20px,3vw,29px);font-weight:bold;overflow-wrap:anywhere;direction:ltr;text-align:right}
+.subvalue{color:var(--muted);font-size:13px;margin-top:8px}
+.green{color:var(--green)}.red{color:var(--red)}
+.ratebox{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#101c20;border:1px solid #20473d;border-radius:14px;padding:16px;margin-bottom:20px}
+.ratevalue{font-size:22px;font-weight:bold;direction:ltr}
+.rate-note{font-size:12px;color:var(--muted);margin-top:6px}
+.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+h2{font-size:18px;margin:0}
+.panel{margin-bottom:20px}
+.formgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px}
+.field input{width:100%;background:#080e18;border:1px solid var(--border);border-radius:9px;padding:12px;color:var(--text);outline:none;direction:ltr}
+.field input:focus{border-color:var(--blue)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:780px}
+th,td{padding:15px 12px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+th{font-size:12px;color:var(--muted);font-weight:normal}
+td{font-size:13px}
+.coin{display:flex;align-items:center;gap:10px}
+.coinicon{width:36px;height:36px;border-radius:12px;background:var(--panel2);display:grid;place-items:center;font-size:12px;font-weight:bold;color:var(--blue)}
+.coinname{font-weight:bold;direction:ltr;text-align:right}
+.coinqty{color:var(--muted);font-size:11px;margin-top:4px;direction:ltr;text-align:right}
+.num{direction:ltr;text-align:right}
+.empty{text-align:center;color:var(--muted);padding:35px 10px}
+.smallbtn{padding:7px 10px;font-size:12px}
+.footer{text-align:center;color:var(--muted);font-size:12px;line-height:1.8;margin-top:24px}
+#errorBox{display:none;margin-top:12px;color:var(--red);font-size:12px;line-height:1.7}
+#notice{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.7}
+@media(max-width:760px){
+ .cards{grid-template-columns:1fr}
+ .formgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .wrap{padding:17px 12px 35px}
+ .card,.panel{padding:16px}
+}
+@media(max-width:420px){.formgrid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-  <main class="container">
-    <header>
-      <div class="brand">
-        <div class="logo">C</div>
-        <div>
-          <h1>Coinfolio</h1>
-          <div class="subtitle">Your crypto portfolio, live in one place.</div>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">₿</div>
+      <div>
+        <h1>Coinfolio</h1>
+        <div class="subtitle">محفظتك الرقمية — أسعار مباشرة</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">جاري الاتصال...</span></div>
+      <button id="refreshButton">↻ تحديث الأسعار</button>
+    </div>
+  </header>
+
+  <section class="cards">
+    <div class="card">
+      <div class="label">إجمالي المحفظة بالدولار</div>
+      <div class="big" id="totalUsd">$0.00</div>
+      <div class="subvalue" id="coinCount">0 عملة</div>
+    </div>
+    <div class="card">
+      <div class="label">إجمالي المحفظة بالجنيه المصري</div>
+      <div class="big" id="totalEgp">—</div>
+      <div class="subvalue">حسب سعر USDT P2P المتاح</div>
+    </div>
+    <div class="card">
+      <div class="label">الربح / الخسارة غير المحققة</div>
+      <div class="big" id="totalPL">$0.00</div>
+      <div class="subvalue" id="totalPLPercent">أدخل متوسط الشراء لحساب النتيجة</div>
+    </div>
+  </section>
+
+  <section class="ratebox">
+    <div>
+      <div class="muted">سعر USDT مقابل الجنيه — Binance P2P</div>
+      <div class="ratevalue" id="p2pRate">جاري التحميل...</div>
+      <div class="rate-note" id="p2pUpdated">محاولة جلب السعر المباشر</div>
+    </div>
+    <button id="p2pRefresh">تحديث سعر الجنيه</button>
+  </section>
+
+  <section class="panel">
+    <div class="sectionhead">
+      <h2>إضافة عملة للمحفظة</h2>
+      <span class="muted">مثال: BTC أو ETH أو SOL</span>
+    </div>
+    <form id="coinForm">
+      <div class="formgrid">
+        <div class="field">
+          <label for="symbol">رمز العملة</label>
+          <input id="symbol" placeholder="BTC" required maxlength="20" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="quantity">الكمية</label>
+          <input id="quantity" type="number" min="0.00000001" step="any" placeholder="0.5" required>
+        </div>
+        <div class="field">
+          <label for="buyPrice">متوسط سعر الشراء بالدولار (اختياري)</label>
+          <input id="buyPrice" type="number" min="0" step="any" placeholder="65000">
+        </div>
+        <div class="field" style="display:flex;align-items:end">
+          <button class="primary" type="submit" style="width:100%">+ إضافة العملة</button>
         </div>
       </div>
-      <div class="status">
-        <span id="statusDot" class="dot"></span>
-        <span id="connectionStatus">Starting...</span>
+    </form>
+    <div id="notice">الأسعار تُجلب من Binance Spot. بيانات المحفظة تُحفظ محليًا في نفس المتصفح.</div>
+    <div id="errorBox"></div>
+  </section>
+
+  <section class="panel">
+    <div class="sectionhead">
+      <h2>عملاتي</h2>
+      <div class="actions" style="margin:0">
+        <button id="exportButton">تصدير CSV</button>
+        <button id="clearButton" class="danger">مسح المحفظة</button>
       </div>
-    </header>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>العملة</th>
+            <th>السعر بالدولار</th>
+            <th>القيمة بالدولار</th>
+            <th>القيمة بالجنيه</th>
+            <th>متوسط الشراء</th>
+            <th>الربح / الخسارة</th>
+            <th>إجراء</th>
+          </tr>
+        </thead>
+        <tbody id="portfolioBody"></tbody>
+      </table>
+      <div id="emptyState" class="empty">محفظتك فارغة. أضف أول عملة من النموذج بالأعلى.</div>
+    </div>
+  </section>
 
-    <section class="summary">
-      <div class="card">
-        <div class="card-label">Total portfolio · USD</div>
-        <div id="totalUsd" class="card-value">$0.00</div>
-        <div id="assetCount" class="card-foot">0 coins</div>
-      </div>
-      <div class="card">
-        <div class="card-label">Total portfolio · EGP</div>
-        <div id="totalEgp" class="card-value">EGP --</div>
-        <div class="card-foot">Converted using Binance P2P</div>
-      </div>
-      <div class="card">
-        <div class="card-label">Recorded cost basis</div>
-        <div id="costBasis" class="card-value">$0.00</div>
-        <div class="card-foot">Based on your average buy prices</div>
-      </div>
-      <div class="card">
-        <div class="card-label">Unrealized profit / loss</div>
-        <div id="totalPnl" class="card-value">$0.00</div>
-        <div id="pnlPercent" class="card-foot">Add average buy prices to calculate P/L.</div>
-      </div>
-    </section>
+  <div class="footer">
+    الأسعار ليست توصية استثمارية. أسعار Binance P2P تختلف حسب عروض التجار وطرق الدفع.<br>
+    Coinfolio — يتم حفظ بيانات المحفظة على جهازك فقط.
+  </div>
+</div>
 
-    <section class="section">
-      <div class="section-head">
-        <h2>My portfolio</h2>
-        <div class="actions">
-          <button class="btn" id="refreshButton" type="button">↻ Refresh</button>
-          <button class="btn" id="exportButton" type="button">Export CSV</button>
-        </div>
-      </div>
-      <div class="toolbar">
-        <input id="searchInput" class="search" type="search" placeholder="Search coins, e.g. BTC">
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Asset</th>
-              <th>Live price (USD)</th>
-              <th>Quantity</th>
-              <th>Value (USD)</th>
-              <th>Value (EGP)</th>
-              <th>P/L (USD)</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="portfolioBody">
-            <tr><td colspan="7" class="empty">Loading portfolio...</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="note" id="lastUpdated">Prices are supplied by Binance Spot market data.</div>
-    </section>
+<script>
+"use strict";
 
-    <section class="section">
-      <div class="section-head"><h2>Add or update a coin</h2></div>
-      <form id="assetForm">
-        <div class="form-grid">
-          <div class="field">
-            <label for="coinSymbol">Coin symbol</label>
-            <input id="coinSymbol" placeholder="BTC" maxlength="20" required autocomplete="off">
-          </div>
-          <div class="field">
-            <label for="coinQuantity">Quantity owned</label>
-            <input id="coinQuantity" type="number" min="0" step="any" placeholder="0.5" required>
-          </div>
-          <div class="field">
-            <label for="coinBuyPrice">Average buy price (USD, optional)</label>
-            <input id="coinBuyPrice" type="number" min="0" step="any" placeholder="0.00">
-          </div>
-          <button class="btn btn-primary" type="submit">Save coin</button>
-        </div>
-        <div id="formMessage" class="message" role="status"></div>
-      </form>
-      <div class="note">Enter the symbol only, such as BTC or APT. The app checks for a matching USDT trading pair. Adding an existing coin updates its quantity and average buy price.</div>
-    </section>
+const $ = id => document.getElementById(id);
+const STORAGE_KEY = "coinfolio_portfolio_v1";
 
-    <section class="section">
-      <div class="section-head">
-        <h2>Binance P2P · USDT / EGP</h2>
-        <span id="p2pStatus" class="subtitle">Waiting for quote...</span>
-      </div>
-      <div class="p2p-grid">
-        <div class="p2p-box">
-          <div class="p2p-label">Indicative rate</div>
-          <div id="p2pRate" class="p2p-value">EGP --</div>
-        </div>
-        <div class="p2p-box">
-          <div class="p2p-label">Last quote update</div>
-          <div id="p2pUpdated" class="p2p-value" style="font-size:18px">Not available yet</div>
-        </div>
-      </div>
-      <div id="p2pNote" class="note">P2P quotes may be blocked by browser CORS restrictions. If that happens, the USD portfolio remains available, but EGP conversion will wait for a valid quote.</div>
-    </section>
+const state = {
+  portfolio: loadPortfolio(),
+  prices: {},
+  p2pRate: null,
+  lastP2PTime: null,
+  priceBusy: false,
+  p2pBusy: false
+};
 
-    <footer>
-      Coinfolio is a portfolio tracker, not a trading platform.<br>
-      Market data and P2P offers can change. Verify prices and payment limits on Binance before trading.
-    </footer>
-  </main>
-
-  <script>
-  (() => {
-    "use strict";
-
-    const STORAGE_KEY = "coinfolio_portfolio_v1";
-    const DEFAULT_COINS = [
-      { symbol: "BTC", quantity: 0, buyPrice: 0 },
-      { symbol: "ETH", quantity: 0, buyPrice: 0 },
-      { symbol: "BNB", quantity: 0, buyPrice: 0 },
-      { symbol: "SOL", quantity: 0, buyPrice: 0 }
-    ];
-    const P2P_URL = "https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search";
-    const REST_HOSTS = [
-      "https://data-api.binance.vision",
-      "https://api.binance.com",
-      "https://api1.binance.com"
-    ];
-    const WS_HOSTS = [
-      "wss://stream.binance.com:443/stream?streams=",
-      "wss://data-stream.binance.vision/stream?streams="
-    ];
-    const P2P_REFRESH_MS = 60000;
-
-    const $ = id => document.getElementById(id);
-    const state = {
-      portfolio: loadPortfolio(),
-      prices: Object.create(null),
-      priceErrors: Object.create(null),
-      validPairs: new Set(),
-      pairListLoaded: false,
-      p2pRate: null,
-      socket: null,
-      reconnectTimer: null,
-      reconnectDelay: 2000,
-      wsHostIndex: 0,
-      p2pBusy: false,
-      p2pTimer: null,
-      lastTradeTime: null,
-      lastP2PTime: null,
-      requestId: 0
-    };
-
-    function num(value) {
-      const n = Number(value);
-      return Number.isFinite(n) ? n : 0;
-    }
-
-    function money(value, currency = "USD") {
-      if (!Number.isFinite(value)) return "--";
-      try {
-        return new Intl.NumberFormat("en-US", {
-          style: "currency", currency,
-          minimumFractionDigits: 2, maximumFractionDigits: 2
-        }).format(value);
-      } catch {
-        return value.toFixed(2) + " " + currency;
-      }
-    }
-
-    function priceFormat(value) {
-      if (!Number.isFinite(value)) return "--";
-      return new Intl.NumberFormat("en-US", {
-        maximumFractionDigits: 8,
-        maximumSignificantDigits: 10
-      }).format(value);
-    }
-
-    function qtyFormat(value) {
-      return new Intl.NumberFormat("en-US", {
-        maximumFractionDigits: 10
-      }).format(value);
-    }
-
-    function setText(id, value) {
-      const el = $(id);
-      if (el) el.textContent = value;
-    }
-
-    function setStatus(message, type = "") {
-      setText("connectionStatus", message);
-      const dot = $("statusDot");
-      if (dot) dot.className = "dot" + (type ? " " + type : "");
-    }
-
-    function message(text, isError = false) {
-      const el = $("formMessage");
-      if (!el) return;
-      el.textContent = text;
-      el.style.color = isError ? "var(--red)" : "var(--yellow)";
-    }
-
-    function loadPortfolio() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved === null) return DEFAULT_COINS.map(c => ({ ...c }));
-        const data = JSON.parse(saved);
-        if (!Array.isArray(data)) return DEFAULT_COINS.map(c => ({ ...c }));
-        return data
-          .filter(c => c && typeof c.symbol === "string")
-          .map(c => ({
-            symbol: c.symbol.trim().toUpperCase(),
-            quantity: Math.max(0, num(c.quantity)),
-            buyPrice: Math.max(0, num(c.buyPrice))
-          }))
-          .filter(c => /^[A-Z0-9]{2,20}$/.test(c.symbol))
-          .slice(0, 100);
-      } catch (err) {
-        console.error("Unable to load saved portfolio:", err);
-        return DEFAULT_COINS.map(c => ({ ...c }));
-      }
-    }
-
-    function savePortfolio() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.portfolio));
-      } catch (err) {
-        console.error("Unable to save portfolio:", err);
-        message("Could not save in this browser. Check browser storage settings.", true);
-      }
-    }
-
-    function symbols() {
-      return [...new Set(state.portfolio.map(c => c.symbol))];
-    }
-
-    async function fetchWithTimeout(url, options = {}, ms = 8000) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), ms);
-      try {
-        return await fetch(url, {
-          ...options,
-          signal: controller.signal,
-          cache: "no-store"
-        });
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-
-    async function loadExchangeInfo() {
-      for (const host of REST_HOSTS) {
-        try {
-          const response = await fetchWithTimeout(host + "/api/v3/exchangeInfo", {}, 12000);
-          if (!response.ok) continue;
-          const data = await response.json();
-          if (!Array.isArray(data.symbols)) continue;
-          state.validPairs = new Set(
-            data.symbols
-              .filter(s => s.status === "TRADING" && s.quoteAsset === "USDT")
-              .map(s => s.baseAsset)
-          );
-          state.pairListLoaded = true;
-          return true;
-        } catch (err) {
-          console.warn("Exchange info unavailable:", host, err.message);
-        }
-      }
-      state.pairListLoaded = false;
-      return false;
-    }
-
-    async function fetchInitialPrice(symbol) {
-      const pair = symbol + "USDT";
-      for (const host of REST_HOSTS) {
-        try {
-          const response = await fetchWithTimeout(
-            host + "/api/v3/ticker/price?symbol=" + encodeURIComponent(pair),
-            {}, 7000
-          );
-          if (response.status === 400 || response.status === 404) {
-            state.priceErrors[symbol] = "No USDT pair on Binance Spot";
-            return null;
-          }
-          if (!response.ok) continue;
-          const data = await response.json();
-          const p = Number(data.price);
-          if (data.symbol === pair && Number.isFinite(p) && p > 0) {
-            state.prices[symbol] = p;
-            delete state.priceErrors[symbol];
-            return p;
-          }
-        } catch (err) {
-          console.warn("Price request failed:", pair, host, err.message);
-        }
-      }
-      state.priceErrors[symbol] = "Price request failed or blocked";
-      return null;
-    }
-
-    async function loadAllInitialPrices() {
-      const currentSymbols = symbols();
-      await Promise.all(currentSymbols.map(async symbol => {
-        if (state.prices[symbol] > 0) return;
-        await fetchInitialPrice(symbol);
-      }));
-      render();
-    }
-
-    function closeSocket() {
-      if (!state.socket) return;
-      const old = state.socket;
-      state.socket = null;
-      old.onopen = old.onmessage = old.onerror = old.onclose = null;
-      try { old.close(); } catch {}
-    }
-
-    function scheduleReconnect() {
-      if (state.reconnectTimer || !symbols().length) return;
-      state.reconnectTimer = setTimeout(() => {
-        state.reconnectTimer = null;
-        state.reconnectDelay = Math.min(state.reconnectDelay * 2, 30000);
-        connectLive();
-      }, state.reconnectDelay);
-    }
-
-    function connectLive() {
-      clearTimeout(state.reconnectTimer);
-      state.reconnectTimer = null;
-      closeSocket();
-
-      const currentSymbols = symbols();
-      if (!currentSymbols.length) {
-        setStatus("Add a coin to start", "");
-        render();
-        return;
-      }
-
-      // Keep the combined stream URL reasonably short.
-      const chosen = currentSymbols.slice(0, 80);
-      const streams = chosen.map(s => s.toLowerCase() + "usdt@trade").join("/");
-      const host = WS_HOSTS[state.wsHostIndex % WS_HOSTS.length];
-      setStatus("Connecting to Binance...", "");
-
-      try {
-        const socket = new WebSocket(host + streams);
-        state.socket = socket;
-
-        socket.onopen = () => {
-          if (state.socket !== socket) return;
-          state.reconnectDelay = 2000;
-          setStatus("Live · Binance Spot", "live");
-        };
-
-        socket.onmessage = event => {
-          if (state.socket !== socket) return;
-          try {
-            const wrapper = JSON.parse(event.data);
-            const trade = wrapper.data || wrapper;
-            if (!trade || !trade.s || trade.p == null) return;
-            const pair = String(trade.s).toUpperCase();
-            if (!pair.endsWith("USDT")) return;
-            const symbol = pair.slice(0, -4);
-            const p = Number(trade.p);
-            if (!Number.isFinite(p) || p <= 0) return;
-            if (!state.portfolio.some(c => c.symbol === symbol)) return;
-
-            state.prices[symbol] = p;
-            delete state.priceErrors[symbol];
-            state.lastTradeTime = new Date(Number(trade.T || trade.E || Date.now()));
-            render();
-            setStatus("Live · Binance Spot", "live");
-            setText("lastUpdated", "Last trade update: " + state.lastTradeTime.toLocaleTimeString());
-          } catch (err) {
-            console.warn("Invalid market message:", err);
-          }
-        };
-
-        socket.onerror = () => {
-          if (state.socket === socket) setStatus("Live connection issue", "error");
-        };
-
-        socket.onclose = () => {
-          if (state.socket !== socket) return;
-          state.socket = null;
-          state.wsHostIndex = (state.wsHostIndex + 1) % WS_HOSTS.length;
-          setStatus("Reconnecting to market...", "");
-          scheduleReconnect();
-        };
-      } catch (err) {
-        console.error("WebSocket could not start:", err);
-        state.wsHostIndex = (state.wsHostIndex + 1) % WS_HOSTS.length;
-        setStatus("WebSocket unavailable", "error");
-        scheduleReconnect();
-      }
-    }
-
-
-async function fetchP2PRate() {
-  if (state.p2pBusy) return;
-
-  state.p2pBusy = true;
-  setText("p2pStatus", "Updating...");
-
+function loadPortfolio() {
   try {
-    const response = await fetch(P2P_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify({
-        page: 1,
-        rows: 10,
-        payTypes: [],
-        countries: [],
-        publisherType: null,
-        asset: "USDT",
-        fiat: "EGP",
-        tradeType: "BUY"
-      }),
-      cache: "no-store"
-    });
-
-    if (!response.ok) {
-      throw new Error("HTTP " + response.status);
-    }
-
-    const data = await response.json();
-    const offers = (data.data || [])
-      .map(item => Number(item.adv?.price))
-      .filter(price => Number.isFinite(price) && price > 0)
-      .sort((a, b) => a - b);
-
-    if (!offers.length) {
-      throw new Error("No P2P offers");
-    }
-
-    state.p2pRate = offers[0];
-    state.lastP2PTime = new Date();
-
-    setText("p2pRate", money(state.p2pRate, "EGP"));
-    setText("p2pStatus", "Quote received");
-    setText("p2pUpdated", state.lastP2PTime.toLocaleTimeString());
-    setText("p2pNote", "Lowest returned Binance P2P offer for buying USDT.");
-    render();
-  } catch (error) {
-    console.error("Binance P2P error:", error);
-    setText("p2pStatus", "Request failed");
-    setText("p2pNote", "Binance P2P did not respond. Check the browser Console for the exact error.");
-    if (state.p2pRate === null) {
-      setText("p2pRate", "EGP --");
-      setText("p2pUpdated", "No fresh quote");
-    }
-  } finally {
-    state.p2pBusy = false;
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    if (!Array.isArray(saved)) return [];
+    return saved.filter(c =>
+      c && typeof c.symbol === "string" &&
+      Number(c.quantity) > 0
+    ).map(c => ({
+      symbol: c.symbol.toUpperCase(),
+      quantity: Number(c.quantity),
+      buyPrice: Number(c.buyPrice) || 0
+    }));
+  } catch {
+    return [];
   }
 }
 
+function savePortfolio() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.portfolio));
+  } catch {
+    showError("تعذر حفظ المحفظة في المتصفح.");
+  }
+}
 
-    function render() {
-      const body = $("portfolioBody");
-      if (!body) return;
+function money(value, currency = "USD") {
+  if (!Number.isFinite(value)) return "—";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2
+  }).format(value);
+}
 
-      const search = ($("searchInput")?.value || "").trim().toUpperCase();
-      const filtered = state.portfolio.filter(c => c.symbol.includes(search));
-      let totalUsd = 0;
-      let costBasis = 0;
-      let totalPnl = 0;
-      let pnlBasis = 0;
+function number(value, digits = 8) {
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: digits
+  }).format(value);
+}
 
-      for (const coin of state.portfolio) {
-        const p = state.prices[coin.symbol];
-        const validPrice = Number.isFinite(p) && p > 0;
-        if (validPrice) totalUsd += p * coin.quantity;
-        if (coin.buyPrice > 0) {
-          const cost = coin.buyPrice * coin.quantity;
-          costBasis += cost;
-          pnlBasis += cost;
-          if (validPrice) totalPnl += p * coin.quantity - cost;
-        }
-      }
+function showError(message) {
+  $("errorBox").textContent = message;
+  $("errorBox").style.display = message ? "block" : "none";
+}
 
-      setText("totalUsd", money(totalUsd));
-      setText("totalEgp", state.p2pRate !== null
-        ? money(totalUsd * state.p2pRate, "EGP")
-        : "EGP --");
-      setText("assetCount", state.portfolio.length + (state.portfolio.length === 1 ? " coin" : " coins"));
-      setText("costBasis", money(costBasis));
+function setStatus(online, text) {
+  $("statusDot").style.background = online ? "var(--green)" : "var(--red)";
+  $("statusText").textContent = text;
+}
 
-      const pnlEl = $("totalPnl");
-      if (pnlEl) {
-        pnlEl.textContent = money(totalPnl);
-        pnlEl.classList.toggle("green", totalPnl > 0);
-        pnlEl.classList.toggle("red", totalPnl < 0);
-      }
-      setText("pnlPercent", pnlBasis > 0
-        ? (totalPnl >= 0 ? "+" : "") + (totalPnl / pnlBasis * 100).toFixed(2) + "% against recorded cost"
-        : "Add average buy prices to calculate P/L.");
-
-      if (!filtered.length) {
-        body.innerHTML = '<tr><td colspan="7" class="empty">' +
-          (state.portfolio.length ? "No assets match your search." : "Your portfolio is empty. Add a coin below.") +
-          "</td></tr>";
-        return;
-      }
-
-      body.innerHTML = filtered.map(coin => {
-        const p = state.prices[coin.symbol];
-        const hasPrice = Number.isFinite(p) && p > 0;
-        const value = hasPrice ? p * coin.quantity : null;
-        const egp = value !== null && state.p2pRate !== null ? value * state.p2pRate : null;
-        const pnl = hasPrice && coin.buyPrice > 0 ? value - coin.buyPrice * coin.quantity : null;
-        const pnlClass = pnl === null ? "" : pnl > 0 ? "green" : pnl < 0 ? "red" : "";
-        const priceText = hasPrice ? money(p) : state.priceErrors[coin.symbol]
-          ? "Unavailable" : "Loading...";
-
-        return `<tr>
-          <td><div class="coin-name">
-            <div class="coin-icon">${escapeHTML(coin.symbol.slice(0, 4))}</div>
-            <div><div class="coin-symbol">${escapeHTML(coin.symbol)}</div>
-            <div class="coin-full">${escapeHTML(coin.symbol + " / USDT")}</div></div>
-          </div></td>
-          <td class="price-cell">${priceText}</td>
-          <td>${qtyFormat(coin.quantity)}</td>
-          <td>${value === null ? "--" : money(value)}</td>
-          <td>${egp === null ? "--" : money(egp, "EGP")}</td>
-          <td class="${pnlClass}">${pnl === null ? "--" : money(pnl)}</td>
-          <td><button class="btn btn-danger" type="button" data-delete="${escapeHTML(coin.symbol)}">Remove</button></td>
-        </tr>`;
-      }).join("");
-    }
-
-    function escapeHTML(value) {
-      return String(value).replace(/[&<>"']/g, c => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-      })[c]);
-    }
-
-    async function validatePair(symbol) {
-      if (state.pairListLoaded) return state.validPairs.has(symbol);
-      const price = await fetchInitialPrice(symbol);
-      return price !== null;
-    }
-
-    $("assetForm").addEventListener("submit", async event => {
-      event.preventDefault();
-      const symbol = $("coinSymbol").value.trim().toUpperCase();
-      const quantityRaw = $("coinQuantity").value;
-      const buyRaw = $("coinBuyPrice").value;
-      const quantity = Number(quantityRaw);
-      const buyPrice = buyRaw === "" ? 0 : Number(buyRaw);
-
-      if (!/^[A-Z0-9]{2,20}$/.test(symbol)) {
-        message("Enter a valid coin symbol, for example BTC or APT.", true);
-        return;
-      }
-      if (quantityRaw === "" || !Number.isFinite(quantity) || quantity < 0) {
-        message("Enter a valid quantity of zero or more.", true);
-        return;
-      }
-      if (!Number.isFinite(buyPrice) || buyPrice < 0) {
-        message("Enter a valid average buy price.", true);
-        return;
-      }
-      if (!state.portfolio.some(c => c.symbol === symbol) && state.portfolio.length >= 100) {
-        message("Portfolio limit reached (100 assets).", true);
-        return;
-      }
-
-      message("Checking " + symbol + "USDT on Binance Spot...");
-      const submitButton = $("assetForm").querySelector('button[type="submit"]');
-      submitButton.disabled = true;
-
-      try {
-        const exists = await validatePair(symbol);
-        if (!exists) {
-          message("Could not confirm " + symbol + "USDT. Check the symbol or try again later.", true);
-          return;
-        }
-
-        const existing = state.portfolio.find(c => c.symbol === symbol);
-        if (existing) {
-          existing.quantity = quantity;
-          existing.buyPrice = buyPrice;
-        } else {
-          state.portfolio.push({ symbol, quantity, buyPrice });
-        }
-
-        savePortfolio();
-        render();
-        $("coinSymbol").value = "";
-        $("coinQuantity").value = "";
-        $("coinBuyPrice").value = "";
-        message(symbol + " saved. Connecting to live prices.");
-        connectLive();
-        loadAllInitialPrices();
-      } catch (err) {
-        console.error(err);
-        message("Could not validate this pair. Check your connection and retry.", true);
-      } finally {
-        submitButton.disabled = false;
-      }
+async function fetchWithTimeout(url, options = {}, ms = 12000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
     });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    return await response.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
-    $("portfolioBody").addEventListener("click", event => {
-      const button = event.target.closest("[data-delete]");
-      if (!button) return;
-      const symbol = button.getAttribute("data-delete");
-      state.portfolio = state.portfolio.filter(c => c.symbol !== symbol);
+/* Binance Spot live prices */
+async function fetchPrices() {
+  if (state.priceBusy) return;
+  state.priceBusy = true;
+  $("refreshButton").disabled = true;
 
-      if (!state.portfolio.some(c => c.symbol === symbol)) {
-        delete state.prices[symbol];
-        delete state.priceErrors[symbol];
-      }
-      savePortfolio();
+  try {
+    const symbols = [...new Set(state.portfolio.map(c => c.symbol + "USDT"))];
+
+    if (!symbols.length) {
+      state.prices = {};
       render();
-      connectLive();
-      message(symbol + " removed.");
-    });
-
-    $("searchInput").addEventListener("input", render);
-
-    $("refreshButton").addEventListener("click", () => {
-      message("Refreshing prices...");
-      loadExchangeInfo().finally(() => {
-        connectLive();
-        loadAllInitialPrices();
-      });
-      fetchP2PRate();
-    });
-
-    $("exportButton").addEventListener("click", () => {
-      const rows = [[
-        "Symbol", "Quantity", "Price USD", "Value USD", "Value EGP",
-        "Average Buy USD", "P/L USD"
-      ]];
-
-      for (const coin of state.portfolio) {
-        const p = state.prices[coin.symbol] || 0;
-        const value = p * coin.quantity;
-        rows.push([
-          coin.symbol, coin.quantity, p || "", p ? value : "",
-          p && state.p2pRate !== null ? value * state.p2pRate : "",
-          coin.buyPrice || "",
-          p > 0 && coin.buyPrice > 0 ? value - coin.buyPrice * coin.quantity : ""
-        ]);
-      }
-
-      const csv = rows.map(row =>
-        row.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(",")
-      ).join("\r\n");
-      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "coinfolio-portfolio.csv";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    });
-
-    document.addEventListener("visibilitychange", () => {
-      if (!document.hidden && (!state.socket || state.socket.readyState !== WebSocket.OPEN)) {
-        connectLive();
-        loadAllInitialPrices();
-        fetchP2PRate();
-      }
-    });
-
-    window.addEventListener("beforeunload", () => {
-      clearTimeout(state.reconnectTimer);
-      clearInterval(state.p2pTimer);
-      closeSocket();
-    });
-
-    async function start() {
-      render();
-      setStatus("Loading market data...", "");
-      await loadExchangeInfo();
-      connectLive();
-      await loadAllInitialPrices();
-      fetchP2PRate();
-      state.p2pTimer = setInterval(fetchP2PRate, P2P_REFRESH_MS);
+      setStatus(true, "جاهز");
+      return;
     }
 
-    start().catch(err => {
-      console.error("Coinfolio startup error:", err);
-      setStatus("Startup error — refresh page", "error");
-      message("The app could not fully start. Open the browser Console for details.", true);
-    });
-  })();
-  </script>
+    const url = "https://api.binance.com/api/v3/ticker/price?symbols=" +
+      encodeURIComponent(JSON.stringify(symbols));
+
+    const data = await fetchWithTimeout(url, {}, 12000);
+    const newPrices = {};
+
+    for (const item of data) {
+      const symbol = item.symbol.replace(/USDT$/, "");
+      const price = Number(item.price);
+      if (Number.isFinite(price) && price > 0) newPrices[symbol] = price;
+    }
+
+    state.prices = { ...state.prices, ...newPrices };
+    render();
+
+    const missing = state.portfolio.filter(c => !state.prices[c.symbol]);
+    if (missing.length) {
+      setStatus(true, "بعض العملات غير متاحة");
+    } else {
+      setStatus(true, "الأسعار محدثة");
+    }
+    showError("");
+  } catch (error) {
+    console.error("Binance Spot error:", error);
+    setStatus(false, "تعذر تحديث الأسعار");
+    showError("لم نستطع جلب أسعار Binance. جرّب التحديث مرة أخرى.");
+  } finally {
+    state.priceBusy = false;
+    $("refreshButton").disabled = false;
+  }
+}
+
+/* Extract a plausible rate from Binance P2P responses */
+function extractP2PPrice(data) {
+  const candidates = [
+    data?.data?.price,
+    data?.data?.sellPrice,
+    data?.price,
+    data?.data?.buyPrice
+  ];
+
+  for (const value of candidates) {
+    const p = Number(value);
+    if (Number.isFinite(p) && p > 0) return p;
+  }
+
+  const ads = Array.isArray(data?.data) ? data.data : [];
+  const prices = ads
+    .map(item => Number(item?.adv?.price))
+    .filter(p => Number.isFinite(p) && p > 0)
+    .sort((a, b) => a - b);
+
+  if (prices.length) return prices[Math.floor(prices.length / 2)];
+  return null;
+}
+
+function updateP2PRate(price, source) {
+  if (!Number.isFinite(price) || price <= 0) return false;
+
+  state.p2pRate = price;
+  state.lastP2PTime = new Date();
+
+  $("p2pRate").textContent = money(price, "EGP") + " / USDT";
+  $("p2pUpdated").textContent =
+    "آخر تحديث: " + state.lastP2PTime.toLocaleTimeString("ar-EG") +
+    (source ? " • " + source : "");
+
+  render();
+  return true;
+}
+
+/*
+ * P2P can be blocked by browser CORS rules.
+ * Try Binance quote endpoint first, then the public ad-search endpoint.
+ */
+async function fetchP2PRate() {
+  if (state.p2pBusy) return;
+  state.p2pBusy = true;
+  $("p2pRefresh").disabled = true;
+  $("p2pUpdated").textContent = "جاري محاولة جلب سعر P2P...";
+
+  let lastError = null;
+
+  try {
+    const quoteUrl =
+      "https://www.binance.com/bapi/c2c/v1/public/c2c/agent/quote-price" +
+      "?fiat=EGP&asset=USDT&tradeType=SELL";
+
+    try {
+      const quoteData = await fetchWithTimeout(quoteUrl, {}, 8000);
+      const quotePrice = extractP2PPrice(quoteData);
+
+      if (quotePrice && updateP2PRate(quotePrice, "Binance P2P")) {
+        showError("");
+        return;
+      }
+    } catch (error) {
+      lastError = error;
+      console.warn("P2P quote endpoint failed:", error);
+    }
+
+    const searchUrl =
+      "https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search";
+
+    const payload = {
+      page: 1,
+      rows: 10,
+      payTypes: [],
+      publisherType: null,
+      asset: "USDT",
+      tradeType: "SELL",
+      fiat: "EGP"
+    };
+
+    try {
+      const data = await fetchWithTimeout(searchUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      }, 10000);
+
+      const price = extractP2PPrice(data);
+
+      if (price && updateP2PRate(price, "Binance P2P")) {
+        showError("");
+        return;
+      }
+
+      throw new Error("لم يرجع Binance أي عروض أسعار.");
+    } catch (error) {
+      lastError = error;
+      console.warn("P2P ad-search endpoint failed:", error);
+    }
+
+    $("p2pRate").textContent = "غير متاح";
+    $("p2pUpdated").textContent =
+      "تعذر الاتصال المباشر بـ Binance P2P. قد يكون الاتصال محجوبًا من المتصفح.";
+    showError(
+      "سعر الجنيه لم يصل من Binance P2P. لو أسعار العملات تعمل وسعر الجنيه لا يعمل، " +
+      "فغالبًا السبب قيود الاتصال من المتصفح، وليس بيانات محفظتك."
+    );
+  } finally {
+    state.p2pBusy = false;
+    $("p2pRefresh").disabled = false;
+  }
+}
+
+function render() {
+  let totalUsd = 0;
+  let totalCost = 0;
+  let hasBuyPrice = false;
+  let html = "";
+
+  for (const coin of state.portfolio) {
+    const price = Number(state.prices[coin.symbol]) || 0;
+    const value = price * coin.quantity;
+    const cost = coin.buyPrice * coin.quantity;
+    const hasPrice = price > 0;
+    const hasCost = coin.buyPrice > 0;
+    const pl = hasPrice && hasCost ? value - cost : null;
+
+    totalUsd += value;
+    if (hasCost) {
+      totalCost += cost;
+      hasBuyPrice = true;
+    }
+
+    const egp = state.p2pRate !== null ? value * state.p2pRate : null;
+    const plClass = pl === null ? "" : pl >= 0 ? "green" : "red";
+
+    html += `
+      <tr>
+        <td>
+          <div class="coin">
+            <div class="coinicon">${escapeHtml(coin.symbol.slice(0, 3))}</div>
+            <div>
+              <div class="coinname">${escapeHtml(coin.symbol)}</div>
+              <div class="coinqty">${number(coin.quantity)} units</div>
+            </div>
+          </div>
+        </td>
+        <td class="num">${hasPrice ? money(price) : "—"}</td>
+        <td class="num">${hasPrice ? money(value) : "—"}</td>
+        <td class="num">${egp !== null && hasPrice ? money(egp, "EGP") : "—"}</td>
+        <td class="num">${hasCost ? money(coin.buyPrice) : "—"}</td>
+        <td class="num ${plClass}">${pl === null ? "—" : money(pl)}</td>
+        <td>
+          <button class="smallbtn" data-edit="${escapeHtml(coin.symbol)}">تعديل</button>
+          <button class="smallbtn danger" data-delete="${escapeHtml(coin.symbol)}">حذف</button>
+        </td>
+      </tr>`;
+  }
+
+  $("portfolioBody").innerHTML = html;
+  $("emptyState").style.display = state.portfolio.length ? "none" : "block";
+  $("coinCount").textContent = state.portfolio.length + " عملة";
+
+  $("totalUsd").textContent = money(totalUsd);
+  $("totalEgp").textContent =
+    state.p2pRate === null ? "—" : money(totalUsd * state.p2pRate, "EGP");
+
+  let totalPL = 0;
+  let pricedCost = 0;
+  let hasPL = false;
+
+  for (const coin of state.portfolio) {
+    const price = Number(state.prices[coin.symbol]) || 0;
+    if (price > 0 && coin.buyPrice > 0) {
+      totalPL += (price - coin.buyPrice) * coin.quantity;
+      pricedCost += coin.buyPrice * coin.quantity;
+      hasPL = true;
+    }
+  }
+
+  $("totalPL").textContent = hasPL ? money(totalPL) : "—";
+  $("totalPL").className = "big " +
+    (!hasPL ? "" : totalPL >= 0 ? "green" : "red");
+
+  $("totalPLPercent").textContent = hasPL && pricedCost > 0
+    ? (totalPL >= 0 ? "+" : "") +
+      ((totalPL / pricedCost) * 100).toFixed(2) + "% من تكلفة الشراء"
+    : "أدخل متوسط الشراء لحساب النتيجة";
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[ch]);
+}
+
+$("coinForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const symbol = $("symbol").value.trim().toUpperCase();
+  const quantity = Number($("quantity").value);
+  const buyPrice = Number($("buyPrice").value) || 0;
+
+  if (!/^[A-Z0-9]{2,20}$/.test(symbol)) {
+    showError("اكتب رمز عملة صحيحًا، مثل BTC أو ETH أو SOL.");
+    return;
+  }
+
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    showError("اكتب كمية أكبر من صفر.");
+    return;
+  }
+
+  if (!Number.isFinite(buyPrice) || buyPrice < 0) {
+    showError("متوسط الشراء غير صحيح.");
+    return;
+  }
+
+  const existing = state.portfolio.find(c => c.symbol === symbol);
+
+  if (existing) {
+    const oldQuantity = existing.quantity;
+    const newQuantity = oldQuantity + quantity;
+
+    if (buyPrice > 0) {
+      existing.buyPrice = oldQuantity * existing.buyPrice > 0
+        ? ((oldQuantity * existing.buyPrice) + (quantity * buyPrice)) / newQuantity
+        : buyPrice;
+    }
+    existing.quantity = newQuantity;
+  } else {
+    state.portfolio.push({ symbol, quantity, buyPrice });
+  }
+
+  savePortfolio();
+  render();
+  showError("");
+  $("coinForm").reset();
+  fetchPrices();
+});
+
+$("portfolioBody").addEventListener("click", event => {
+  const deleteButton = event.target.closest("[data-delete]");
+  const editButton = event.target.closest("[data-edit]");
+
+  if (deleteButton) {
+    const symbol = deleteButton.dataset.delete;
+    if (!confirm("حذف " + symbol + " من المحفظة؟")) return;
+
+    state.portfolio = state.portfolio.filter(c => c.symbol !== symbol);
+    delete state.prices[symbol];
+    savePortfolio();
+    render();
+    return;
+  }
+
+  if (editButton) {
+    const symbol = editButton.dataset.edit;
+    const coin = state.portfolio.find(c => c.symbol === symbol);
+    if (!coin) return;
+
+    const quantity = prompt("الكمية الجديدة لـ " + symbol, String(coin.quantity));
+    if (quantity === null) return;
+
+    const newQuantity = Number(quantity);
+    if (!Number.isFinite(newQuantity) || newQuantity <= 0) {
+      alert("اكتب كمية صحيحة أكبر من صفر.");
+      return;
+    }
+
+    const buy = prompt(
+      "متوسط سعر الشراء بالدولار (اكتب 0 لو مش عايز تحسب الربح والخسارة)",
+      String(coin.buyPrice)
+    );
+    if (buy === null) return;
+
+    const newBuy = Number(buy);
+    if (!Number.isFinite(newBuy) || newBuy < 0) {
+      alert("اكتب سعر شراء صحيحًا.");
+      return;
+    }
+
+    coin.quantity = newQuantity;
+    coin.buyPrice = newBuy;
+    savePortfolio();
+    render();
+  }
+});
+
+$("refreshButton").addEventListener("click", async () => {
+  await fetchPrices();
+  await fetchP2PRate();
+});
+
+$("p2pRefresh").addEventListener("click", () => {
+  fetchP2PRate();
+});
+
+$("clearButton").addEventListener("click", () => {
+  if (!state.portfolio.length) return;
+  if (!confirm("متأكد إنك عايز تمسح كل العملات من المحفظة؟")) return;
+
+  state.portfolio = [];
+  state.prices = {};
+  savePortfolio();
+  render();
+});
+
+$("exportButton").addEventListener("click", () => {
+  const rows = [[
+    "Symbol", "Quantity", "Price USD", "Value USD", "Value EGP",
+    "Average Buy USD", "P/L USD"
+  ]];
+
+  for (const coin of state.portfolio) {
+    const price = Number(state.prices[coin.symbol]) || 0;
+    const value = price * coin.quantity;
+    rows.push([
+      coin.symbol,
+      coin.quantity,
+      price || "",
+      price ? value : "",
+      price && state.p2pRate !== null ? value * state.p2pRate : "",
+      coin.buyPrice || "",
+      price > 0 && coin.buyPrice > 0
+        ? value - coin.buyPrice * coin.quantity
+        : ""
+    ]);
+  }
+
+  const csv = "\uFEFF" + rows.map(row =>
+    row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(",")
+  ).join("\r\n");
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "coinfolio-portfolio.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+});
+
+async function start() {
+  render();
+  await Promise.allSettled([fetchPrices(), fetchP2PRate()]);
+  setInterval(fetchPrices, 30000);
+  setInterval(fetchP2PRate, 60000);
+}
+
+start();
+</script>
 </body>
 </html>
