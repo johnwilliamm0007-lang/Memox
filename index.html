@@ -203,7 +203,16 @@ function totals(){
   return {value,cost,pnl,pnlPct:cost?pnl/cost*100:0,hasBuy};
 }
 function currentEgp(v){return state.usdEgp>0?v*state.usdEgp:0}
-function persistLocal(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(e){console.warn("Local save failed",e)}}
+function persistLocal(){
+  if(!currentUser) return;
+
+  try{
+    const key = `${STORAGE_KEY}_${currentUser.uid}`;
+    localStorage.setItem(key, JSON.stringify(state));
+  }catch(e){
+    console.warn("Local save failed",e);
+  }
+}
 function persist(){
   persistLocal();
   if(!currentUser||!cloudReady||applyingRemote)return;
