@@ -171,14 +171,24 @@ function normalizeAsset(raw){
   if(!symbol||!/^[A-Z0-9._-]{1,20}$/.test(symbol))return null;
   return {id:safe(raw.id||uid()),symbol,name:safe(raw.name||symbol),amount:Math.max(0,num(raw.amount??raw.quantity??raw.qty)),buyPrice:Math.max(0,num(raw.buyPrice??raw.avgBuyPrice??raw.averageBuyPrice??raw.entryPrice??raw.purchasePrice)),logo:safe(raw.logo||raw.image||""),geckoId:safe(raw.geckoId||""),price:num(raw.price),change24h:num(raw.change24h)};
 }
-function loadLocal(){
+function loadLocal(userId){
+  if(!userId) return defaultState();
+
   try{
-    const s=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
-    if(s&&Array.isArray(s.portfolio))return {...defaultState(),...s};
-  }catch(e){console.warn("Local cache unavailable",e)}
+    const key = `${STORAGE_KEY}_${userId}`;
+    const s = JSON.parse(localStorage.getItem(key) || "null");
+
+    if(s && Array.isArray(s.portfolio)){
+      return {...defaultState(), ...s};
+    }
+  }catch(e){
+    console.warn("Local cache unavailable",e);
+  }
+
   return defaultState();
 }
-let state=loadLocal(),currentUser=null,unsubscribeCloud=null;
+
+let state=defaultState(),currentUser=null,unsubscribeCloud=null;
 let socket=null,reconnectTimer=null,p2pTimer=null,priceTimer=null,cloudTimer=null;
 let applyingRemote=false,cloudReady=false,authMode="login",searchTerm="",p2pSource="";
 let logoCache={},chartSymbol="",chartRange="24H",chartRequest=0;
