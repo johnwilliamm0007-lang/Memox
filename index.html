@@ -247,8 +247,8 @@ tbody tr:last-child td{border-bottom:0}
       <div class="panel stat"><div class="stat-label">Loss</div><div class="stat-value red" id="mLoss">$0.00</div></div>
       <div class="panel stat"><div class="stat-label">Net result</div><div class="stat-value" id="mNet">$0.00</div><div class="stat-foot" id="mNetEgp">—</div></div>
     </div>
-    <div class="table-scroll"><table style="min-width:600px">
-      <thead><tr><th>Date</th><th>Asset</th><th>Qty sold</th><th>Buy → Sell</th><th>Fees</th><th>P/L</th><th></th></tr></thead>
+    <div class="table-scroll"><table style="min-width:900px">
+      <thead><tr><th>Date</th><th>Asset</th><th>Qty sold</th><th>Buy → Sell</th><th>Bought for</th><th>Sold for</th><th>Fees</th><th>P/L</th><th></th></tr></thead>
       <tbody id="tradeTable"></tbody>
     </table></div>
   </section>
@@ -271,7 +271,7 @@ tbody tr:last-child td{border-bottom:0}
     </div>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>Asset</th><th>Price (USD)</th><th>Holdings</th><th>Value (USD)</th><th>Value (EGP)</th><th>Avg. buy price</th><th>P/L</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Asset</th><th>Price (USD)</th><th>Holdings</th><th>Value (USD)</th><th>Value (EGP)</th><th>Avg. buy price</th><th>Invested</th><th>P/L</th><th>Actions</th></tr></thead>
         <tbody id="assetTable"></tbody>
       </table>
       <div class="empty" id="emptyState"><div class="empty-icon">✧</div><strong>Your portfolio starts here</strong><br>Add your first crypto asset to see live prices, coin logos, and portfolio analytics.</div>
@@ -292,6 +292,7 @@ tbody tr:last-child td{border-bottom:0}
         <div class="field"><label for="coinAmount">Quantity held *</label><input id="coinAmount" type="number" min="0" step="any" placeholder="0.5" required></div>
         <div class="field"><label for="coinBuy">Average buy price (USD)</label><input id="coinBuy" type="number" min="0" step="any" placeholder="Optional"></div>
         <div class="field full"><label for="coinFee">Buy fee (optional)</label><div style="display:flex;gap:8px"><input id="coinFee" type="number" min="0" step="any" placeholder="e.g. 0.1" style="flex:1;min-width:0"><select id="coinFeeUnit" class="fee-unit"><option value="pct">% of purchase</option><option value="usd">$ USD</option></select></div></div>
+        <div class="field full"><div class="notice" id="buyPreview" style="margin:0">—</div></div>
         <div class="field full"><label for="coinLogo">Logo URL (optional)</label><input id="coinLogo" type="url" placeholder="Auto-detected if left empty"></div>
       </div>
       <div class="notice">For a new asset, its live price uses the Binance SYMBOL/USDT market when available. A logo lookup uses CoinGecko's public search API.</div>
@@ -480,7 +481,7 @@ function render() {
   $("totalPnl").textContent = t.hasBuy ? (t.pnl > 0 ? "+" : "") + money(t.pnl) : "—";
   $("totalPnl").className = "stat-value " + (t.pnl > 0 ? "green" : t.pnl < 0 ? "red" : "");
   $("totalPnlPct").textContent = t.hasBuy
-    ? `${t.pnlPct >= 0 ? "+" : ""}${t.pnlPct.toFixed(2)}% overall${state.usdEgp > 0 ? " · " + egpSigned(t.pnl) : ""}`
+    ? `${t.pnlPct >= 0 ? "+" : ""}${t.pnlPct.toFixed(2)}% overall · invested ${money(t.cost)}${state.usdEgp > 0 ? " · " + egpSigned(t.pnl) : ""}`
     : "Add average buy prices to track P/L";
   $("assetCount").textContent = state.portfolio.length;
   $("usdEgp").textContent = state.usdEgp > 0
@@ -523,6 +524,7 @@ function renderCards() {
       <div class="asset-change ${change>0?"green":change<0?"red":""}">${change>0?"+":""}${change.toFixed(2)}% <span style="color:var(--muted);font-weight:400">24h</span></div>
       <div class="asset-details"><div>Holding value<strong>${money(value)}</strong></div><div style="text-align:right">Value in EGP<strong>${state.usdEgp>0?money(currentEgp(value),"EGP"):"—"}</strong></div></div>
       <div class="asset-details"><div>Average buy<strong>${asset.buyPrice?money(asset.buyPrice):"Not set"}</strong>${asset.buyFee>0?`<span style="display:block;font-size:10px;margin-top:3px;color:var(--muted)">+ ${money(asset.buyFee)} fees</span>`:""}</div><div style="text-align:right">Unrealized P/L<strong class="${asset.buyPrice?(pnl.pnl>0?"green":pnl.pnl<0?"red":""):""}">${asset.buyPrice?(pnl.pnl>0?"+":"")+money(pnl.pnl):"—"}</strong>${asset.buyPrice&&state.usdEgp>0?`<span style="display:block;font-size:10px;margin-top:3px;color:var(--muted)">${egpSigned(pnl.pnl)}</span>`:""}</div></div>
+      <div class="asset-details"><div>Total invested<strong>${asset.buyPrice?money(pnl.cost):"—"}</strong></div><div style="text-align:right">Qty × buy price<strong>${quantity(asset.amount)} × ${asset.buyPrice?money(asset.buyPrice):"—"}</strong></div></div>
       <div class="asset-buttons"><button class="btn" data-close="${escapeHtml(asset.id)}">Close</button><button class="btn" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="btn danger" data-delete="${escapeHtml(asset.id)}">Delete</button></div>
     </article>`;
   }).join("");
@@ -579,6 +581,7 @@ function renderTable() {
       <td>${money(price)}</td><td>${quantity(asset.amount)}</td><td>${money(value)}</td>
       <td>${state.usdEgp>0?money(currentEgp(value),"EGP"):"—"}</td>
       <td>${asset.buyPrice?money(asset.buyPrice):"—"}</td>
+      <td>${asset.buyPrice?money(pnl.cost):"—"}</td>
       <td class="${asset.buyPrice?(pnl.pnl>0?"green":pnl.pnl<0?"red":""):""}">${asset.buyPrice?(pnl.pnl>0?"+":"")+money(pnl.pnl):"—"}${asset.buyPrice?`<div style="font-size:10px;margin-top:4px">${pnl.pct>=0?"+":""}${pnl.pct.toFixed(2)}%</div>`:""}${asset.buyPrice&&state.usdEgp>0?`<div style="font-size:10px;margin-top:2px">${egpSigned(pnl.pnl)}</div>`:""}</td>
       <td><button class="small-action" data-close="${escapeHtml(asset.id)}">Close</button><button class="small-action" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="small-action" data-delete="${escapeHtml(asset.id)}">Delete</button></td>
     </tr>`;
@@ -662,6 +665,7 @@ function openModal(asset=null) {
   $("coinBuy").value=asset?.buyPrice||"";
   $("coinLogo").value=asset?.logo||"";
   $("coinFee").value=asset?.buyFee||"";$("coinFeeUnit").value=asset?"usd":"pct";
+  previewBuy();
   $("modalBackdrop").classList.add("open");
   setTimeout(()=>$("coinSymbol").focus(),50);
 }
@@ -911,10 +915,12 @@ function renderTrades(){
     <td><strong>${escapeHtml(t.symbol)}</strong></td>
     <td>${quantity(t.qty)}</td>
     <td>${money(t.buy)} → ${money(t.sell)}</td>
+    <td>${money(t.qty*t.buy)}</td>
+    <td>${money(t.qty*t.sell)}</td>
     <td>${money(num(t.buyFee)+num(t.sellFee))}</td>
     <td class="${t.pnl>0?"green":t.pnl<0?"red":""}">${t.pnl>0?"+":""}${money(t.pnl)}</td>
     <td><button class="small-action" data-trade-del="${escapeHtml(t.id)}">Delete</button></td>
-  </tr>`).join(""):`<tr><td colspan="7" class="empty" style="padding:26px">No closed positions this month.</td></tr>`;
+  </tr>`).join(""):`<tr><td colspan="9" class="empty" style="padding:26px">No closed positions this month.</td></tr>`;
 }
 function openClose(id){
   const a=state.portfolio.find(x=>x.id===id);if(!a)return;
@@ -934,12 +940,12 @@ function calcClose(a){
   const sellFee=$("closeFeeUnit").value==="pct"?q*p*feeIn/100:feeIn;
   const buyFeePart=a.amount>0?num(a.buyFee)*q/a.amount:0;
   const cost=q*a.buyPrice+buyFeePart;
-  return {q,p,sellFee,buyFeePart,pnl:q*p-sellFee-cost};
+  return {q,p,sellFee,buyFeePart,cost,proceeds:q*p-sellFee,pnl:q*p-sellFee-cost};
 }
 function previewClose(){
   const a=state.portfolio.find(x=>x.id===$("closeId").value);if(!a)return;
   const c=calcClose(a);
-  $("closePreview").innerHTML=`Fees: ${money(c.buyFeePart+c.sellFee)} (buy ${money(c.buyFeePart)} + sell ${money(c.sellFee)})<br>Net result: <strong class="${c.pnl>0?"green":c.pnl<0?"red":""}">${c.pnl>0?"+":""}${money(c.pnl)}</strong>${state.usdEgp>0?" · "+egpSigned(c.pnl):""}`;
+  $("closePreview").innerHTML=`Bought: ${quantity(c.q)} × ${money(a.buyPrice)} = ${money(c.q*a.buyPrice)}${c.buyFeePart>0?` + ${money(c.buyFeePart)} fee`:""} → <strong>${money(c.cost)}</strong><br>Sold: ${quantity(c.q)} × ${money(c.p)} = ${money(c.q*c.p)}${c.sellFee>0?` − ${money(c.sellFee)} fee`:""} → <strong>${money(c.proceeds)}</strong><br>Net result: <strong class="${c.pnl>0?"green":c.pnl<0?"red":""}">${c.pnl>0?"+":""}${money(c.pnl)}</strong>${state.usdEgp>0?" · "+egpSigned(c.pnl):""}`;
 }
 function submitClose(e){
   e.preventDefault();
@@ -977,6 +983,13 @@ document.addEventListener("click",e=>{
 $("addBtn").addEventListener("click",()=>openModal());
 $("cancelBtn").addEventListener("click",closeModal);
 $("modalBackdrop").addEventListener("click",event=>{if(event.target===$("modalBackdrop"))closeModal();});
+function previewBuy(){
+  const q=num($("coinAmount").value),pr=num($("coinBuy").value),fi=num($("coinFee").value);
+  const fee=$("coinFeeUnit").value==="pct"?q*pr*fi/100:fi;
+  $("buyPreview").innerHTML=pr>0&&q>0?`Total purchase: ${quantity(q)} × ${money(pr)} = ${money(q*pr)}${fee>0?` + ${money(fee)} fee`:""} → <strong>${money(q*pr+fee)}</strong>`:"Enter quantity and buy price to see the total cost.";
+}
+["coinAmount","coinBuy","coinFee"].forEach(id=>$(id).addEventListener("input",previewBuy));
+$("coinFeeUnit").addEventListener("change",previewBuy);
 $("coinForm").addEventListener("submit",saveAsset);
 $("exportBtn").addEventListener("click",exportCsv);
 $("refreshBtn").addEventListener("click",async()=>{
