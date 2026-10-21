@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#f6f7f9">
+<meta name="theme-color" content="#0b0f14">
 <title>Coinfolio — Crypto Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700" rel="stylesheet">
 <style>
 :root{
-  --bg:#f6f7f9;--card:#fff;--border:#e8eaed;--text:#0f1419;
-  --muted:#6b7480;--green:#0a9f6b;--red:#e5484d;--accent:#0f1419;
-  --shadow:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.04);
+  --bg:#0b0f14;--card:#131a22;--border:#222c38;--text:#e7ecf3;
+  --muted:#8b97a7;--green:#22c993;--red:#ff6b70;--accent:#3b82f6;
+  --shadow:0 1px 2px rgba(0,0,0,.4);color-scheme:dark;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;min-height:100vh;font-size:14px;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
@@ -21,22 +21,22 @@ button{cursor:pointer}
 button:focus-visible,input:focus-visible{outline:2px solid #3b82f6;outline-offset:2px}
 .app{display:none}
 .auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px}
-.auth-card{width:min(100%,420px);padding:32px;border-radius:20px;background:var(--card);border:1px solid var(--border);box-shadow:0 10px 40px rgba(16,24,40,.08)}
+.auth-card{width:min(100%,420px);padding:32px;border-radius:20px;background:var(--card);border:1px solid var(--border);box-shadow:0 10px 40px rgba(0,0,0,.5)}
 .auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:26px}
 .auth-brand .brand-mark{width:44px;height:44px}
 .auth-card h2{margin:0 0 8px;font-size:24px}
 .auth-card .auth-sub{color:var(--muted);font-size:13px;line-height:1.7;margin:0 0 22px}
 .auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
-.auth-tab{padding:11px;border:1px solid var(--border);border-radius:10px;background:#fff;color:var(--muted);font-weight:600}
+.auth-tab{padding:11px;border:1px solid #2a3441;border-radius:10px;background:#0f151c;color:var(--muted);font-weight:600}
 .auth-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .auth-field{display:flex;flex-direction:column;gap:8px;margin:14px 0}
-.auth-field label{color:#444c57;font-size:12px;font-weight:500}
-.auth-field input{width:100%;background:#fff;border:1px solid #d9dde3;color:var(--text);padding:12px 13px;border-radius:10px}
+.auth-field label{color:var(--muted);font-size:12px;font-weight:500}
+.auth-field input{width:100%;background:#0f151c;border:1px solid #2a3441;color:var(--text);padding:12px 13px;border-radius:10px}
 .auth-submit{width:100%;margin-top:10px;padding:13px}
 .auth-message{font-size:12px;line-height:1.6;margin-top:14px;color:var(--muted);min-height:18px}
 .auth-message.error{color:var(--red)}
 .auth-message.success{color:var(--green)}
-.user-pill{font-size:12px;color:var(--muted);padding:8px 11px;border:1px solid var(--border);background:#fff;border-radius:999px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-pill{font-size:12px;color:var(--muted);padding:8px 11px;border:1px solid var(--border);background:#0f151c;border-radius:999px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .app{max-width:1280px;margin:auto;padding:24px}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:22px}
 .brand{display:flex;align-items:center;gap:12px}
@@ -45,12 +45,12 @@ button:focus-visible,input:focus-visible{outline:2px solid #3b82f6;outline-offse
 .brand p{font-size:12px;color:var(--muted);margin:2px 0 0}
 .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
-.dot{width:8px;height:8px;border-radius:50%;background:#c3c8cf}
+.dot{width:8px;height:8px;border-radius:50%;background:#4a5563}
 .dot.live{background:var(--green)}
-.btn{border:1px solid #d9dde3;background:#fff;color:var(--text);padding:9px 14px;border-radius:10px;font-weight:600;transition:background .15s,border-color .15s}
-.btn:hover{background:#f1f3f5;border-color:#c5cad2}
+.btn{border:1px solid #2a3441;background:#0f151c;color:var(--text);padding:9px 14px;border-radius:10px;font-weight:600;transition:background .15s,border-color .15s}
+.btn:hover{background:#1b2531;border-color:#3a4658}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.primary:hover{background:#2a313a;border-color:#2a313a}
+.btn.primary:hover{background:#2563eb;border-color:#2563eb}
 .btn.danger{color:var(--red)}
 .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
 .green{color:var(--green)!important}.red{color:var(--red)!important}
@@ -66,6 +66,7 @@ button:focus-visible,input:focus-visible{outline:2px solid #3b82f6;outline-offse
 canvas{width:100%;height:100%;display:block}
 
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.stats3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 .stat{padding:18px 20px;min-width:0}
 .stat-label{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
 .stat-value{font-size:clamp(20px,2.6vw,30px);font-weight:700;letter-spacing:-.03em;margin:10px 0 6px;overflow-wrap:anywhere;line-height:1.1}
@@ -74,13 +75,13 @@ canvas{width:100%;height:100%;display:block}
 .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
 .section-head h3{margin:0;font-size:16px;font-weight:600}
 .section-head p{margin:4px 0 0;color:var(--muted);font-size:12px}
-.badge{padding:5px 10px;border-radius:999px;background:#e8f6ef;color:var(--green);font-size:11px;font-weight:600;white-space:nowrap}
+.badge{padding:5px 10px;border-radius:999px;background:rgba(34,201,147,.12);color:var(--green);font-size:11px;font-weight:600;white-space:nowrap}
 
 .asset-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}
 .asset-card{padding:18px;min-width:0;transition:border-color .15s,box-shadow .15s}
-.asset-card:hover{border-color:#c9ced6;box-shadow:0 4px 14px rgba(16,24,40,.07)}
+.asset-card:hover{border-color:#34414f;box-shadow:0 4px 14px rgba(0,0,0,.4)}
 .asset-top{display:flex;align-items:center;gap:11px;min-width:0}
-.coin-logo{width:42px;height:42px;flex:0 0 42px;border-radius:50%;display:grid;place-items:center;background:#f1f3f5;border:1px solid var(--border);font-weight:700;font-size:12px;overflow:hidden}
+.coin-logo{width:42px;height:42px;flex:0 0 42px;border-radius:50%;display:grid;place-items:center;background:#1b2531;border:1px solid var(--border);font-weight:700;font-size:12px;overflow:hidden}
 .coin-logo img{width:100%;height:100%;object-fit:cover}
 .coin-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .coin-symbol{color:var(--muted);font-size:12px;margin-top:4px}
@@ -93,36 +94,36 @@ canvas{width:100%;height:100%;display:block}
 
 .table-panel{padding:20px 22px;margin-bottom:20px}
 .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.search{background:#fff;color:var(--text);border:1px solid #d9dde3;padding:10px 13px;border-radius:10px;min-width:180px}
-.search::placeholder,input::placeholder{color:#9aa1ab}
+.search{background:#0f151c;color:var(--text);border:1px solid #2a3441;padding:10px 13px;border-radius:10px;min-width:180px}
+.search::placeholder,input::placeholder{color:#5d6877}
 .table-scroll{overflow-x:auto}
 table{border-collapse:collapse;width:100%;min-width:780px;text-align:left}
 th{color:var(--muted);font-size:12px;font-weight:500;padding:12px;border-bottom:1px solid var(--border)}
-td{padding:14px 12px;border-bottom:1px solid #f0f2f4;font-size:13px;white-space:nowrap}
-tbody tr:hover{background:#fafbfc}
+td{padding:14px 12px;border-bottom:1px solid #1c2530;font-size:13px;white-space:nowrap}
+tbody tr:hover{background:#17202a}
 tbody tr:last-child td{border-bottom:0}
 .coin-cell{display:flex;align-items:center;gap:10px}
 .coin-cell .coin-logo{width:32px;height:32px;flex-basis:32px;font-size:10px}
 .coin-cell .coin-name{font-size:13px}
 .coin-cell .coin-symbol{font-size:11px;margin-top:2px}
-.small-action{border:1px solid #d9dde3;background:#fff;color:var(--text);border-radius:8px;padding:6px 9px;margin-right:4px}
-.small-action:hover{background:#f1f3f5}
+.small-action{border:1px solid #2a3441;background:#0f151c;color:var(--text);border-radius:8px;padding:6px 9px;margin-right:4px}
+.small-action:hover{background:#1b2531}
 .empty{text-align:center;padding:40px 20px;color:var(--muted);line-height:1.8}
 .empty-icon{font-size:32px;margin-bottom:10px}
 .footer{display:flex;justify-content:space-between;gap:15px;color:var(--muted);font-size:12px;padding:10px 2px 25px}
 
-.modal-backdrop{display:none;position:fixed;inset:0;z-index:10;background:rgba(15,20,25,.45);padding:20px;align-items:center;justify-content:center}
+.modal-backdrop{display:none;position:fixed;inset:0;z-index:10;background:rgba(0,0,0,.65);padding:20px;align-items:center;justify-content:center}
 .modal-backdrop.open{display:flex}
-.modal{width:min(100%,480px);padding:24px;border-radius:18px;background:#fff;border:1px solid var(--border);box-shadow:0 20px 60px rgba(16,24,40,.2)}
+.modal{width:min(100%,480px);padding:24px;border-radius:18px;background:var(--card);border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .modal h3{margin:0 0 6px;font-size:19px}
 .modal p{color:var(--muted);font-size:13px;line-height:1.6;margin:0 0 18px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .field{display:flex;flex-direction:column;gap:7px;min-width:0}
 .field.full{grid-column:1/-1}
-.field label{font-size:12px;color:#444c57;font-weight:500}
-.field input{width:100%;min-width:0;background:#fff;border:1px solid #d9dde3;color:var(--text);padding:11px 12px;border-radius:10px}
+.field label{font-size:12px;color:var(--muted);font-weight:500}
+.field input{width:100%;min-width:0;background:#0f151c;border:1px solid #2a3441;color:var(--text);padding:11px 12px;border-radius:10px}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
-.notice{padding:11px 13px;border-radius:10px;background:#f3f4f6;color:#4b5563;font-size:12px;line-height:1.7;margin:12px 0}
+.notice{padding:11px 13px;border-radius:10px;background:#1b2531;color:#aab4c2;font-size:12px;line-height:1.7;margin:12px 0}
 
 .alloc{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
 .alloc canvas{width:150px;height:150px;flex:0 0 150px}
@@ -237,6 +238,22 @@ tbody tr:last-child td{border-bottom:0}
 
   <section class="panel section" style="margin-bottom:18px">
     <div class="section-head">
+      <div><h3>Monthly profit</h3><p>Realized results from closed positions</p></div>
+      <div class="toolbar"><button class="btn" id="prevMonth" type="button">‹</button><strong id="tradeMonth" style="min-width:130px;text-align:center"></strong><button class="btn" id="nextMonth" type="button">›</button></div>
+    </div>
+    <div class="stats stats3" style="margin-bottom:14px">
+      <div class="panel stat"><div class="stat-label">Profit</div><div class="stat-value green" id="mProfit">$0.00</div></div>
+      <div class="panel stat"><div class="stat-label">Loss</div><div class="stat-value red" id="mLoss">$0.00</div></div>
+      <div class="panel stat"><div class="stat-label">Net result</div><div class="stat-value" id="mNet">$0.00</div><div class="stat-foot" id="mNetEgp">—</div></div>
+    </div>
+    <div class="table-scroll"><table style="min-width:600px">
+      <thead><tr><th>Date</th><th>Asset</th><th>Qty sold</th><th>Buy → Sell</th><th>P/L</th><th></th></tr></thead>
+      <tbody id="tradeTable"></tbody>
+    </table></div>
+  </section>
+
+  <section class="panel section" style="margin-bottom:18px">
+    <div class="section-head">
       <div><h3>Watchlist</h3><p>Coins you follow without holding them</p></div>
       <form class="watch-add" id="watchForm"><input class="search" id="watchInput" placeholder="Add symbol, e.g. SOL" maxlength="20" autocomplete="off" aria-label="Add a coin to your watchlist"><button class="btn primary" type="submit">＋ Watch</button></form>
     </div>
@@ -281,6 +298,23 @@ tbody tr:last-child td{border-bottom:0}
   </div>
 </div>
 
+<div class="modal-backdrop" id="closeBackdrop">
+  <div class="modal">
+    <h3 id="closeTitle">Close position</h3>
+    <p id="closeInfo"></p>
+    <form id="closeForm">
+      <input type="hidden" id="closeId">
+      <div class="form-grid">
+        <div class="field"><label for="closeQty">Quantity sold *</label><input id="closeQty" type="number" min="0" step="any" required></div>
+        <div class="field"><label for="closePrice">Sell price (USD) *</label><input id="closePrice" type="number" min="0" step="any" required></div>
+        <div class="field full"><label for="closeDate">Date</label><input id="closeDate" type="date"></div>
+      </div>
+      <div class="notice" id="closePreview">—</div>
+      <div class="modal-actions"><button class="btn" type="button" id="closeCancel">Cancel</button><button class="btn primary" type="submit">Close &amp; record</button></div>
+    </form>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -299,11 +333,6 @@ const db = getFirestore(firebaseApp);
 (() => {
 "use strict";
 
-/* STORAGE
-   The app attempts to find an existing portfolio array in localStorage.
-   New data is saved under coinfolio_glass_v2. Keep a browser backup before
-   replacing your previous app if its storage format was customized.
-*/
 const STORAGE_KEY = "coinfolio_glass_v2";
 const $ = id => document.getElementById(id);
 const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
@@ -343,57 +372,14 @@ function normalizeAsset(raw) {
     change24h: num(raw.change24h || raw.priceChangePercent || raw.change || 0)
   };
 }
-function findExistingPortfolio() {
-  const preferred = [
-    "coinfolio_glass_v2","coinfolio","coinfolio_v1","coinfolio_portfolio",
-    "cryptoPortfolio","crypto-portfolio","portfolio"
-  ];
-  const candidates = [];
-  for (const key of preferred) {
-    try {
-      const raw = localStorage.getItem(key);
-      if (raw) candidates.push([key, JSON.parse(raw)]);
-    } catch {}
-  }
-  try {
-    for (let i=0;i<localStorage.length;i++) {
-      const key = localStorage.key(i);
-      if (!key || candidates.some(c => c[0] === key)) continue;
-      try {
-        const value = JSON.parse(localStorage.getItem(key));
-        if (value && typeof value === "object") candidates.push([key,value]);
-      } catch {}
-    }
-  } catch {}
 
-  for (const [key,value] of candidates) {
-    if (key === STORAGE_KEY && value && Array.isArray(value.portfolio)) {
-      return {key,value};
-    }
-    const arrays = [
-      value?.portfolio, value?.assets, value?.coins, value?.holdings,
-      value?.state?.portfolio, value?.state?.assets, value?.data?.portfolio
-    ];
-    const arr = arrays.find(Array.isArray);
-    if (arr && arr.length && arr.some(item => item && (item.symbol || item.ticker))) {
-      return {key,value:{portfolio:arr,prices:value.prices || value.state?.prices || {}}};
-    }
-    if (Array.isArray(value) && value.length &&
-        value.some(item => item && (item.symbol || item.ticker))) {
-      return {key,value:{portfolio:value,prices:{}}};
-    }
-  }
-  return null;
-}
-
-const defaultState = () => ({portfolio:[],prices:{},usdEgp:0,history:[],watchlist:[],watchLogos:{},changes:{},updatedAt:null});
+const defaultState = () => ({portfolio:[],prices:{},usdEgp:0,history:[],watchlist:[],watchLogos:{},changes:{},trades:[],updatedAt:null});
 let state = defaultState();
 let currentUser = null;
 let cloudReady = false;
 let socket = null;
 let reconnectTimer = null;
 let p2pTimer = null;
-let logoSearchTimer = null;
 let logoCache = {};
 let p2pSource = "";
 let searchTerm = "";
@@ -416,6 +402,7 @@ async function saveCloudPortfolio() {
     premiumPct: num(state.premiumPct),
     watchlist: state.watchlist,
     history: state.history,
+    trades: state.trades || [],
     updatedAt: Date.now()
   };
   cloudSaveTimer = setTimeout(async () => {
@@ -512,6 +499,7 @@ function render() {
   renderCards();
   renderTable();
   renderWatchlist();
+  renderTrades();
   drawChart();
   drawAllocation();
 }
@@ -531,7 +519,7 @@ function renderCards() {
       <div class="asset-change ${change>0?"green":change<0?"red":""}">${change>0?"+":""}${change.toFixed(2)}% <span style="color:var(--muted);font-weight:400">24h</span></div>
       <div class="asset-details"><div>Holding value<strong>${money(value)}</strong></div><div style="text-align:right">Value in EGP<strong>${state.usdEgp>0?money(currentEgp(value),"EGP"):"—"}</strong></div></div>
       <div class="asset-details"><div>Average buy<strong>${asset.buyPrice?money(asset.buyPrice):"Not set"}</strong></div><div style="text-align:right">Unrealized P/L<strong class="${asset.buyPrice?(pnl.pnl>0?"green":pnl.pnl<0?"red":""):""}">${asset.buyPrice?(pnl.pnl>0?"+":"")+money(pnl.pnl):"—"}</strong>${asset.buyPrice&&state.usdEgp>0?`<span style="display:block;font-size:10px;margin-top:3px;color:var(--muted)">${egpSigned(pnl.pnl)}</span>`:""}</div></div>
-      <div class="asset-buttons"><button class="btn" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="btn danger" data-delete="${escapeHtml(asset.id)}">Delete</button></div>
+      <div class="asset-buttons"><button class="btn" data-close="${escapeHtml(asset.id)}">Close</button><button class="btn" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="btn danger" data-delete="${escapeHtml(asset.id)}">Delete</button></div>
     </article>`;
   }).join("");
 }
@@ -588,7 +576,7 @@ function renderTable() {
       <td>${state.usdEgp>0?money(currentEgp(value),"EGP"):"—"}</td>
       <td>${asset.buyPrice?money(asset.buyPrice):"—"}</td>
       <td class="${asset.buyPrice?(pnl.pnl>0?"green":pnl.pnl<0?"red":""):""}">${asset.buyPrice?(pnl.pnl>0?"+":"")+money(pnl.pnl):"—"}${asset.buyPrice?`<div style="font-size:10px;margin-top:4px">${pnl.pct>=0?"+":""}${pnl.pct.toFixed(2)}%</div>`:""}${asset.buyPrice&&state.usdEgp>0?`<div style="font-size:10px;margin-top:2px">${egpSigned(pnl.pnl)}</div>`:""}</td>
-      <td><button class="small-action" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="small-action" data-delete="${escapeHtml(asset.id)}">Delete</button></td>
+      <td><button class="small-action" data-close="${escapeHtml(asset.id)}">Close</button><button class="small-action" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="small-action" data-delete="${escapeHtml(asset.id)}">Delete</button></td>
     </tr>`;
   }).join("");
 }
@@ -619,14 +607,14 @@ function drawChart() {
   const pad=8,chartH=h-14,chartW=w-pad*2;
   const coords=values.map((v,i)=>({x:pad+i/(Math.max(1,values.length-1))*chartW,y:6+(max-v)/(max-min)*chartH}));
   const grad=ctx.createLinearGradient(0,0,0,h);
-  grad.addColorStop(0,"rgba(10,159,107,.18)");grad.addColorStop(1,"rgba(10,159,107,0)");
+  grad.addColorStop(0,"rgba(34,201,147,.22)");grad.addColorStop(1,"rgba(34,201,147,0)");
   ctx.beginPath();coords.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
   ctx.lineTo(coords[coords.length-1].x,h);ctx.lineTo(coords[0].x,h);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
   ctx.beginPath();coords.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
-  ctx.strokeStyle="#0a9f6b";ctx.lineWidth=2.4;ctx.lineJoin="round";ctx.stroke();
-  const last=coords[coords.length-1];ctx.beginPath();ctx.arc(last.x,last.y,8,0,Math.PI*2);ctx.fillStyle="rgba(10,159,107,.18)";ctx.fill();ctx.beginPath();ctx.arc(last.x,last.y,4,0,Math.PI*2);ctx.fillStyle="#0a9f6b";ctx.fill();
+  ctx.strokeStyle="#22c993";ctx.lineWidth=2.4;ctx.lineJoin="round";ctx.stroke();
+  const last=coords[coords.length-1];ctx.beginPath();ctx.arc(last.x,last.y,8,0,Math.PI*2);ctx.fillStyle="rgba(34,201,147,.2)";ctx.fill();ctx.beginPath();ctx.arc(last.x,last.y,4,0,Math.PI*2);ctx.fillStyle="#22c993";ctx.fill();
 }
-const ALLOC_COLORS=["#0a9f6b","#3b82f6","#f59e0b","#8b5cf6","#ef4444","#06b6d4","#ec4899","#94a3b8"];
+const ALLOC_COLORS=["#22c993","#3b82f6","#f59e0b","#8b5cf6","#ef4444","#06b6d4","#ec4899","#94a3b8"];
 function drawAllocation() {
   const canvas=$("allocChart"),legend=$("allocLegend");
   if(!canvas||!legend) return;
@@ -639,9 +627,9 @@ function drawAllocation() {
     .filter(i=>i.value>0).sort((a,b)=>b.value-a.value);
   const total=items.reduce((sum,i)=>sum+i.value,0);
   if(!total) {
-    ctx.strokeStyle="rgba(15,20,25,.07)";
+    ctx.strokeStyle="rgba(255,255,255,.08)";
     ctx.beginPath();ctx.arc(c,c,radius,0,Math.PI*2);ctx.stroke();
-    legend.innerHTML='<div class="rate-note">Add assets with live prices to see how your portfolio is split.</div>';
+    legend.innerHTML='<div class="rate-note" style="color:var(--muted)">Add assets with live prices to see how your portfolio is split.</div>';
     return;
   }
   let shown=items.slice(0,7);
@@ -698,7 +686,6 @@ async function resolveLogo(asset) {
     }
   } catch(error) {
     console.warn("Logo lookup failed for",asset.symbol,error);
-    // Keep a clean symbol badge when an external logo cannot be found.
   }
 }
 async function resolveAllLogos() {
@@ -733,8 +720,6 @@ async function fetchPrices() {
       const data=await response.json();
       for(const ticker of data) applyTicker(ticker);
     } catch(error) {
-      /* One coin without a USDT pair makes Binance reject the whole batch,
-         so retry each coin on its own and just skip the invalid ones. */
       console.warn("Binance batch failed, retrying coins one by one",error);
       for(const s of chunk) {
         try {
@@ -800,12 +785,7 @@ function connectLivePrices() {
   }
 }
 
-/* Automatic USD/EGP rate.
-   Binance blocks server-side P2P requests, so the rate is read straight from the browser:
-   1) a manual rate, if you saved one, always wins
-   2) Binance spot USDT/EGP if that pair exists (public API, same one used for coin prices)
-   3) the market USD/EGP rate from open.er-api.com (free, no key)
-   "Adjust vs market (%)" shifts the result so it can match your real P2P sell price. */
+/* Automatic USD/EGP rate: Binance spot USDT/EGP, else open.er-api.com market rate. */
 async function fetchMarketRate() {
   try {
     const r = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTEGP",{cache:"no-store"});
@@ -899,6 +879,79 @@ function exportCsv() {
   const a=document.createElement("a");a.href=url;a.download="coinfolio-portfolio.csv";a.click();
   URL.revokeObjectURL(url);
 }
+
+/* ===== Closed trades & monthly P/L ===== */
+const monthKey=t=>{const d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");};
+let viewMonth=monthKey(Date.now());
+function shiftMonth(n){const [y,m]=viewMonth.split("-").map(Number);viewMonth=monthKey(new Date(y,m-1+n,1));renderTrades();}
+function renderTrades(){
+  const all=Array.isArray(state.trades)?state.trades:[];
+  const list=all.filter(t=>monthKey(t.time)===viewMonth).sort((a,b)=>b.time-a.time);
+  let profit=0,loss=0;
+  for(const t of list){if(t.pnl>=0)profit+=t.pnl;else loss+=t.pnl;}
+  const net=profit+loss,[y,m]=viewMonth.split("-").map(Number);
+  $("tradeMonth").textContent=new Date(y,m-1,1).toLocaleDateString("en-US",{month:"long",year:"numeric"});
+  $("mProfit").textContent=(profit>0?"+":"")+money(profit);
+  $("mLoss").textContent=money(loss);
+  $("mNet").textContent=(net>0?"+":"")+money(net);
+  $("mNet").className="stat-value "+(net>0?"green":net<0?"red":"");
+  $("mNetEgp").textContent=state.usdEgp>0?egpSigned(net):"—";
+  $("tradeTable").innerHTML=list.length?list.map(t=>`<tr>
+    <td>${new Date(t.time).toLocaleDateString("en-GB")}</td>
+    <td><strong>${escapeHtml(t.symbol)}</strong></td>
+    <td>${quantity(t.qty)}</td>
+    <td>${money(t.buy)} → ${money(t.sell)}</td>
+    <td class="${t.pnl>0?"green":t.pnl<0?"red":""}">${t.pnl>0?"+":""}${money(t.pnl)}</td>
+    <td><button class="small-action" data-trade-del="${escapeHtml(t.id)}">Delete</button></td>
+  </tr>`).join(""):`<tr><td colspan="6" class="empty" style="padding:26px">No closed positions this month.</td></tr>`;
+}
+function openClose(id){
+  const a=state.portfolio.find(x=>x.id===id);if(!a)return;
+  if(!(a.buyPrice>0)){alert("Set the average buy price for "+a.symbol+" first (Edit), so profit can be calculated.");return;}
+  $("closeId").value=id;
+  $("closeTitle").textContent="Close "+a.symbol;
+  $("closeInfo").textContent=`You hold ${quantity(a.amount)} · avg buy ${money(a.buyPrice)}`;
+  $("closeQty").value=a.amount;
+  $("closePrice").value=priceOf(a)||"";
+  $("closeDate").value=new Date().toISOString().slice(0,10);
+  previewClose();
+  $("closeBackdrop").classList.add("open");
+}
+function previewClose(){
+  const a=state.portfolio.find(x=>x.id===$("closeId").value);if(!a)return;
+  const q=num($("closeQty").value),p=num($("closePrice").value),pnl=(p-a.buyPrice)*q;
+  $("closePreview").innerHTML=`Result: <strong class="${pnl>0?"green":pnl<0?"red":""}">${pnl>0?"+":""}${money(pnl)}</strong>${state.usdEgp>0?" · "+egpSigned(pnl):""}`;
+}
+function submitClose(e){
+  e.preventDefault();
+  const a=state.portfolio.find(x=>x.id===$("closeId").value);if(!a)return;
+  const q=num($("closeQty").value),p=num($("closePrice").value);
+  if(!(q>0)||q>a.amount+1e-9){alert("Quantity must be between 0 and "+quantity(a.amount)+".");return;}
+  const d=$("closeDate").value?new Date($("closeDate").value+"T12:00:00").getTime():Date.now();
+  if(!Array.isArray(state.trades))state.trades=[];
+  state.trades.push({id:uid(),symbol:a.symbol,name:a.name,qty:q,buy:a.buyPrice,sell:p,pnl:(p-a.buyPrice)*q,time:d});
+  a.amount=Math.max(0,a.amount-q);
+  if(a.amount<1e-12)state.portfolio=state.portfolio.filter(x=>x.id!==a.id);
+  markPortfolioChanged();
+  $("closeBackdrop").classList.remove("open");
+  viewMonth=monthKey(d);render();connectLivePrices();
+}
+$("closeForm").addEventListener("submit",submitClose);
+$("closeQty").addEventListener("input",previewClose);
+$("closePrice").addEventListener("input",previewClose);
+$("closeCancel").addEventListener("click",()=>$("closeBackdrop").classList.remove("open"));
+$("prevMonth").addEventListener("click",()=>shiftMonth(-1));
+$("nextMonth").addEventListener("click",()=>shiftMonth(1));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("closeBackdrop").classList.remove("open");});
+document.addEventListener("click",e=>{
+  const c=e.target.closest("[data-close]");if(c)openClose(c.dataset.close);
+  const t=e.target.closest("[data-trade-del]");
+  if(t&&confirm("Delete this closed trade from the record?")){
+    state.trades=(state.trades||[]).filter(x=>x.id!==t.dataset.tradeDel);
+    markPortfolioChanged();render();
+  }
+});
+
 $("addBtn").addEventListener("click",()=>openModal());
 $("cancelBtn").addEventListener("click",closeModal);
 $("modalBackdrop").addEventListener("click",event=>{if(event.target===$("modalBackdrop"))closeModal();});
@@ -1049,12 +1102,11 @@ onAuthStateChanged(auth,async user=>{
     const snap=await getDoc(doc(db,"users",user.uid));
     if(snap.exists()) {
       const cloud=snap.data();
-      state={...defaultState(),...cloud,portfolio:Array.isArray(cloud.portfolio)?cloud.portfolio.map(normalizeAsset).filter(Boolean):[],prices:cloud.prices||{},history:Array.isArray(cloud.history)?cloud.history:[],watchlist:Array.isArray(cloud.watchlist)?cloud.watchlist.filter(x=>/^[A-Z0-9]{1,20}$/.test(x)):[],changes:{}};
+      state={...defaultState(),...cloud,portfolio:Array.isArray(cloud.portfolio)?cloud.portfolio.map(normalizeAsset).filter(Boolean):[],prices:cloud.prices||{},history:Array.isArray(cloud.history)?cloud.history:[],watchlist:Array.isArray(cloud.watchlist)?cloud.watchlist.filter(x=>/^[A-Z0-9]{1,20}$/.test(x)):[],changes:{},trades:Array.isArray(cloud.trades)?cloud.trades:[]};
       persist();
     } else {
-      // New accounts start empty; never import another profile's local portfolio.
       state=defaultState();persist();
-      await setDoc(doc(db,"users",user.uid),{portfolio:[],prices:{},usdEgp:0,history:[],updatedAt:serverTimestamp()});
+      await setDoc(doc(db,"users",user.uid),{portfolio:[],prices:{},usdEgp:0,history:[],trades:[],updatedAt:serverTimestamp()});
     }
     cloudReady=true;
     $("userPill").textContent="@"+(user.email||"").split("@")[0];
