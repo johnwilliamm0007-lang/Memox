@@ -84,7 +84,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--purple);outline
 .stat-value{font-size:clamp(20px,2.6vw,30px);font-weight:800;letter-spacing:-1px;margin:15px 0 9px;overflow-wrap:anywhere}
 .stat-foot{font-size:12px;color:var(--muted)}
 .green{color:var(--green)!important}.red{color:var(--red)!important}
-.two-col{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr);gap:18px;margin-bottom:18px}
+.two-col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:14px;margin-bottom:14px;align-items:start}
+.two-col .section{padding:16px 18px}
+.rate-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.rate-pair .rate-card{margin-bottom:0}
 .section{padding:22px;min-width:0}
 .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
 .section-head h3{margin:0;font-size:16px;letter-spacing:-.4px}
@@ -92,10 +95,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--purple);outline
 .badge{padding:7px 10px;border-radius:10px;background:#55f2b115;color:var(--green);font-size:11px;font-weight:700;white-space:nowrap}
 .chart-wrap{height:180px;position:relative}
 canvas{width:100%;height:100%;display:block}
-.rate-card{padding:18px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid var(--border);margin-bottom:12px}
+.rate-card{padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid var(--border);margin-bottom:10px}
 .rate-label{color:var(--muted);font-size:12px}
-.rate-number{font-size:25px;font-weight:800;margin:10px 0}
-.rate-note{color:var(--muted);font-size:11px;line-height:1.6}
+.rate-number{font-size:19px;font-weight:800;margin:6px 0}
+.rate-note{color:var(--muted);font-size:10px;line-height:1.5}
 .asset-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:22px}
 .asset-card{padding:18px;min-width:0;position:relative;overflow:hidden;transition:transform .2s,border-color .2s}
 .asset-card:hover{transform:translateY(-3px);border-color:#9b8cff70}
@@ -144,9 +147,9 @@ tbody tr:last-child td{border-bottom:0}
 .field input{width:100%;min-width:0;background:#ffffff08;border:1px solid var(--border);color:var(--text);padding:12px;border-radius:10px}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
 .notice{padding:12px 14px;border-radius:12px;background:#9b8cff12;color:#c5beff;font-size:11px;line-height:1.7;margin:12px 0}
-.alloc{display:flex;align-items:center;gap:30px;flex-wrap:wrap}
-.alloc canvas{width:180px;height:180px;flex:0 0 180px}
-.alloc-legend{flex:1;min-width:220px;display:grid;gap:11px}
+.alloc{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.alloc canvas{width:120px;height:120px;flex:0 0 120px}
+.alloc-legend{flex:1;min-width:180px;display:grid;gap:8px}
 .alloc-row{display:flex;align-items:center;gap:10px;font-size:12px}
 .alloc-dot{width:10px;height:10px;border-radius:50%;flex:0 0 10px}
 .alloc-row .pct{margin-left:auto;font-weight:700}
@@ -258,21 +261,23 @@ tbody tr:last-child td{border-bottom:0}
   </div>
     <div class="panel section">
       <div class="section-head"><div><h3>Currency conversion</h3><p>Using your current USD/EGP rate</p></div></div>
+      <div class="rate-pair">
       <div class="rate-card"><div class="rate-label">Portfolio value in USD</div><div class="rate-number" id="conversionUsd">$0.00</div><div class="rate-note">Calculated from current asset prices in USDT.</div></div>
       <div class="rate-card"><div class="rate-label">Estimated value in Egyptian pounds</div><div class="rate-number" id="conversionEgp">EGP 0.00</div><div class="rate-note" id="conversionNote">Waiting for the USD/EGP rate.</div></div>
+      </div>
       <div class="rate-card"><div class="rate-label">Manual SELL rate (EGP per 1 USD)</div>
-        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
           <input class="search" id="manualRateInput" type="number" min="0" step="any" placeholder="e.g. 50.25" aria-label="Manual USD to EGP sell rate" style="flex:1;min-width:110px">
           <button class="btn primary" id="saveManualRate" type="button">Save</button>
           <button class="btn" id="clearManualRate" type="button">Auto</button>
         </div>
-        <div class="rate-note" style="margin-top:10px">When a manual rate is saved it replaces the automatic rate. Press Auto to go back to automatic.</div>
-        <div style="display:flex;gap:8px;margin-top:14px;align-items:center;flex-wrap:wrap">
+        <div class="rate-note" style="margin-top:6px">When a manual rate is saved it replaces the automatic rate. Press Auto to go back to automatic.</div>
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
           <label class="rate-label" for="premiumInput">Adjust vs market (%)</label>
           <input class="search" id="premiumInput" type="number" step="any" placeholder="0" style="width:90px;min-width:0">
           <button class="btn" id="savePremium" type="button">Apply</button>
         </div>
-        <div class="rate-note" style="margin-top:8px">Use a negative number (for example -1) if your real P2P sell price is lower than the market rate.</div>
+        <div class="rate-note" style="margin-top:6px">Use a negative number (for example -1) if your real P2P sell price is lower than the market rate.</div>
       </div>
     </div>
   </section>
