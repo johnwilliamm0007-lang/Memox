@@ -193,7 +193,7 @@ tbody tr:last-child td{border-bottom:0}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
 .notice{padding:12px 14px;border-radius:12px;background:rgba(108,140,255,.08);color:#c3d0ff;font-size:11px;line-height:1.7;margin:12px 0}
 .alloc{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.alloc canvas{width:120px;height:120px;flex:0 0 120px}
+.alloc canvas{width:150px;height:150px;flex:0 0 150px}
 .alloc-legend{flex:1;min-width:180px;display:grid;gap:8px}
 .alloc-row{display:flex;align-items:center;gap:10px;font-size:12px}
 .alloc-dot{width:10px;height:10px;border-radius:50%;flex:0 0 10px}
@@ -206,18 +206,16 @@ tbody tr:last-child td{border-bottom:0}
 .perf-change{font-size:11px;margin-top:3px;color:var(--muted)}
 .perf-chart{flex:1;height:64px;min-width:0;position:relative}
 .watch-add{display:flex;gap:8px;flex-wrap:wrap}
-.watch-grid{display:flex;flex-direction:column;gap:6px}
-.watch-row{display:grid;grid-template-columns:minmax(120px,1.3fr) minmax(90px,1fr) 90px minmax(90px,1fr) auto;align-items:center;gap:12px;padding:7px 12px;min-width:0;border-radius:12px}
-.watch-top{display:flex;align-items:center;gap:9px;min-width:0}
-.watch-top .coin-logo{width:26px;height:26px;flex:0 0 26px;font-size:8px}
+.watch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,230px));gap:8px}
+.watch-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 10px;min-width:0;border-radius:12px}
+.watch-top{display:flex;align-items:center;gap:8px;min-width:0}
+.watch-top .coin-logo{width:28px;height:28px;flex:0 0 28px;font-size:8px}
 .watch-sym{font-weight:700;font-size:13px;line-height:1.1}
-.watch-sub{color:var(--muted);font-size:10px;margin-top:2px}
-.watch-price{font-size:13px;font-weight:800;overflow-wrap:anywhere}
-.watch-egp{color:var(--muted);font-size:11px;overflow-wrap:anywhere}
-.watch-row .asset-change{font-size:12px;text-align:right}
-.watch-actions{display:flex;gap:6px}
-.watch-actions .btn{padding:5px 9px;font-size:11px;white-space:nowrap}
-@media(max-width:700px){.watch-row{grid-template-columns:1fr auto;gap:4px 10px;padding:9px 12px}.watch-row .watch-egp{display:none}.watch-row .asset-change{text-align:right}.watch-actions{grid-column:1/-1}.watch-actions .btn{flex:1}}
+.watch-price{font-size:12px;font-weight:700;overflow-wrap:anywhere;margin-top:2px}
+.watch-row .asset-change{font-size:11px;font-weight:700;text-align:right}
+.watch-actions{display:flex;gap:4px;grid-column:1/-1;margin-top:-2px}
+.watch-actions .btn{padding:3px 8px;font-size:10px;flex:1;white-space:nowrap}
+@media(max-width:700px){.watch-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.perf-strip{flex-wrap:wrap;padding:14px 16px}.perf-chart{flex:1 1 100%;order:3}.watch-add{width:100%}.watch-add .search{flex:1;min-width:0}}
 @media(max-width:1000px){.asset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two-col{grid-template-columns:1fr}}
 @media(max-width:600px){
@@ -293,32 +291,11 @@ tbody tr:last-child td{border-bottom:0}
     </div>
   </section>
 
-  <section class="two-col">
+  <section style="margin-bottom:14px">
     <div class="panel section">
     <div class="section-head"><div><h3>Portfolio allocation</h3><p>Share of each asset in your total value</p></div></div>
     <div class="alloc"><canvas id="allocChart" width="180" height="180"></canvas><div class="alloc-legend" id="allocLegend"></div></div>
   </div>
-    <div class="panel section">
-      <div class="section-head"><div><h3>Currency conversion</h3><p>Using your current USD/EGP rate</p></div></div>
-      <div class="rate-pair">
-      <div class="rate-card"><div class="rate-label">Portfolio value in USD</div><div class="rate-number" id="conversionUsd">$0.00</div><div class="rate-note">Calculated from current asset prices in USDT.</div></div>
-      <div class="rate-card"><div class="rate-label">Estimated value in Egyptian pounds</div><div class="rate-number" id="conversionEgp">EGP 0.00</div><div class="rate-note" id="conversionNote">Waiting for the USD/EGP rate.</div></div>
-      </div>
-      <div class="rate-card"><div class="rate-label">Manual SELL rate (EGP per 1 USD)</div>
-        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-          <input class="search" id="manualRateInput" type="number" min="0" step="any" placeholder="e.g. 50.25" aria-label="Manual USD to EGP sell rate" style="flex:1;min-width:110px">
-          <button class="btn primary" id="saveManualRate" type="button">Save</button>
-          <button class="btn" id="clearManualRate" type="button">Auto</button>
-        </div>
-        <div class="rate-note" style="margin-top:6px">When a manual rate is saved it replaces the automatic rate. Press Auto to go back to automatic.</div>
-        <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
-          <label class="rate-label" for="premiumInput">Adjust vs market (%)</label>
-          <input class="search" id="premiumInput" type="number" step="any" placeholder="0" style="width:90px;min-width:0">
-          <button class="btn" id="savePremium" type="button">Apply</button>
-        </div>
-        <div class="rate-note" style="margin-top:6px">Use a negative number (for example -1) if your real P2P sell price is lower than the market rate.</div>
-      </div>
-    </div>
   </section>
 
   <section class="panel section" style="margin-bottom:18px">
@@ -582,11 +559,6 @@ function render() {
     ? new Intl.NumberFormat("en-US",{maximumFractionDigits:3}).format(state.usdEgp)
     : "—";
   $("p2pStatus").textContent = p2pSource || "Fetching USD/EGP rate";
-  $("conversionUsd").textContent = money(t.value);
-  $("conversionEgp").textContent = state.usdEgp > 0 ? money(currentEgp(t.value),"EGP") : "EGP —";
-  $("conversionNote").textContent = state.usdEgp > 0
-    ? `1 USD ≈ ${state.usdEgp.toFixed(3)} EGP · Source: ${p2pSource || "market rate"}`
-    : "The USD/EGP rate could not be loaded yet.";
   $("assetBadge").textContent = `${state.portfolio.length} ASSET${state.portfolio.length===1?"":"S"}`;
 
   const first=state.history.length?num(state.history[0].value):0;
@@ -642,10 +614,9 @@ function renderWatchlist() {
     const url=(held&&held.logo)||state.watchLogos[sym]||("https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/"+sym.toLowerCase()+".png");
     const fb=escapeHtml(sym.slice(0,3));
     return `<article class="panel watch-row">
-      <div class="watch-top"><span class="coin-logo"><img src="${escapeHtml(url)}" alt="${escapeHtml(sym)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${fb}'"></span><div style="min-width:0"><div class="watch-sym">${escapeHtml(sym)}</div><div class="watch-sub">${escapeHtml(sym)}/USDT</div></div></div>
-      <div class="watch-price">${price>0?money(price):"—"}</div>
+      <span class="coin-logo"><img src="${escapeHtml(url)}" alt="${escapeHtml(sym)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${fb}'"></span>
+      <div style="min-width:0"><div class="watch-sym">${escapeHtml(sym)}</div><div class="watch-price">${price>0?money(price):"—"}</div></div>
       <div class="asset-change ${ch>0?"green":ch<0?"red":""}">${ch>0?"+":""}${ch.toFixed(2)}%</div>
-      <div class="watch-egp">${state.usdEgp>0&&price>0?money(price*state.usdEgp,"EGP"):""}</div>
       <div class="watch-actions"><button class="btn" data-watch-add="${escapeHtml(sym)}">＋ Portfolio</button><button class="btn danger" data-watch-remove="${escapeHtml(sym)}">Remove</button></div>
     </article>`;
   }).join("");
@@ -918,12 +889,7 @@ async function fetchMarketRate() {
   return null;
 }
 async function fetchP2PRate() {
-  if (num(state.manualRate) > 0) {
-    state.usdEgp = num(state.manualRate);
-    p2pSource = "Manual rate (set by you)";
-    persist(); render();
-    return;
-  }
+  state.manualRate = 0; state.premiumPct = 0;
   const result = await fetchMarketRate();
   if (result) {
     const pct = num(state.premiumPct);
@@ -931,7 +897,7 @@ async function fetchP2PRate() {
     p2pSource = result.source + (pct ? ` ${pct>0?"+":""}${pct}%` : "");
     persist(); render();
   } else {
-    p2pSource = state.usdEgp > 0 ? "Last saved rate · refresh failed" : "Rate unavailable · enter it manually";
+    p2pSource = state.usdEgp > 0 ? "Last saved rate · refresh failed" : "Rate unavailable";
     render();
   }
 }
@@ -1001,21 +967,6 @@ $("cancelBtn").addEventListener("click",closeModal);
 $("modalBackdrop").addEventListener("click",event=>{if(event.target===$("modalBackdrop"))closeModal();});
 $("coinForm").addEventListener("submit",saveAsset);
 $("exportBtn").addEventListener("click",exportCsv);
-$("saveManualRate").addEventListener("click",()=>{
-  const v=Number($("manualRateInput").value);
-  if(!Number.isFinite(v)||v<=0){alert("Enter a valid rate, for example 50.25");return;}
-  state.manualRate=v;state.usdEgp=v;p2pSource="Manual rate (set by you)";
-  markPortfolioChanged();render();
-});
-$("savePremium").addEventListener("click",()=>{
-  const v=Number($("premiumInput").value||0);
-  if(!Number.isFinite(v)||Math.abs(v)>50){alert("Enter a percentage between -50 and 50.");return;}
-  state.premiumPct=v;markPortfolioChanged();fetchP2PRate();
-});
-$("clearManualRate").addEventListener("click",()=>{
-  state.manualRate=0;$("manualRateInput").value="";
-  markPortfolioChanged();fetchP2PRate();
-});
 $("refreshBtn").addEventListener("click",async()=>{
   $("refreshBtn").textContent="Refreshing...";
   await Promise.allSettled([fetchPrices(),fetchP2PRate()]);
@@ -1067,8 +1018,6 @@ document.addEventListener("keydown",event=>{if(event.key==="Escape")closeModal()
 window.addEventListener("resize",()=>drawChart());
 
 function startApp() {
-  $("manualRateInput").value = num(state.manualRate) > 0 ? state.manualRate : "";
-  $("premiumInput").value = num(state.premiumPct) ? state.premiumPct : "";
   render();
   if(!Array.isArray(state.watchlist)) state.watchlist=[];
   if(!state.changes||typeof state.changes!=="object") state.changes={};
