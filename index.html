@@ -158,15 +158,18 @@ tbody tr:last-child td{border-bottom:0}
 .perf-change{font-size:11px;margin-top:3px;color:var(--muted)}
 .perf-chart{flex:1;height:64px;min-width:0;position:relative}
 .watch-add{display:flex;gap:8px;flex-wrap:wrap}
-.watch-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.watch-card{padding:14px;min-width:0}
-.watch-top{display:flex;align-items:center;gap:10px;min-width:0}
-.watch-top .coin-logo{width:34px;height:34px;flex-basis:34px;font-size:10px}
-.watch-sym{font-weight:700}
-.watch-price{font-size:17px;font-weight:800;margin:12px 0 4px;overflow-wrap:anywhere}
-.watch-actions{display:flex;gap:6px;margin-top:12px}
-.watch-actions .btn{flex:1;padding:7px 6px;font-size:11px}
-@media(max-width:1000px){.watch-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.watch-grid{display:flex;flex-direction:column;gap:6px}
+.watch-row{display:grid;grid-template-columns:minmax(120px,1.3fr) minmax(90px,1fr) 90px minmax(90px,1fr) auto;align-items:center;gap:12px;padding:7px 12px;min-width:0;border-radius:12px}
+.watch-top{display:flex;align-items:center;gap:9px;min-width:0}
+.watch-top .coin-logo{width:26px;height:26px;flex:0 0 26px;font-size:8px}
+.watch-sym{font-weight:700;font-size:13px;line-height:1.1}
+.watch-sub{color:var(--muted);font-size:10px;margin-top:2px}
+.watch-price{font-size:13px;font-weight:800;overflow-wrap:anywhere}
+.watch-egp{color:var(--muted);font-size:11px;overflow-wrap:anywhere}
+.watch-row .asset-change{font-size:12px;text-align:right}
+.watch-actions{display:flex;gap:6px}
+.watch-actions .btn{padding:5px 9px;font-size:11px;white-space:nowrap}
+@media(max-width:700px){.watch-row{grid-template-columns:1fr auto;gap:4px 10px;padding:9px 12px}.watch-row .watch-egp{display:none}.watch-row .asset-change{text-align:right}.watch-actions{grid-column:1/-1}.watch-actions .btn{flex:1}}
 @media(max-width:600px){.perf-strip{flex-wrap:wrap;padding:14px 16px}.perf-chart{flex:1 1 100%;order:3}.watch-add{width:100%}.watch-add .search{flex:1;min-width:0}}
 @media(max-width:1000px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.asset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two-col{grid-template-columns:1fr}}
 @media(max-width:600px){
@@ -425,7 +428,7 @@ function findExistingPortfolio() {
   return null;
 }
 
-const defaultState = () => ({portfolio:[],prices:{},usdEgp:0,history:[],watchlist:[],changes:{},updatedAt:null});
+const defaultState = () => ({portfolio:[],prices:{},usdEgp:0,history:[],watchlist:[],watchLogos:{},changes:{},updatedAt:null});
 let state = defaultState();
 let currentUser = null;
 let cloudReady = false;
@@ -588,16 +591,39 @@ function renderWatchlist() {
     return;
   }
   const changes=state.changes||{};
+  state.watchLogos=state.watchLogos||{};
   grid.innerHTML=list.map(sym=>{
     const price=num(state.prices[sym]),ch=num(changes[sym]);
-    return `<article class="panel watch-card">
-      <div class="watch-top"><span class="coin-logo">${escapeHtml(sym.slice(0,3))}</span><div style="min-width:0"><div class="watch-sym">${escapeHtml(sym)}</div><div class="coin-symbol" style="margin-top:3px">${escapeHtml(sym)}/USDT</div></div></div>
+    const held=(state.portfolio||[]).find(a=>a.symbol===sym&&a.logo);
+    const url=(held&&held.logo)||state.watchLogos[sym]||("https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/"+sym.toLowerCase()+".png");
+    const fb=escapeHtml(sym.slice(0,3));
+    return `<article class="panel watch-row">
+      <div class="watch-top"><span class="coin-logo"><img src="${escapeHtml(url)}" alt="${escapeHtml(sym)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${fb}'"></span><div style="min-width:0"><div class="watch-sym">${escapeHtml(sym)}</div><div class="watch-sub">${escapeHtml(sym)}/USDT</div></div></div>
       <div class="watch-price">${price>0?money(price):"—"}</div>
-      <div class="asset-change ${ch>0?"green":ch<0?"red":""}">${ch>0?"+":""}${ch.toFixed(2)}% <span style="color:var(--muted);font-weight:400">24h</span></div>
-      ${state.usdEgp>0&&price>0?`<div class="coin-symbol">${money(price*state.usdEgp,"EGP")}</div>`:""}
+      <div class="asset-change ${ch>0?"green":ch<0?"red":""}">${ch>0?"+":""}${ch.toFixed(2)}%</div>
+      <div class="watch-egp">${state.usdEgp>0&&price>0?money(price*state.usdEgp,"EGP"):""}</div>
       <div class="watch-actions"><button class="btn" data-watch-add="${escapeHtml(sym)}">＋ Portfolio</button><button class="btn danger" data-watch-remove="${escapeHtml(sym)}">Remove</button></div>
     </article>`;
   }).join("");
+}
+async function resolveWatchLogos(){
+  state.watchLogos=state.watchLogos||{};
+  for(const sym of (state.watchlist||[])){
+    if(state.watchLogos[sym]) continue;
+    const key=sym.toLowerCase();
+    try{
+      let c=logoCache[key];
+      if(!c){
+        const r=await fetch("https://api.coingecko.com/api/v3/search?query="+encodeURIComponent(sym),{cache:"force-cache"});
+        if(!r.ok) continue;
+        const d=await r.json();const coins=d.coins||[];
+        const m=coins.find(x=>String(x.symbol).toLowerCase()===key)||coins[0];
+        if(!m) continue;
+        c=logoCache[key]={image:m.large||m.thumb||"",id:m.id,name:m.name};
+      }
+      if(c.image){state.watchLogos[sym]=c.image;persist();renderWatchlist();}
+    }catch(e){}
+  }
 }
 function renderTable() {
   const rows = state.portfolio.filter(a => (a.symbol+" "+a.name).toLowerCase().includes(searchTerm));
@@ -991,7 +1017,7 @@ $("watchForm").addEventListener("submit",async event=>{
   }
   state.watchlist.push(symbol);
   input.value="";
-  markPortfolioChanged();render();connectLivePrices();
+  markPortfolioChanged();render();connectLivePrices();resolveWatchLogos();
 });
 document.addEventListener("keydown",event=>{if(event.key==="Escape")closeModal();});
 window.addEventListener("resize",()=>drawChart());
@@ -1005,7 +1031,7 @@ function startApp() {
   if(allSymbols().length) {
     setStatus(false,"Loading market prices...");
     fetchPrices().finally(()=>connectLivePrices());
-    resolveAllLogos();
+    resolveAllLogos();resolveWatchLogos();
   } else {
     setStatus(true,"Add assets to begin");
   }
