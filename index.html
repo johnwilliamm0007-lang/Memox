@@ -151,6 +151,23 @@ tbody tr:last-child td{border-bottom:0}
 .alloc-dot{width:10px;height:10px;border-radius:50%;flex:0 0 10px}
 .alloc-row .pct{margin-left:auto;font-weight:700}
 .alloc-row .val{color:var(--muted);font-size:11px}
+.perf-strip{display:flex;align-items:center;gap:22px;padding:14px 22px;margin-bottom:18px}
+.perf-info{min-width:150px}
+.perf-title{font-size:12px;color:var(--muted)}
+.perf-value{font-size:20px;font-weight:800;letter-spacing:-.6px;margin-top:4px}
+.perf-change{font-size:11px;margin-top:3px;color:var(--muted)}
+.perf-chart{flex:1;height:64px;min-width:0;position:relative}
+.watch-add{display:flex;gap:8px;flex-wrap:wrap}
+.watch-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.watch-card{padding:14px;min-width:0}
+.watch-top{display:flex;align-items:center;gap:10px;min-width:0}
+.watch-top .coin-logo{width:34px;height:34px;flex-basis:34px;font-size:10px}
+.watch-sym{font-weight:700}
+.watch-price{font-size:17px;font-weight:800;margin:12px 0 4px;overflow-wrap:anywhere}
+.watch-actions{display:flex;gap:6px;margin-top:12px}
+.watch-actions .btn{flex:1;padding:7px 6px;font-size:11px}
+@media(max-width:1000px){.watch-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.perf-strip{flex-wrap:wrap;padding:14px 16px}.perf-chart{flex:1 1 100%;order:3}.watch-add{width:100%}.watch-add .search{flex:1;min-width:0}}
 @media(max-width:1000px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.asset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two-col{grid-template-columns:1fr}}
 @media(max-width:600px){
  .app{padding:16px}.topbar{align-items:flex-start}.brand h1{font-size:18px}
@@ -225,11 +242,17 @@ tbody tr:last-child td{border-bottom:0}
     </div>
   </section>
 
+  <section class="panel perf-strip">
+    <div class="perf-info"><div class="perf-title">Portfolio performance</div><div class="perf-value" id="perfValue">$0.00</div><div class="perf-change" id="perfChange">—</div></div>
+    <div class="perf-chart"><canvas id="portfolioChart"></canvas></div>
+    <span class="badge">LIVE VALUE</span>
+  </section>
+
   <section class="two-col">
     <div class="panel section">
-      <div class="section-head"><div><h3>Portfolio performance</h3><p>Your estimated portfolio value over time</p></div><span class="badge">LIVE VALUE</span></div>
-      <div class="chart-wrap"><canvas id="portfolioChart"></canvas></div>
-    </div>
+    <div class="section-head"><div><h3>Portfolio allocation</h3><p>Share of each asset in your total value</p></div></div>
+    <div class="alloc"><canvas id="allocChart" width="180" height="180"></canvas><div class="alloc-legend" id="allocLegend"></div></div>
+  </div>
     <div class="panel section">
       <div class="section-head"><div><h3>Currency conversion</h3><p>Using your current USD/EGP rate</p></div></div>
       <div class="rate-card"><div class="rate-label">Portfolio value in USD</div><div class="rate-number" id="conversionUsd">$0.00</div><div class="rate-note">Calculated from current asset prices in USDT.</div></div>
@@ -252,8 +275,11 @@ tbody tr:last-child td{border-bottom:0}
   </section>
 
   <section class="panel section" style="margin-bottom:18px">
-    <div class="section-head"><div><h3>Portfolio allocation</h3><p>Share of each asset in your total value</p></div></div>
-    <div class="alloc"><canvas id="allocChart" width="180" height="180"></canvas><div class="alloc-legend" id="allocLegend"></div></div>
+    <div class="section-head">
+      <div><h3>Watchlist</h3><p>Coins you follow without holding them</p></div>
+      <form class="watch-add" id="watchForm"><input class="search" id="watchInput" placeholder="Add symbol, e.g. SOL" maxlength="20" autocomplete="off" aria-label="Add a coin to your watchlist"><button class="btn primary" type="submit">＋ Watch</button></form>
+    </div>
+    <div class="watch-grid" id="watchGrid"></div>
   </section>
 
   <div class="section-head"><div><h3>Your assets</h3><p>Live market prices and individual holdings</p></div><span class="badge" id="assetBadge">0 ASSETS</span></div>
@@ -399,7 +425,7 @@ function findExistingPortfolio() {
   return null;
 }
 
-const defaultState = () => ({portfolio:[],prices:{},usdEgp:0,history:[],updatedAt:null});
+const defaultState = () => ({portfolio:[],prices:{},usdEgp:0,history:[],watchlist:[],changes:{},updatedAt:null});
 let state = defaultState();
 let currentUser = null;
 let cloudReady = false;
@@ -427,6 +453,7 @@ async function saveCloudPortfolio() {
     usdEgp: state.usdEgp,
     manualRate: num(state.manualRate),
     premiumPct: num(state.premiumPct),
+    watchlist: state.watchlist,
     history: state.history,
     updatedAt: Date.now()
   };
@@ -445,6 +472,9 @@ function markPortfolioChanged() {
   saveCloudPortfolio();
 }
 
+function allSymbols() {
+  return [...new Set([...state.portfolio.map(a=>a.symbol),...(state.watchlist||[])])];
+}
 function priceOf(asset) {
   return num(state.prices[asset.symbol] ?? asset.price);
 }
@@ -512,8 +542,20 @@ function render() {
     : "The USD/EGP rate could not be loaded yet.";
   $("assetBadge").textContent = `${state.portfolio.length} ASSET${state.portfolio.length===1?"":"S"}`;
 
+  const first=state.history.length?num(state.history[0].value):0;
+  $("perfValue").textContent=money(t.value);
+  if(first>0&&state.history.length>1){
+    const pc=(t.value-first)/first*100;
+    $("perfChange").textContent=`${pc>=0?"+":""}${pc.toFixed(2)}% since first record`;
+    $("perfChange").className="perf-change "+(pc>0?"green":pc<0?"red":"");
+  } else {
+    $("perfChange").textContent="Tracking started";
+    $("perfChange").className="perf-change";
+  }
+
   renderCards();
   renderTable();
+  renderWatchlist();
   drawChart();
   drawAllocation();
 }
@@ -534,6 +576,26 @@ function renderCards() {
       <div class="asset-details"><div>Holding value<strong>${money(value)}</strong></div><div style="text-align:right">Value in EGP<strong>${state.usdEgp>0?money(currentEgp(value),"EGP"):"—"}</strong></div></div>
       <div class="asset-details"><div>Average buy<strong>${asset.buyPrice?money(asset.buyPrice):"Not set"}</strong></div><div style="text-align:right">Unrealized P/L<strong class="${asset.buyPrice?(pnl.pnl>0?"green":pnl.pnl<0?"red":""):""}">${asset.buyPrice?(pnl.pnl>0?"+":"")+money(pnl.pnl):"—"}</strong>${asset.buyPrice&&state.usdEgp>0?`<span style="display:block;font-size:10px;margin-top:3px;color:var(--muted)">${egpSigned(pnl.pnl)}</span>`:""}</div></div>
       <div class="asset-buttons"><button class="btn" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="btn danger" data-delete="${escapeHtml(asset.id)}">Delete</button></div>
+    </article>`;
+  }).join("");
+}
+function renderWatchlist() {
+  const grid=$("watchGrid");
+  if(!grid) return;
+  const list=Array.isArray(state.watchlist)?state.watchlist:[];
+  if(!list.length) {
+    grid.innerHTML='<div class="empty" style="grid-column:1/-1;padding:24px 10px">No coins on your watchlist yet. Add a symbol like SOL or ETH above.</div>';
+    return;
+  }
+  const changes=state.changes||{};
+  grid.innerHTML=list.map(sym=>{
+    const price=num(state.prices[sym]),ch=num(changes[sym]);
+    return `<article class="panel watch-card">
+      <div class="watch-top"><span class="coin-logo">${escapeHtml(sym.slice(0,3))}</span><div style="min-width:0"><div class="watch-sym">${escapeHtml(sym)}</div><div class="coin-symbol" style="margin-top:3px">${escapeHtml(sym)}/USDT</div></div></div>
+      <div class="watch-price">${price>0?money(price):"—"}</div>
+      <div class="asset-change ${ch>0?"green":ch<0?"red":""}">${ch>0?"+":""}${ch.toFixed(2)}% <span style="color:var(--muted);font-weight:400">24h</span></div>
+      ${state.usdEgp>0&&price>0?`<div class="coin-symbol">${money(price*state.usdEgp,"EGP")}</div>`:""}
+      <div class="watch-actions"><button class="btn" data-watch-add="${escapeHtml(sym)}">＋ Portfolio</button><button class="btn danger" data-watch-remove="${escapeHtml(sym)}">Remove</button></div>
     </article>`;
   }).join("");
 }
@@ -576,10 +638,8 @@ function drawChart() {
   const values=[...points,current].filter(Number.isFinite);
   let min=Math.min(...values),max=Math.max(...values);
   if(max===min){max+=Math.max(1,max*.02);min=Math.max(0,min-Math.max(1,min*.02));}
-  const pad=12,chartH=h-30,chartW=w-pad*2;
-  ctx.strokeStyle="rgba(255,255,255,.07)";ctx.lineWidth=1;
-  for(let i=0;i<4;i++){const y=10+i*(chartH/3);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
-  const coords=values.map((v,i)=>({x:pad+i/(Math.max(1,values.length-1))*chartW,y:10+(max-v)/(max-min)*chartH}));
+  const pad=8,chartH=h-14,chartW=w-pad*2;
+  const coords=values.map((v,i)=>({x:pad+i/(Math.max(1,values.length-1))*chartW,y:6+(max-v)/(max-min)*chartH}));
   const grad=ctx.createLinearGradient(0,0,0,h);
   grad.addColorStop(0,"rgba(85,242,177,.25)");grad.addColorStop(1,"rgba(85,242,177,0)");
   ctx.beginPath();coords.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
@@ -671,7 +731,7 @@ async function resolveAllLogos() {
 
 /* Binance Spot REST snapshot, followed by live WebSocket ticker updates. */
 async function fetchPrices() {
-  const symbols=[...new Set(state.portfolio.map(a=>a.symbol))];
+  const symbols=allSymbols();
   if(!symbols.length){setStatus(true,"Add assets to begin");return;}
   let succeeded=0;
   const chunks=[];
@@ -683,6 +743,7 @@ async function fetchPrices() {
       state.prices[symbol]=price;
       const asset=state.portfolio.find(a=>a.symbol===symbol);
       if(asset) asset.change24h=num(ticker.priceChangePercent);
+      state.changes=state.changes||{};state.changes[symbol]=num(ticker.priceChangePercent);
       succeeded++;
     }
   };
@@ -727,7 +788,7 @@ function connectLivePrices() {
     socket.onclose=null;
     try{socket.close();}catch{}
   }
-  const symbols=[...new Set(state.portfolio.map(a=>a.symbol.toLowerCase()+"usdt"))];
+  const symbols=allSymbols().map(x=>x.toLowerCase()+"usdt");
   if(!symbols.length){socket=null;setStatus(true,"Add assets to begin");return;}
   const streams=symbols.map(s=>s+"@ticker").join("/");
   const url="wss://stream.binance.com:9443/stream?streams="+streams;
@@ -744,6 +805,7 @@ function connectLivePrices() {
           state.prices[symbol]=price;
           const asset=state.portfolio.find(a=>a.symbol===symbol);
           if(asset) asset.change24h=num(ticker.P);
+          state.changes=state.changes||{};state.changes[symbol]=num(ticker.P);
           state.updatedAt=Date.now();
           scheduleLiveRender();
         }
@@ -897,6 +959,39 @@ document.addEventListener("click",event=>{
   const del=event.target.closest("[data-delete]");
   if(edit)editAsset(edit.dataset.edit);
   if(del)deleteAsset(del.dataset.delete);
+  const wAdd=event.target.closest("[data-watch-add]");
+  const wDel=event.target.closest("[data-watch-remove]");
+  if(wAdd){
+    openModal();
+    $("coinSymbol").value=wAdd.dataset.watchAdd;
+    setTimeout(()=>$("coinAmount").focus(),80);
+  }
+  if(wDel){
+    state.watchlist=(state.watchlist||[]).filter(x=>x!==wDel.dataset.watchRemove);
+    markPortfolioChanged();render();connectLivePrices();
+  }
+});
+$("watchForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+  const input=$("watchInput");
+  const symbol=input.value.trim().toUpperCase();
+  if(!/^[A-Z0-9]{1,20}$/.test(symbol)){alert("Enter a valid coin symbol, such as SOL.");return;}
+  if(!Array.isArray(state.watchlist)) state.watchlist=[];
+  if(state.watchlist.includes(symbol)){alert(symbol+" is already on your watchlist.");return;}
+  try {
+    const r=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol="+encodeURIComponent(symbol+"USDT"),{cache:"no-store"});
+    if(!r.ok) throw new Error("not found");
+    const t=await r.json();
+    const price=num(t.lastPrice);
+    if(!(price>0)) throw new Error("no price");
+    state.prices[symbol]=price;
+    state.changes=state.changes||{};state.changes[symbol]=num(t.priceChangePercent);
+  } catch {
+    alert(symbol+"/USDT was not found on Binance.");return;
+  }
+  state.watchlist.push(symbol);
+  input.value="";
+  markPortfolioChanged();render();connectLivePrices();
 });
 document.addEventListener("keydown",event=>{if(event.key==="Escape")closeModal();});
 window.addEventListener("resize",()=>drawChart());
@@ -905,7 +1000,9 @@ function startApp() {
   $("manualRateInput").value = num(state.manualRate) > 0 ? state.manualRate : "";
   $("premiumInput").value = num(state.premiumPct) ? state.premiumPct : "";
   render();
-  if(state.portfolio.length) {
+  if(!Array.isArray(state.watchlist)) state.watchlist=[];
+  if(!state.changes||typeof state.changes!=="object") state.changes={};
+  if(allSymbols().length) {
     setStatus(false,"Loading market prices...");
     fetchPrices().finally(()=>connectLivePrices());
     resolveAllLogos();
@@ -996,7 +1093,7 @@ onAuthStateChanged(auth,async user=>{
     const snap=await getDoc(doc(db,"users",user.uid));
     if(snap.exists()) {
       const cloud=snap.data();
-      state={...defaultState(),...cloud,portfolio:Array.isArray(cloud.portfolio)?cloud.portfolio.map(normalizeAsset).filter(Boolean):[],prices:cloud.prices||{},history:Array.isArray(cloud.history)?cloud.history:[]};
+      state={...defaultState(),...cloud,portfolio:Array.isArray(cloud.portfolio)?cloud.portfolio.map(normalizeAsset).filter(Boolean):[],prices:cloud.prices||{},history:Array.isArray(cloud.history)?cloud.history:[],watchlist:Array.isArray(cloud.watchlist)?cloud.watchlist.filter(x=>/^[A-Z0-9]{1,20}$/.test(x)):[],changes:{}};
       persist();
     } else {
       // New accounts start empty; never import another profile's local portfolio.
