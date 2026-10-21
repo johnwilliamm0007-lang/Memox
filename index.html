@@ -76,31 +76,58 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 .eyebrow{font-size:13px;color:var(--gold);font-weight:600}
 .hero h2{font-size:clamp(30px,4.6vw,52px);line-height:1.02;letter-spacing:-2px;margin:10px 0 12px;font-weight:700}
 .hero p{color:var(--muted);margin:0;line-height:1.7;max-width:56ch}
+/* atmosphere: one slow drifting aurora + grain */
+body::before{content:"";position:fixed;inset:-20%;z-index:0;pointer-events:none;
+  background:
+   radial-gradient(40% 35% at 20% 25%,rgba(233,185,73,.20),transparent 70%),
+   radial-gradient(35% 40% at 80% 20%,rgba(30,120,170,.28),transparent 70%),
+   radial-gradient(40% 35% at 60% 85%,rgba(20,150,120,.18),transparent 70%);
+  animation:drift 28s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate3d(-3%,-2%,0) scale(1)}to{transform:translate3d(4%,3%,0) scale(1.12)}}
+body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.app,.auth-screen{position:relative;z-index:1}
+@property --ang{syntax:"<angle>";inherits:false;initial-value:0deg}
+.hero-card{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:30px;
+  padding:36px 38px;border-radius:30px;margin-bottom:16px;overflow:hidden;
+  background:linear-gradient(155deg,rgba(24,44,60,.92),rgba(8,18,28,.95));
+  box-shadow:0 50px 90px -40px rgba(233,185,73,.35),0 30px 60px -30px #000}
+.hero-card:before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;z-index:2;pointer-events:none;
+  background:conic-gradient(from var(--ang),rgba(233,185,73,.08) 0deg,rgba(233,185,73,.08) 200deg,#e9b949 280deg,#fff3c9 320deg,rgba(233,185,73,.08) 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  animation:spin 9s linear infinite}
+@keyframes spin{to{--ang:360deg}}
+.hero-card:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(rgba(243,235,216,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(243,235,216,.05) 1px,transparent 1px);
+  background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 90% at 80% 40%,#000,transparent);mask-image:radial-gradient(70% 90% at 80% 40%,#000,transparent)}
+.hc-main{min-width:0;display:flex;flex-direction:column}
+.hc-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.hc-label{font-size:14px;font-weight:600;color:#e6cf93}
+.hc-value{font-family:var(--display);font-size:clamp(46px,8.2vw,112px);font-weight:800;letter-spacing:-.05em;line-height:.92;margin:22px 0 12px;overflow-wrap:anywhere;
+  background:linear-gradient(180deg,#fff6d6 0%,#f4c95a 55%,#c98f1c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 8px 40px rgba(233,185,73,.25))}
+.hc-egp{font-family:var(--display);font-size:clamp(18px,2vw,26px);font-weight:600;color:#e9dcb8;letter-spacing:-.5px}
+.hc-perf{margin-top:auto;padding-top:22px}
+.hc-perf-in{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;padding-top:16px;border-top:1px solid rgba(233,185,73,.22)}
+.hc-perf .perf-title{font-size:12px;color:var(--muted);margin-right:auto}
+.hc-perf .perf-value{font-size:20px;margin:0}
+.hc-perf .perf-change{margin:0;font-size:12px}
+.hc-chart{position:relative;min-height:240px;min-width:0}
+@media(prefers-reduced-motion:reduce){body::before,.hero-card:before{animation:none}}
+@media(max-width:800px){.hero-card{grid-template-columns:1fr;padding:22px 20px;border-radius:24px;gap:16px}.hc-chart{min-height:150px}.stats{grid-template-columns:1fr}}
 .panel{
   background:linear-gradient(180deg,rgba(243,235,216,.055),rgba(243,235,216,.02));
   border:1px solid var(--border);border-radius:18px;
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 24px 40px -28px #000
 }
-.stats{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr;gap:14px;margin-bottom:16px}
-.stat{padding:20px;min-width:0;position:relative;overflow:hidden}
-.stat:after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;right:-34px;top:-44px;background:var(--glow,rgba(233,185,73,.1));filter:blur(14px)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:16px}
+.stat{padding:22px 24px;min-width:0;position:relative;overflow:hidden}
+.stat:before{content:"";position:absolute;left:24px;top:0;width:36px;height:3px;border-radius:0 0 3px 3px;background:var(--gold)}
+.stat:after{content:"";position:absolute;width:120px;height:120px;border-radius:50%;right:-40px;bottom:-60px;background:var(--glow,rgba(233,185,73,.1));filter:blur(22px)}
 .stat-label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
-.stat-value{font-size:clamp(20px,2.4vw,28px);font-weight:700;letter-spacing:-1px;margin:14px 0 8px;overflow-wrap:anywhere}
+.stat-value{font-size:clamp(26px,3vw,38px);font-weight:700;letter-spacing:-1.5px;margin:14px 0 8px;overflow-wrap:anywhere;line-height:1}
 .stat-foot{font-size:12px;color:var(--muted)}
-.stats .stat:first-child{
-  background:linear-gradient(155deg,rgba(233,185,73,.20),rgba(233,185,73,.04) 55%,rgba(243,235,216,.02));
-  border-color:rgba(233,185,73,.42);
-  box-shadow:inset 0 1px 0 rgba(255,235,170,.25),0 30px 60px -30px rgba(233,185,73,.35)
-}
-.stats .stat:first-child:after{display:none}
-.stats .stat:first-child .stat-label{color:#e6cf93}
-.stats .stat:first-child .stat-value{
-  font-size:clamp(34px,5vw,60px);font-weight:800;letter-spacing:-2.5px;margin:12px 0 10px;line-height:1;
-  background:linear-gradient(180deg,#fff3c9 0%,#f0c24f 70%,#d9a22f 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent
-}
-.stats .stat:first-child .stat-foot{color:#e9dcb8;font-size:13px}
 .green{color:var(--green)!important}.red{color:var(--red)!important}
 .two-col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:14px;margin-bottom:14px;align-items:start}
 .two-col .section{padding:16px 18px}
@@ -192,7 +219,7 @@ tbody tr:last-child td{border-bottom:0}
 .watch-actions .btn{padding:5px 9px;font-size:11px;white-space:nowrap}
 @media(max-width:700px){.watch-row{grid-template-columns:1fr auto;gap:4px 10px;padding:9px 12px}.watch-row .watch-egp{display:none}.watch-row .asset-change{text-align:right}.watch-actions{grid-column:1/-1}.watch-actions .btn{flex:1}}
 @media(max-width:600px){.perf-strip{flex-wrap:wrap;padding:14px 16px}.perf-chart{flex:1 1 100%;order:3}.watch-add{width:100%}.watch-add .search{flex:1;min-width:0}}
-@media(max-width:1000px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats .stat:first-child{grid-column:1/-1}.asset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two-col{grid-template-columns:1fr}}
+@media(max-width:1000px){.asset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two-col{grid-template-columns:1fr}}
 @media(max-width:600px){
  .app{padding:16px}.topbar{align-items:flex-start}.brand h1{font-size:18px}
  .top-actions{justify-content:flex-end}.status{width:100%;justify-content:flex-end}
@@ -238,38 +265,32 @@ tbody tr:last-child td{border-bottom:0}
     </div>
   </header>
 
-  <section class="hero">
-    <div><div class="eyebrow">Portfolio overview</div><h2>Your assets. In real time.</h2><p>Track your crypto holdings, market prices, and estimated value in USD and EGP.</p></div>
-    <div class="badge" id="lastUpdated">Waiting for prices</div>
+  <section class="hero-card">
+    <div class="hc-main">
+      <div class="hc-top"><span class="hc-label">Total portfolio value</span><span class="badge" id="lastUpdated">Waiting for prices</span></div>
+      <div class="hc-value" id="totalUsd">$0.00</div>
+      <div class="hc-egp" id="totalEgp">EGP 0.00</div>
+      <div class="hc-perf"><div class="hc-perf-in"><div class="perf-title">Portfolio performance</div><div class="perf-value" id="perfValue">$0.00</div><div class="perf-change" id="perfChange">—</div></div></div>
+    </div>
+    <div class="hc-chart"><canvas id="portfolioChart"></canvas></div>
   </section>
 
   <section class="stats">
-    <div class="panel stat" style="--glow:#e9b94925">
-      <div class="stat-label">◈ Total portfolio value</div>
-      <div class="stat-value" id="totalUsd">$0.00</div>
-      <div class="stat-foot" id="totalEgp">EGP 0.00</div>
-    </div>
-    <div class="panel stat" style="--glow:#55f2b125">
-      <div class="stat-label">↗ Unrealized profit / loss</div>
+    <div class="panel stat" style="--glow:#46e3a630">
+      <div class="stat-label">Unrealized profit / loss</div>
       <div class="stat-value" id="totalPnl">$0.00</div>
       <div class="stat-foot" id="totalPnlPct">Add your buy prices to track P/L</div>
     </div>
-    <div class="panel stat" style="--glow:#6ba9ff25">
-      <div class="stat-label">◉ Assets held</div>
+    <div class="panel stat" style="--glow:#5b8def30">
+      <div class="stat-label">Assets held</div>
       <div class="stat-value" id="assetCount">0</div>
       <div class="stat-foot">Unique assets in your portfolio</div>
     </div>
-    <div class="panel stat" style="--glow:#55f2b125">
-      <div class="stat-label">＄ USD / EGP rate</div>
+    <div class="panel stat" style="--glow:#e9b94930">
+      <div class="stat-label">USD / EGP rate</div>
       <div class="stat-value" id="usdEgp">—</div>
       <div class="stat-foot" id="p2pStatus">Fetching USD/EGP rate</div>
     </div>
-  </section>
-
-  <section class="panel perf-strip">
-    <div class="perf-info"><div class="perf-title">Portfolio performance</div><div class="perf-value" id="perfValue">$0.00</div><div class="perf-change" id="perfChange">—</div></div>
-    <div class="perf-chart"><canvas id="portfolioChart"></canvas></div>
-    <span class="badge">Live value</span>
   </section>
 
   <section class="two-col">
@@ -694,8 +715,8 @@ function drawChart() {
   ctx.beginPath();coords.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
   ctx.lineTo(coords[coords.length-1].x,h);ctx.lineTo(coords[0].x,h);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
   ctx.beginPath();coords.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
-  ctx.strokeStyle="#f0c24f";ctx.lineWidth=2.4;ctx.lineJoin="round";ctx.stroke();
-  const last=coords[coords.length-1];ctx.beginPath();ctx.arc(last.x,last.y,3.5,0,Math.PI*2);ctx.fillStyle="#fff0b8";ctx.fill();
+  ctx.strokeStyle="#f4c95a";ctx.lineWidth=3;ctx.shadowColor="rgba(233,185,73,.6)";ctx.shadowBlur=14;ctx.lineJoin="round";ctx.stroke();
+  const last=coords[coords.length-1];ctx.shadowBlur=0;ctx.beginPath();ctx.arc(last.x,last.y,10,0,Math.PI*2);ctx.fillStyle="rgba(233,185,73,.25)";ctx.fill();ctx.beginPath();ctx.arc(last.x,last.y,4.5,0,Math.PI*2);ctx.fillStyle="#fff0b8";ctx.fill();
 }
 const ALLOC_COLORS=["#e9b949","#46e3a6","#5b8def","#e8745a","#b99cf0","#7fd6e8","#f0d9a0","#9aa7b8"];
 function drawAllocation() {
