@@ -293,6 +293,21 @@ body{background:radial-gradient(900px 500px at 12% -10%,rgba(79,140,255,.14),tra
 .asset-card.down::before{background:linear-gradient(90deg,transparent,var(--red),transparent)}
 .asset-card:hover{box-shadow:0 14px 34px rgba(0,0,0,.5);border-color:rgba(79,140,255,.4)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+.season-ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.season-ctl select{background:#0f151c;color:var(--text);border:1px solid #2a3441;padding:10px;border-radius:10px}
+.sblock{margin-top:20px}
+.sblock h4{margin:0 0 4px;font-size:14px}
+.sblock p{margin:0 0 10px;color:var(--muted);font-size:12px;line-height:1.6}
+.stable{min-width:0;width:100%;font-size:12px;text-align:center;border-collapse:separate;border-spacing:3px}
+.stable th{padding:4px;border:0;color:var(--muted);font-weight:500}
+.stable td{padding:8px 4px;border:0;border-radius:6px;white-space:nowrap}
+.stable td.lbl{text-align:left;color:var(--muted);background:none}
+.stable tr.sum td{font-weight:700}
+.wk-grid{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:3px}
+.wk-cell{padding:8px 0;border-radius:6px;text-align:center;font-size:11px}
+.wk-cell small{display:block;color:var(--muted);font-size:9px}
+.phase{font-weight:700}
+.phase.acc{color:var(--green)}.phase.dis{color:var(--red)}
 </style>
 </head>
 <body>
@@ -381,7 +396,14 @@ body{background:radial-gradient(900px 500px at 12% -10%,rgba(79,140,255,.14),tra
   </section>
 
 
-  <footer class="footer"><span>Coinfolio · Personal portfolio tracker</span><span>Market prices are indicative. The USD/EGP rate comes from CoinGecko and may differ from actual P2P prices.</span></footer>
+    <section class="panel section" style="margin-bottom:18px">
+    <div class="section-head">
+      <div><h3>Seasonality</h3><p>Monthly / weekly behavior, correlation, and accumulation phases (Binance data)</p></div>
+      <div class="season-ctl"><select id="seasonSym" aria-label="Coin"></select><button class="btn primary" id="seasonBtn" type="button">Analyze</button></div>
+    </div>
+    <div id="seasonOut"><div class="empty" style="padding:24px 10px">Pick a coin and press Analyze.</div></div>
+  </section>
+<footer class="footer"><span>Coinfolio · Personal portfolio tracker</span><span>Market prices are indicative. The USD/EGP rate comes from CoinGecko and may differ from actual P2P prices.</span></footer>
 </div>
 
 <div class="chart-backdrop" id="chartBackdrop">
@@ -1381,9 +1403,109 @@ $("watchGrid").addEventListener("keydown",e=>{
 document.addEventListener("keydown",event=>{if(event.key==="Escape")closeModal();});
 window.addEventListener("resize",()=>drawChart());
 
+/* ===== Seasonality ===== */
+const MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const kcache={};
+async function klines(sym,iv,limit){
+  const key=sym+iv+limit;if(kcache[key])return kcache[key];
+  const r=await fetch(`https://api.binance.com/api/v3/klines?symbol=${sym}USDT&interval=${iv}&limit=${limit}`);
+  if(!r.ok)throw new Error(sym);
+  return kcache[key]=(await r.json()).map(x=>({t:x[0],o:+x[1],h:+x[2],l:+x[3],c:+x[4],v:+x[5],tb:+x[9]}));
+}
+const sColor=v=>v==null?"transparent":`rgba(${v>=0?"34,201,147":"255,107,112"},${Math.min(.85,.12+Math.abs(v)/35).toFixed(2)})`;
+const sPct=v=>v==null?"":(v>0?"+":"")+v.toFixed(1)+"%";
+const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+function pearson(a,b){
+  const n=a.length;if(n<6)return null;
+  const ma=mean(a),mb=mean(b);let s=0,da=0,db=0;
+  for(let i=0;i<n;i++){s+=(a[i]-ma)*(b[i]-mb);da+=(a[i]-ma)**2;db+=(b[i]-mb)**2;}
+  return da&&db?s/Math.sqrt(da*db):null;
+}
+function seasonSymbols(){return [...new Set(["BTC",...allSymbols()])];}
+function fillSeasonSelect(){
+  const sel=$("seasonSym"),cur=sel.value;
+  sel.innerHTML=seasonSymbols().map(s=>`<option>${escapeHtml(s)}</option>`).join("");
+  if(cur)sel.value=cur;
+}
+function monthlyHeat(k){
+  const rows={},cols=Array.from({length:12},()=>[]);
+  for(const x of k){
+    const d=new Date(x.t),y=d.getUTCFullYear(),m=d.getUTCMonth(),r=(x.c/x.o-1)*100;
+    (rows[y]=rows[y]||{})[m]=r;cols[m].push(r);
+  }
+  const years=Object.keys(rows).sort((a,b)=>b-a);
+  const head="<tr><th></th>"+MN.map(m=>`<th>${m}</th>`).join("")+"</tr>";
+  const body=years.map(y=>`<tr><td class="lbl">${y}</td>`+MN.map((_,m)=>{const v=rows[y][m];return `<td style="background:${sColor(v)}">${v==null?"":sPct(v)}</td>`;}).join("")+"</tr>").join("");
+  const avg=cols.map(mean);
+  const green=cols.map(c=>c.length?Math.round(c.filter(v=>v>0).length/c.length*100):null);
+  return `<div class="table-scroll"><table class="stable">${head}${body}
+    <tr class="sum"><td class="lbl">Avg</td>${avg.map(v=>`<td style="background:${sColor(v)}">${sPct(v)}</td>`).join("")}</tr>
+    <tr class="sum"><td class="lbl">% green</td>${green.map(v=>`<td class="${v>=60?"green":v!=null&&v<=40?"red":""}">${v==null?"":v+"%"}</td>`).join("")}</tr></table></div>`;
+}
+function weeklyGrid(k){
+  const buckets=Array.from({length:52},()=>[]);
+  for(const x of k){
+    const d=new Date(x.t),doy=Math.floor((d-Date.UTC(d.getUTCFullYear(),0,1))/864e5);
+    const w=Math.min(51,Math.floor(doy/7));buckets[w].push((x.c/x.o-1)*100);
+  }
+  return `<div class="wk-grid">`+buckets.map((b,i)=>{const v=mean(b);return `<div class="wk-cell" style="background:${sColor(v)}" title="Week ${i+1}: ${sPct(v)} avg, ${b.length} samples">${v==null?"–":v.toFixed(1)}<small>W${i+1}</small></div>`;}).join("")+`</div>`;
+}
+async function corrTable(syms){
+  const data={};
+  await Promise.all(syms.map(async s=>{try{const k=await klines(s,"1M",60);data[s]=Object.fromEntries(k.map(x=>[x.t,(x.c/x.o-1)*100]));}catch{}}));
+  const list=syms.filter(s=>data[s]);
+  if(list.length<2)return '<div class="empty" style="padding:14px">Add more coins to compare.</div>';
+  const cell=(a,b)=>{
+    if(a===b)return `<td style="background:rgba(79,140,255,.25)">1</td>`;
+    const ts=Object.keys(data[a]).filter(t=>t in data[b]);
+    const r=pearson(ts.map(t=>data[a][t]),ts.map(t=>data[b][t]));
+    return `<td style="background:${r==null?"transparent":`rgba(79,140,255,${Math.max(0,r).toFixed(2)})`}" title="${ts.length} common months">${r==null?"–":r.toFixed(2)}</td>`;
+  };
+  return `<div class="table-scroll"><table class="stable"><tr><th></th>${list.map(s=>`<th>${escapeHtml(s)}</th>`).join("")}</tr>`+
+    list.map(a=>`<tr><td class="lbl">${escapeHtml(a)}</td>${list.map(b=>cell(a,b)).join("")}</tr>`).join("")+`</table></div>`;
+}
+async function accumTable(syms){
+  const rows=await Promise.all(syms.map(async s=>{
+    try{
+      const k=await klines(s,"1d",60),last=k.slice(-20);
+      let mf=0,vv=0;
+      for(const x of last){const rg=x.h-x.l;mf+=rg?((x.c-x.l)-(x.h-x.c))/rg*x.v:0;vv+=x.v;}
+      const cmf=vv?mf/vv:0;
+      const v7=mean(k.slice(-7).map(x=>x.v)),v30=mean(k.slice(-30).map(x=>x.v));
+      const buy7=k.slice(-7).reduce((a,x)=>a+x.tb,0)/(k.slice(-7).reduce((a,x)=>a+x.v,0)||1)*100;
+      const ch30=(k[k.length-1].c/k[k.length-30].c-1)*100;
+      const ph=cmf>.1?["Accumulation","acc"]:cmf<-.1?["Distribution","dis"]:["Neutral",""];
+      return `<tr><td>${escapeHtml(s)}</td><td class="phase ${ph[1]}">${ph[0]}</td><td>${cmf.toFixed(2)}</td><td>${buy7.toFixed(0)}%</td><td>${(v7/v30).toFixed(2)}×</td><td class="${ch30>0?"green":"red"}">${sPct(ch30)}</td></tr>`;
+    }catch{return "";}
+  }));
+  return `<div class="table-scroll"><table style="min-width:520px"><thead><tr><th>Coin</th><th>Phase</th><th>CMF(20)</th><th>Taker buy 7d</th><th>Vol 7d/30d</th><th>30d change</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+}
+async function runSeason(){
+  const sym=$("seasonSym").value,out=$("seasonOut"),btn=$("seasonBtn");
+  if(!sym)return;
+  btn.disabled=true;btn.textContent="Loading…";
+  out.innerHTML='<div class="empty" style="padding:24px 10px">Loading history…</div>';
+  try{
+    const [mk,wk]=await Promise.all([klines(sym,"1M",120),klines(sym,"1w",520)]);
+    const syms=seasonSymbols();
+    const [corr,acc]=await Promise.all([corrTable(syms),accumTable(syms)]);
+    out.innerHTML=`
+      <div class="sblock"><h4>${escapeHtml(sym)} monthly returns</h4><p>Each cell is the month's open→close change. Bottom rows show the average and how often that month closed green.</p>${monthlyHeat(mk)}</div>
+      <div class="sblock"><h4>${escapeHtml(sym)} average weekly return by week of year</h4><p>Average across all years available. Hover a cell for sample count.</p>${weeklyGrid(wk)}</div>
+      <div class="sblock"><h4>Monthly correlation (last 60 months)</h4><p>Closer to 1 = the coins tend to move together in the same months.</p>${corr}</div>
+      <div class="sblock"><h4>Accumulation / distribution (daily)</h4><p>CMF above 0.1 with rising volume suggests accumulation; below −0.1 suggests distribution. An indicator, not a guarantee.</p>${acc}</div>`;
+  }catch{
+    out.innerHTML='<div class="empty" style="padding:24px 10px;color:var(--red)">Could not load data for '+escapeHtml(sym)+'.</div>';
+  }
+  btn.disabled=false;btn.textContent="Analyze";
+}
+$("seasonBtn").addEventListener("click",runSeason);
+$("seasonSym").addEventListener("focus",fillSeasonSelect);
 function startApp() {
   $("mainApp").classList.add("intro");setTimeout(()=>$("mainApp").classList.remove("intro"),1200);
+
   render();
+  fillSeasonSelect();
   if(!Array.isArray(state.watchlist)) state.watchlist=[];
   if(!state.changes||typeof state.changes!=="object") state.changes={};
   if(allSymbols().length) {
