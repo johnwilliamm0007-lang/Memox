@@ -70,7 +70,7 @@ button:focus-visible,input:focus-visible{outline:2px solid #3b82f6;outline-offse
 .perf-chart{flex:1;height:64px;min-width:0;position:relative}
 canvas{width:100%;height:100%;display:block}
 
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:14px;margin-bottom:14px}
 .stats3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 .stat{padding:18px 20px;min-width:0}
 .stat-label{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
@@ -191,7 +191,8 @@ tbody tr:last-child td{border-bottom:0}
 .card-details strong{display:block;color:var(--text);font-size:12px;margin-top:3px;font-weight:600;overflow-wrap:anywhere}
 .asset-card .asset-buttons .btn:first-child{flex:2}
 
-@media(max-width:1000px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.asset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.stats{grid-template-columns:1fr}}
+@media(max-width:1000px){.asset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){
  .app{padding:14px}.topbar{align-items:flex-start}
  .hero{align-items:flex-start;flex-direction:column}.stats{gap:10px}.stat{padding:14px 16px}.stat-value{font-size:22px}
@@ -249,6 +250,21 @@ tbody tr:last-child td{border-bottom:0}
   .month-nav{width:100%;justify-content:space-between}
   .month-nav strong{flex:1}
 }
+
+/* ===== Refreshed look ===== */
+:root{--bg:#070a0f;--card:#0f141b;--border:#1c2531;--accent:#4f8cff;--accent2:#22d3ee}
+body{background:radial-gradient(900px 500px at 12% -10%,rgba(79,140,255,.14),transparent 60%),radial-gradient(800px 480px at 100% 0,rgba(34,201,147,.10),transparent 55%),var(--bg);background-attachment:fixed}
+.panel{border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0)),var(--card)}
+.brand-mark{background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 6px 20px rgba(79,140,255,.35)}
+.btn.primary{background:linear-gradient(135deg,var(--accent),#3b6fe0);border-color:transparent}
+.stats .stat:first-child{background:linear-gradient(135deg,rgba(79,140,255,.16),rgba(34,211,238,.06)),var(--card);border-color:rgba(79,140,255,.35)}
+.stats .stat:first-child .stat-value{font-size:clamp(30px,4.4vw,44px)}
+.asset-card{transition:transform .15s,border-color .15s,box-shadow .15s}.asset-card:hover{transform:translateY(-2px)}
+.coin-symbol,.stat-foot,.card-details,.trade-meta,.watch-sub{font-size:12px}
+.user-menu{position:relative}.user-menu summary{list-style:none;cursor:pointer}.user-menu summary::-webkit-details-marker{display:none}
+.user-pop{position:absolute;right:0;top:calc(100% + 8px);z-index:6;min-width:170px;padding:6px;background:#0f151c;border:1px solid #2a3441;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.55)}
+.user-pop button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--text);padding:10px;border-radius:8px;font-size:13px}
+.user-pop button:hover{background:#1b2531}
 </style>
 </head>
 <body>
@@ -275,17 +291,12 @@ tbody tr:last-child td{border-bottom:0}
     </div>
     <div class="top-actions">
       <div class="status"><span class="dot" id="liveDot"></span><span id="liveStatus">Connecting to markets...</span></div>
-      <span class="user-pill" id="userPill"></span>
-      <button class="btn" id="signOutBtn" type="button">Sign out</button>
-      <button class="btn" id="exportBtn">↓ Export CSV</button>
+      <span class="badge" id="lastUpdated">Waiting for prices</span>
+      <button class="btn" id="refreshBtn" type="button">↻ Refresh</button>
       <button class="btn primary" id="addBtn">＋ Add asset</button>
+      <details class="user-menu"><summary class="user-pill" id="userPill"></summary><div class="user-pop"><button id="exportBtn" type="button">↓ Export CSV</button><button id="signOutBtn" type="button">Sign out</button></div></details>
     </div>
   </header>
-
-  <section class="hero">
-    <div><div class="eyebrow">Portfolio overview</div><h2>Your assets. In real time.</h2><p>Track your crypto holdings, market prices, and estimated value in USD and EGP.</p></div>
-    <div class="badge" id="lastUpdated">Waiting for prices</div>
-  </section>
 
   <section class="stats">
     <div class="panel stat">
@@ -299,11 +310,6 @@ tbody tr:last-child td{border-bottom:0}
       <div class="stat-foot" id="totalPnlPct">Add your buy prices to track P/L</div>
     </div>
     <div class="panel stat">
-      <div class="stat-label">◉ Assets held</div>
-      <div class="stat-value" id="assetCount">0</div>
-      <div class="stat-foot">Unique assets in your portfolio</div>
-    </div>
-    <div class="panel stat">
       <div class="stat-label">＄ USD / EGP rate</div>
       <div class="stat-value" id="usdEgp">—</div>
       <div class="stat-foot" id="p2pStatus">Fetching USD/EGP rate</div>
@@ -313,11 +319,18 @@ tbody tr:last-child td{border-bottom:0}
   <section class="panel perf-strip">
     <div class="perf-info"><div class="perf-title">Portfolio performance</div><div class="perf-value" id="perfValue">$0.00</div><div class="perf-change" id="perfChange">—</div></div>
     <div class="perf-chart"><canvas id="portfolioChart"></canvas></div>
-    <span class="badge">Live value</span>
   </section>
 
   <div class="section-head" style="margin-top:6px"><div><h3>Your assets</h3><p>Live market prices and individual holdings</p></div><span class="badge" id="assetBadge">0 assets</span></div>
   <section class="asset-grid" id="assetGrid"></section>
+
+  <section class="panel section" style="margin-bottom:18px">
+    <div class="section-head">
+      <div><h3>Watchlist</h3><p>Coins you follow without holding them</p></div>
+      <form class="watch-add" id="watchForm"><input class="search" id="watchInput" placeholder="Add symbol, e.g. SOL" maxlength="20" autocomplete="off" aria-label="Add a coin to your watchlist"><button class="btn primary" type="submit">＋ Watch</button></form>
+    </div>
+    <div class="watch-grid" id="watchGrid"></div>
+  </section>
 
   <section class="panel section dual-panel" style="margin-bottom:18px">
     <div class="dual-col">
@@ -339,28 +352,8 @@ tbody tr:last-child td{border-bottom:0}
     </div>
   </section>
 
-  <section class="panel section" style="margin-bottom:18px">
-    <div class="section-head">
-      <div><h3>Watchlist</h3><p>Coins you follow without holding them</p></div>
-      <form class="watch-add" id="watchForm"><input class="search" id="watchInput" placeholder="Add symbol, e.g. SOL" maxlength="20" autocomplete="off" aria-label="Add a coin to your watchlist"><button class="btn primary" type="submit">＋ Watch</button></form>
-    </div>
-    <div class="watch-grid" id="watchGrid"></div>
-  </section>
 
-  <section class="panel table-panel">
-    <div class="section-head">
-      <div><h3>Holdings breakdown</h3><p>Detailed portfolio positions</p></div>
-      <div class="toolbar"><input class="search" id="searchInput" placeholder="Search assets..." aria-label="Search assets"><button class="btn" id="refreshBtn">↻ Refresh</button></div>
-    </div>
-    <div class="table-scroll">
-      <table>
-        <thead><tr><th>Asset</th><th>Price (USD)</th><th>Holdings</th><th>Value (USD)</th><th>Value (EGP)</th><th>Avg. buy price</th><th>Invested</th><th>P/L</th><th>Actions</th></tr></thead>
-        <tbody id="assetTable"></tbody>
-      </table>
-      <div class="empty" id="emptyState"><div class="empty-icon">✧</div><strong>Your portfolio starts here</strong><br>Add your first crypto asset to see live prices, coin logos, and portfolio analytics.</div>
-    </div>
-  </section>
-  <footer class="footer"><span>Coinfolio · Personal portfolio tracker</span><span>Market prices are indicative. USD/EGP uses the Binance P2P sell rate (median of top ads) when available, otherwise a market rate.</span></footer>
+  <footer class="footer"><span>Coinfolio · Personal portfolio tracker</span><span>Market prices are indicative. The USD/EGP rate comes from CoinGecko and may differ from actual P2P prices.</span></footer>
 </div>
 
 <div class="chart-backdrop" id="chartBackdrop">
@@ -529,8 +522,6 @@ async function saveCloudPortfolio() {
     portfolio: state.portfolio,
     prices: state.prices,
     usdEgp: state.usdEgp,
-    manualRate: num(state.manualRate),
-    premiumPct: num(state.premiumPct),
     watchlist: state.watchlist,
     history: state.history,
     trades: state.trades || [],
@@ -609,7 +600,6 @@ function render() {
   $("totalPnlPct").textContent = t.hasBuy
     ? `${t.pnlPct >= 0 ? "+" : ""}${t.pnlPct.toFixed(2)}% overall · invested ${moneyRound(t.cost)}${state.usdEgp > 0 ? " · " + (t.pnl > 0 ? "+" : "") + moneyRound(t.pnl * state.usdEgp,"EGP") : ""}`
     : "Add average buy prices to track P/L";
-  $("assetCount").textContent = state.portfolio.length;
   $("usdEgp").textContent = state.usdEgp > 0
     ? new Intl.NumberFormat("en-US",{maximumFractionDigits:3}).format(state.usdEgp)
     : "—";
@@ -630,7 +620,6 @@ function render() {
   }
 
   renderCards();
-  renderTable();
   renderWatchlist();
   renderTrades();
   drawChart();
@@ -732,22 +721,6 @@ async function resolveWatchLogos(){
       if(c.image){state.watchLogos[sym]=c.image;persist();renderWatchlist();}
     }catch(e){}
   }
-}
-function renderTable() {
-  const rows = state.portfolio.filter(a => (a.symbol+" "+a.name).toLowerCase().includes(searchTerm));
-  $("emptyState").style.display = rows.length ? "none" : "block";
-  $("assetTable").innerHTML = rows.map(asset => {
-    const price=priceOf(asset),value=asset.amount*price,pnl=pnlFor(asset);
-    return `<tr>
-      <td><div class="coin-cell">${logoMarkup(asset,false)}<div><div class="coin-name">${escapeHtml(asset.name)}</div><div class="coin-symbol">${escapeHtml(asset.symbol)}</div></div></div></td>
-      <td>${priceFmt(price)}</td><td>${quantity(asset.amount)}</td><td>${usd2(value)}</td>
-      <td>${state.usdEgp>0?money(currentEgp(value),"EGP"):"—"}</td>
-      <td>${asset.buyPrice?money(asset.buyPrice):"—"}</td>
-      <td>${asset.buyPrice?usd2(pnl.cost):"—"}</td>
-      <td class="${asset.buyPrice?(pnl.pnl>0?"green":pnl.pnl<0?"red":""):""}">${asset.buyPrice?(pnl.pnl>0?"+":"")+usd2(pnl.pnl):"—"}${asset.buyPrice?`<div style="font-size:10px;margin-top:4px">${pnl.pct>=0?"+":""}${pnl.pct.toFixed(2)}%</div>`:""}${asset.buyPrice&&state.usdEgp>0?`<div style="font-size:10px;margin-top:2px">${egpSigned(pnl.pnl)}</div>`:""}</td>
-      <td><button class="small-action" data-buy="${escapeHtml(asset.id)}">Buy</button><button class="small-action" data-transfer="${escapeHtml(asset.id)}">Transfer</button><button class="small-action" data-close="${escapeHtml(asset.id)}">Close</button><button class="small-action" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="small-action" data-delete="${escapeHtml(asset.id)}">Delete</button></td>
-    </tr>`;
-  }).join("");
 }
 /* Records a portfolio value point every 15 minutes, keeping ~7 days of history (700 points). */
 function recordHistory() {
@@ -967,55 +940,24 @@ async function getJson(url, ms=8000) {
     return await r.json();
   } finally { clearTimeout(t); }
 }
-/* The market sources below give the mid-market rate. To adjust them toward your real sell price, set the % difference here.
-   Example: sources show 50.50 and your actual sell price is 50.10 -> (50.10/50.50 - 1) * 100 = -0.8 */
-const RATE_SELL_ADJUST_PCT = 0;
-
-/* Binance P2P SELL rate through your Cloudflare Worker.
-   Put your Worker URL here (e.g. "https://coinfolio-p2p.yourname.workers.dev").
-   While it still contains "YOUR-WORKER", the P2P source is skipped and the market sources are used. */
-const P2P_WORKER_URL = "https://YOUR-WORKER.workers.dev";
-const medianOf = arr => {
-  const p = arr.map(Number).filter(x => x > 1).sort((a,b) => a-b);
-  if (!p.length) return 0;
-  const m = Math.floor(p.length/2);
-  return p.length % 2 ? p[m] : (p[m-1] + p[m]) / 2;
-};
-const RATE_SOURCES = [
-  ...(P2P_WORKER_URL.includes("YOUR-WORKER") ? [] : [
-    {name:"Binance P2P", url:P2P_WORKER_URL, pick:j=>medianOf(j?.prices||[])}
-  ]),
-  {name:"CoinGecko USDT/EGP", url:"https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=egp", pick:j=>num(j?.tether?.egp)},
-  {name:"Coinbase USD/EGP", url:"https://api.coinbase.com/v2/exchange-rates?currency=USD", pick:j=>num(j?.data?.rates?.EGP)},
-  {name:"open.er-api.com", url:"https://open.er-api.com/v6/latest/USD", pick:j=>num(j?.rates?.EGP)},
-  {name:"currency-api", url:"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json", pick:j=>num(j?.usd?.egp)},
-  {name:"currency-api backup", url:"https://latest.currency-api.pages.dev/v1/currencies/usd.json", pick:j=>num(j?.usd?.egp)}
-];
-async function fetchMarketRate() {
-  for (const s of RATE_SOURCES) {
-    try {
-      const p = s.pick(await getJson(s.url));
-      if (p > 1) return {price:p, source:s.name};
-    } catch (e) { console.warn("Rate source failed:", s.name, e); }
-  }
-  return null;
-}
-async function fetchP2PRate() {
-  state.manualRate = 0;
-  const result = await fetchMarketRate();
-  if (result) {
-    const isP2P = result.source === "Binance P2P";
-    state.usdEgp = result.price * (isP2P ? 1 : (1 + RATE_SELL_ADJUST_PCT / 100));
+/* USD/EGP rate from CoinGecko (USDT/EGP). If a refresh fails, the last saved rate stays in use. */
+async function fetchUsdEgpRate() {
+  try {
+    const j = await getJson("https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=egp");
+    const p = num(j?.tether?.egp);
+    if (!(p > 1)) throw new Error("No rate in response");
+    state.usdEgp = p;
     rateUpdatedAt = Date.now();
-    p2pSource = isP2P
-      ? "P2P Sell · Binance"
-      : "Market rate · " + result.source + (RATE_SELL_ADJUST_PCT ? ` (${RATE_SELL_ADJUST_PCT > 0 ? "+" : ""}${RATE_SELL_ADJUST_PCT}%)` : "");
-  } else {
+    p2pSource = "CoinGecko USDT/EGP";
+  } catch (e) {
+    console.warn("USD/EGP rate failed:", e);
     p2pSource = "⚠ Refresh failed · using last saved rate";
   }
   persist(); render();
 }
-document.addEventListener("visibilitychange", () => { if (!document.hidden) fetchP2PRate(); });
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && (!state.usdEgp || Date.now() - rateUpdatedAt > 30000)) fetchUsdEgpRate();
+});
 
 function saveAsset(event) {
   event.preventDefault();
@@ -1257,11 +1199,8 @@ $("coinForm").addEventListener("submit",saveAsset);
 $("exportBtn").addEventListener("click",exportCsv);
 $("refreshBtn").addEventListener("click",async()=>{
   $("refreshBtn").textContent="Refreshing...";
-  await Promise.allSettled([fetchPrices(),fetchP2PRate()]);
+  await Promise.allSettled([fetchPrices(),fetchUsdEgpRate()]);
   connectLivePrices();$("refreshBtn").textContent="↻ Refresh";
-});
-$("searchInput").addEventListener("input",event=>{
-  searchTerm=event.target.value.trim().toLowerCase();renderTable();
 });
 /* ===== Coin chart (TradingView Advanced Chart: indicators, drawing tools, timeframes) ===== */
 let tvScriptPromise=null;
@@ -1414,9 +1353,9 @@ function startApp() {
   } else {
     setStatus(true,"Add assets to begin");
   }
-  fetchP2PRate();
+  fetchUsdEgpRate();
   clearInterval(p2pTimer);
-  p2pTimer=setInterval(fetchP2PRate,60000);
+  p2pTimer=setInterval(fetchUsdEgpRate,60000);
 }
 
 let authMode = "signin";
