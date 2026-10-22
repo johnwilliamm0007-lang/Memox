@@ -1427,6 +1427,16 @@ function fillSeasonSelect(){
   sel.innerHTML=seasonSymbols().map(s=>`<option>${escapeHtml(s)}</option>`).join("");
   if(cur)sel.value=cur;
 }
+function bestMonths(k){
+  const cols=Array.from({length:12},()=>[]);
+  for(const x of k)cols[new Date(x.t).getUTCMonth()].push((x.c/x.o-1)*100);
+  const st=cols.map((c,m)=>({m,n:c.length,avg:mean(c),g:c.length?c.filter(v=>v>0).length/c.length*100:0})).filter(x=>x.n>=3);
+  if(st.length<6)return '<div class="empty" style="padding:14px">Not enough history for this coin.</div>';
+  const sell=[...st].sort((a,b)=>b.avg-a.avg).slice(0,3);
+  const buy=[...st].sort((a,b)=>a.avg-b.avg).slice(0,3);
+  const row=(x,c)=>`<div class="alloc-row"><strong>${MN[x.m]}</strong><span class="val">${x.n} yrs · ${x.g.toFixed(0)}% green</span><span class="pct ${c}">${sPct(x.avg)}</span></div>`;
+  return `<div class="alloc-legend" style="display:grid;grid-template-columns:1fr 1fr;gap:18px"><div><div class="stat-label green" style="margin-bottom:8px">Best months to BUY (weakest, dips)</div>${buy.map(x=>row(x,"red")).join("")}</div><div><div class="stat-label red" style="margin-bottom:8px">Best months to SELL (strongest)</div>${sell.map(x=>row(x,"green")).join("")}</div></div>`;
+}
 function monthlyHeat(k){
   const rows={},cols=Array.from({length:12},()=>[]);
   for(const x of k){
@@ -1490,6 +1500,8 @@ async function runSeason(){
     const syms=seasonSymbols();
     const [corr,acc]=await Promise.all([corrTable(syms),accumTable(syms)]);
     out.innerHTML=`
+      <div class="sblock"><h4>${escapeHtml(sym)} best months to buy &amp; sell</h4><p>Buy = months that were historically weakest (cheaper entries). Sell = months that were strongest. Based on the average monthly return below; past patterns do not guarantee the future.</p>${bestMonths(mk)}</div>
+      
       <div class="sblock"><h4>${escapeHtml(sym)} monthly returns</h4><p>Each cell is the month's open→close change. Bottom rows show the average and how often that month closed green.</p>${monthlyHeat(mk)}</div>
       <div class="sblock"><h4>${escapeHtml(sym)} average weekly return by week of year</h4><p>Average across all years available. Hover a cell for sample count.</p>${weeklyGrid(wk)}</div>
       <div class="sblock"><h4>Monthly correlation (last 60 months)</h4><p>Closer to 1 = the coins tend to move together in the same months.</p>${corr}</div>
