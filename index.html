@@ -350,6 +350,10 @@ const money = (value, currency="USD") => {
     }).format(n);
   } catch { return "$" + n.toFixed(2); }
 };
+const moneyRound = (value, currency="USD") => {
+  try { return new Intl.NumberFormat("en-US",{style:"currency",currency,maximumFractionDigits:0,minimumFractionDigits:0}).format(num(value)); }
+  catch { return "$" + Math.round(num(value)); }
+};
 const quantity = value => new Intl.NumberFormat("en-US",{
   maximumFractionDigits:8
 }).format(num(value));
@@ -478,10 +482,10 @@ function render() {
   const t = totals();
   $("totalUsd").textContent = money(t.value);
   $("totalEgp").textContent = state.usdEgp > 0 ? money(currentEgp(t.value),"EGP") : "EGP rate unavailable";
-  $("totalPnl").textContent = t.hasBuy ? (t.pnl > 0 ? "+" : "") + money(t.pnl) : "—";
+  $("totalPnl").textContent = t.hasBuy ? (t.pnl > 0 ? "+" : "") + moneyRound(t.pnl) : "—";
   $("totalPnl").className = "stat-value " + (t.pnl > 0 ? "green" : t.pnl < 0 ? "red" : "");
   $("totalPnlPct").textContent = t.hasBuy
-    ? `${t.pnlPct >= 0 ? "+" : ""}${t.pnlPct.toFixed(2)}% overall · invested ${money(t.cost)}${state.usdEgp > 0 ? " · " + egpSigned(t.pnl) : ""}`
+    ? `${t.pnlPct >= 0 ? "+" : ""}${t.pnlPct.toFixed(2)}% overall · invested ${moneyRound(t.cost)}${state.usdEgp > 0 ? " · " + (t.pnl > 0 ? "+" : "") + moneyRound(t.pnl * state.usdEgp,"EGP") : ""}`
     : "Add average buy prices to track P/L";
   $("assetCount").textContent = state.portfolio.length;
   $("usdEgp").textContent = state.usdEgp > 0
