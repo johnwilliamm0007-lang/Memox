@@ -319,6 +319,24 @@ tbody tr:last-child td{border-bottom:0}
   </div>
 </div>
 
+<div class="modal-backdrop" id="mvBackdrop">
+  <div class="modal">
+    <h3 id="mvTitle">Buy more</h3>
+    <p id="mvInfo"></p>
+    <form id="mvForm">
+      <input type="hidden" id="mvId"><input type="hidden" id="mvMode">
+      <div class="form-grid">
+        <div class="field full" id="mvDirRow"><label for="mvDir">Direction</label><select id="mvDir" class="fee-unit" style="width:100%"><option value="in">Transfer in (received, no purchase)</option><option value="out">Transfer out (sent away)</option></select></div>
+        <div class="field"><label for="mvQty">Quantity *</label><input id="mvQty" type="number" min="0" step="any" required></div>
+        <div class="field" id="mvPriceRow"><label for="mvPrice" id="mvPriceLabel">Buy price (USD) *</label><input id="mvPrice" type="number" min="0" step="any"></div>
+        <div class="field full" id="mvFeeRow"><label for="mvFee">Buy fee (optional)</label><div style="display:flex;gap:8px"><input id="mvFee" type="number" min="0" step="any" placeholder="e.g. 0.1" style="flex:1;min-width:0"><select id="mvFeeUnit" class="fee-unit"><option value="pct">% of purchase</option><option value="usd">$ USD</option></select></div></div>
+      </div>
+      <div class="notice" id="mvPreview">—</div>
+      <div class="modal-actions"><button class="btn" type="button" id="mvCancel">Cancel</button><button class="btn primary" type="submit" id="mvSubmit">Save</button></div>
+    </form>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -529,7 +547,8 @@ function renderCards() {
       <div class="asset-details"><div>Holding value<strong>${money(value)}</strong></div><div style="text-align:right">Value in EGP<strong>${state.usdEgp>0?money(currentEgp(value),"EGP"):"—"}</strong></div></div>
       <div class="asset-details"><div>Average buy<strong>${asset.buyPrice?money(asset.buyPrice):"Not set"}</strong>${asset.buyFee>0?`<span style="display:block;font-size:10px;margin-top:3px;color:var(--muted)">+ ${money(asset.buyFee)} fees</span>`:""}</div><div style="text-align:right">Unrealized P/L<strong class="${asset.buyPrice?(pnl.pnl>0?"green":pnl.pnl<0?"red":""):""}">${asset.buyPrice?(pnl.pnl>0?"+":"")+money(pnl.pnl):"—"}</strong>${asset.buyPrice&&state.usdEgp>0?`<span style="display:block;font-size:10px;margin-top:3px;color:var(--muted)">${egpSigned(pnl.pnl)}</span>`:""}</div></div>
       <div class="asset-details"><div>Total invested<strong>${asset.buyPrice?money(pnl.cost):"—"}</strong></div><div style="text-align:right">Qty × buy price<strong>${quantity(asset.amount)} × ${asset.buyPrice?money(asset.buyPrice):"—"}</strong></div></div>
-      <div class="asset-buttons"><button class="btn" data-close="${escapeHtml(asset.id)}">Close</button><button class="btn" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="btn danger" data-delete="${escapeHtml(asset.id)}">Delete</button></div>
+      <div class="asset-buttons"><button class="btn" data-buy="${escapeHtml(asset.id)}">＋ Buy more</button><button class="btn" data-transfer="${escapeHtml(asset.id)}">⇄ Transfer</button></div>
+      <div class="asset-buttons" style="margin-top:7px"><button class="btn" data-close="${escapeHtml(asset.id)}">Close</button><button class="btn" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="btn danger" data-delete="${escapeHtml(asset.id)}">Delete</button></div>
     </article>`;
   }).join("");
 }
@@ -587,7 +606,7 @@ function renderTable() {
       <td>${asset.buyPrice?money(asset.buyPrice):"—"}</td>
       <td>${asset.buyPrice?money(pnl.cost):"—"}</td>
       <td class="${asset.buyPrice?(pnl.pnl>0?"green":pnl.pnl<0?"red":""):""}">${asset.buyPrice?(pnl.pnl>0?"+":"")+money(pnl.pnl):"—"}${asset.buyPrice?`<div style="font-size:10px;margin-top:4px">${pnl.pct>=0?"+":""}${pnl.pct.toFixed(2)}%</div>`:""}${asset.buyPrice&&state.usdEgp>0?`<div style="font-size:10px;margin-top:2px">${egpSigned(pnl.pnl)}</div>`:""}</td>
-      <td><button class="small-action" data-close="${escapeHtml(asset.id)}">Close</button><button class="small-action" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="small-action" data-delete="${escapeHtml(asset.id)}">Delete</button></td>
+      <td><button class="small-action" data-buy="${escapeHtml(asset.id)}">Buy</button><button class="small-action" data-transfer="${escapeHtml(asset.id)}">Transfer</button><button class="small-action" data-close="${escapeHtml(asset.id)}">Close</button><button class="small-action" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="small-action" data-delete="${escapeHtml(asset.id)}">Delete</button></td>
     </tr>`;
   }).join("");
 }
@@ -982,6 +1001,79 @@ document.addEventListener("click",e=>{
     state.trades=(state.trades||[]).filter(x=>x.id!==t.dataset.tradeDel);
     markPortfolioChanged();render();
   }
+});
+
+/* ===== Buy more / Transfer ===== */
+const mvKind=()=>$("mvMode").value==="buy"?"buy":$("mvDir").value;
+const mvAsset=()=>state.portfolio.find(x=>x.id===$("mvId").value);
+function openMove(id,mode){
+  const a=state.portfolio.find(x=>x.id===id);if(!a)return;
+  $("mvId").value=id;$("mvMode").value=mode;
+  $("mvTitle").textContent=(mode==="buy"?"Buy more ":"Transfer ")+a.symbol;
+  $("mvInfo").textContent=`You hold ${quantity(a.amount)}${a.buyPrice>0?" · avg buy "+money(a.buyPrice):""}`;
+  $("mvDirRow").style.display=mode==="transfer"?"":"none";
+  $("mvDir").value="in";$("mvQty").value="";
+  $("mvPrice").value=priceOf(a)||"";
+  $("mvFee").value="";$("mvFeeUnit").value="pct";
+  syncMove();
+  $("mvBackdrop").classList.add("open");
+}
+function syncMove(){
+  const k=mvKind();
+  $("mvPriceRow").style.display=k==="out"?"none":"";
+  $("mvFeeRow").style.display=k==="buy"?"":"none";
+  $("mvPriceLabel").textContent=k==="buy"?"Buy price (USD) *":"Cost basis price (USD)";
+  $("mvSubmit").textContent=k==="buy"?"Add purchase":k==="in"?"Add transfer":"Record transfer out";
+  previewMove();
+}
+function calcMove(a){
+  const k=mvKind(),q=num($("mvQty").value),p=num($("mvPrice").value),fi=num($("mvFee").value);
+  if(k==="out"){
+    const feePart=a.amount>0?num(a.buyFee)*q/a.amount:0;
+    return {k,q,p,fee:0,newAmount:a.amount-q,newAvg:a.buyPrice,newFee:Math.max(0,num(a.buyFee)-feePart)};
+  }
+  const fee=k==="buy"?($("mvFeeUnit").value==="pct"?q*p*fi/100:fi):0;
+  const newAmount=a.amount+q;
+  const newAvg=a.buyPrice>0&&newAmount>0?(a.amount*a.buyPrice+q*p)/newAmount:p;
+  return {k,q,p,fee,newAmount,newAvg,newFee:num(a.buyFee)+fee};
+}
+function previewMove(){
+  const a=mvAsset();if(!a)return;
+  const c=calcMove(a);
+  if(c.k==="out"){
+    $("mvPreview").innerHTML=c.q>0?`After transfer: <strong>${quantity(c.newAmount)}</strong> held · avg buy stays ${a.buyPrice>0?money(a.buyPrice):"—"}.<br>No profit or loss is recorded.`:"Enter the quantity sent out.";
+    return;
+  }
+  $("mvPreview").innerHTML=c.q>0&&c.p>0
+    ?`This ${c.k==="buy"?"purchase":"transfer"}: ${quantity(c.q)} × ${money(c.p)} = ${money(c.q*c.p)}${c.fee>0?` + ${money(c.fee)} fee`:""}<br>New quantity: <strong>${quantity(c.newAmount)}</strong> · New average: <strong>${money(c.newAvg)}</strong>${c.k==="in"?"<br>Cost basis defaults to the current price, so your profit/loss doesn't change.":""}${a.buyPrice>0?"":"<br>No previous buy price was set, so the average uses this entry only."}`
+    :"Enter quantity and price.";
+}
+function submitMove(e){
+  e.preventDefault();
+  const a=mvAsset();if(!a)return;
+  const c=calcMove(a);
+  if(!(c.q>0)){alert("Enter a valid quantity.");return;}
+  if(c.k==="out"){
+    if(c.q>a.amount+1e-9){alert("You only hold "+quantity(a.amount)+".");return;}
+    a.buyFee=c.newFee;a.amount=Math.max(0,c.newAmount);
+    if(a.amount<1e-12)state.portfolio=state.portfolio.filter(x=>x.id!==a.id);
+  } else {
+    if(!(c.p>0)||!(c.fee>=0)){alert("Enter a valid price.");return;}
+    a.buyPrice=c.newAvg;a.buyFee=c.newFee;a.amount=c.newAmount;
+  }
+  markPortfolioChanged();
+  $("mvBackdrop").classList.remove("open");
+  render();fetchPrices();connectLivePrices();
+}
+$("mvForm").addEventListener("submit",submitMove);
+["mvQty","mvPrice","mvFee"].forEach(id=>$(id).addEventListener("input",previewMove));
+$("mvFeeUnit").addEventListener("change",previewMove);
+$("mvDir").addEventListener("change",syncMove);
+$("mvCancel").addEventListener("click",()=>$("mvBackdrop").classList.remove("open"));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("mvBackdrop").classList.remove("open");});
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-buy]");if(b)openMove(b.dataset.buy,"buy");
+  const t=e.target.closest("[data-transfer]");if(t)openMove(t.dataset.transfer,"transfer");
 });
 
 $("addBtn").addEventListener("click",()=>openModal());
