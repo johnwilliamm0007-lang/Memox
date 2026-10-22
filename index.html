@@ -137,19 +137,39 @@ tbody tr:last-child td{border-bottom:0}
 .perf-value{font-size:20px;font-weight:700;letter-spacing:-.02em}
 .perf-change{font-size:12px;margin-top:3px;color:var(--muted)}
 
+/* ===== Watchlist: one coin per row ===== */
 .watch-add{display:flex;gap:8px;flex-wrap:wrap}
-.watch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,230px));gap:8px}
-.watch-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 12px;min-width:0;border-radius:12px;box-shadow:none}
-.watch-top{display:flex;align-items:center;gap:8px;min-width:0}
-.watch-row .coin-logo{width:28px;height:28px;flex:0 0 28px;font-size:8px}
-.watch-sym{font-weight:600;font-size:13px;line-height:1.1}
-.watch-price{font-size:12px;font-weight:600;overflow-wrap:anywhere;margin-top:2px}
-.watch-row .asset-change{font-size:12px;font-weight:600;text-align:right}
-.watch-actions{display:flex;gap:4px;grid-column:1/-1}
-.watch-actions .btn{padding:4px 8px;font-size:11px;flex:1;white-space:nowrap}
+.watch-grid{display:flex;flex-direction:column;gap:8px}
+.watch-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto 84px auto;align-items:center;gap:14px;padding:11px 14px;min-width:0;border-radius:12px;box-shadow:none}
+.watch-row .coin-logo{width:34px;height:34px;flex:0 0 34px;font-size:10px}
+.watch-sym{font-weight:600;font-size:14px;line-height:1.1}
+.watch-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.watch-price{font-size:15px;font-weight:700;text-align:right;white-space:nowrap}
+.watch-row .asset-change{font-size:13px;font-weight:600;text-align:right;white-space:nowrap}
+.watch-actions{display:flex;gap:6px}
+.watch-actions .btn{padding:6px 10px;font-size:12px;white-space:nowrap}
+
+/* ===== Asset card (new) ===== */
+.menu-wrap{position:relative;margin-left:auto}
+.icon-btn{width:32px;height:32px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);font-size:18px;line-height:1}
+.icon-btn:hover{background:#1b2531;color:var(--text)}
+.menu{display:none;position:absolute;right:0;top:36px;z-index:5;min-width:150px;padding:6px;background:#0f151c;border:1px solid #2a3441;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.55)}
+.menu.open{display:block}
+.menu button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--text);padding:9px 10px;border-radius:8px;font-size:13px}
+.menu button:hover{background:#1b2531}
+.menu button.danger{color:var(--red)}
+.card-value{font-size:26px;font-weight:700;letter-spacing:-.03em;margin-top:18px}
+.card-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.card-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.pnl-pill{padding:4px 9px;border-radius:999px;font-weight:600;font-size:12px;white-space:nowrap;background:#1b2531}
+.pnl-pill.green{background:rgba(34,201,147,.12)}
+.pnl-pill.red{background:rgba(255,107,112,.12)}
+.card-details{display:none;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
+.card-details.open{display:grid}
+.card-details strong{display:block;color:var(--text);font-size:12px;margin-top:3px;font-weight:600;overflow-wrap:anywhere}
+.asset-card .asset-buttons .btn:first-child{flex:2}
 
 @media(max-width:1000px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.asset-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:800px){.watch-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){
  .app{padding:14px}.topbar{align-items:flex-start}
  .hero{align-items:flex-start;flex-direction:column}.stats{gap:10px}.stat{padding:14px 16px}.stat-value{font-size:22px}
@@ -162,6 +182,50 @@ tbody tr:last-child td{border-bottom:0}
  .form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}
  .footer{flex-direction:column}.toolbar{width:100%}.search{flex:1;min-width:0;width:100%}
  .watch-add{width:100%}.watch-add .search{flex:1;min-width:0}
+ .card-value{font-size:20px}
+}
+
+/* ===== Allocation + Monthly profit side by side ===== */
+.dual-panel{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);padding:0}
+.dual-col{padding:20px 22px;min-width:0}
+.dual-col+.dual-col{border-left:1px solid var(--border)}
+.dual-col .section-head{flex-wrap:wrap}
+.month-nav{display:flex;align-items:center;gap:6px}
+.month-nav .btn{padding:6px 11px}
+.month-nav strong{min-width:112px;text-align:center;font-size:13px}
+.mstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.mstats .stat{padding:12px 14px;background:#0f151c;box-shadow:none}
+.mstats .stat-value{font-size:clamp(16px,1.8vw,21px);margin:6px 0 0}
+.trade-list{display:flex;flex-direction:column;max-height:340px;overflow-y:auto}
+.trade-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #1c2530}
+.trade-row:last-child{border-bottom:0}
+.trade-date{color:var(--muted);font-size:11px;margin-left:6px}
+.trade-meta{color:var(--muted);font-size:11px;margin-top:3px;overflow-wrap:anywhere}
+.trade-pnl{font-weight:700;font-size:13px;text-align:right;white-space:nowrap}
+.trade-row .small-action{margin:0;padding:5px 8px}
+
+@media(max-width:900px){
+  .dual-panel{grid-template-columns:1fr}
+  .dual-col+.dual-col{border-left:0;border-top:1px solid var(--border)}
+}
+@media(max-width:700px){
+  .watch-row{grid-template-columns:34px minmax(0,1fr) auto;gap:10px 12px;padding:12px}
+  .watch-row .asset-change{grid-column:3;grid-row:2;text-align:right}
+  .watch-price{grid-column:3;grid-row:1}
+  .watch-actions{grid-column:1/-1;grid-row:3}
+  .watch-actions .btn{flex:1}
+  .watch-row .watch-info{grid-column:2;grid-row:1/3}
+  .watch-row .coin-logo{grid-row:1/3}
+}
+@media(max-width:600px){
+  .dual-col{padding:16px}
+  .alloc{justify-content:center}
+  .alloc-legend{min-width:100%}
+  .mstats{grid-template-columns:1fr 1fr}
+  .mstats .stat:last-child{grid-column:1/-1}
+  .mstats .stat-value{font-size:18px}
+  .month-nav{width:100%;justify-content:space-between}
+  .month-nav strong{flex:1}
 }
 </style>
 </head>
@@ -205,7 +269,7 @@ tbody tr:last-child td{border-bottom:0}
     <div class="panel stat">
       <div class="stat-label">◈ Total portfolio value</div>
       <div class="stat-value" id="totalUsd">$0.00</div>
-      <div class="stat-foot" id="totalEgp">EGP 0.00</div>
+      <div class="stat-foot" id="totalEgp">EGP 0</div>
     </div>
     <div class="panel stat">
       <div class="stat-label">↗ Unrealized profit / loss</div>
@@ -230,27 +294,27 @@ tbody tr:last-child td{border-bottom:0}
     <span class="badge">Live value</span>
   </section>
 
-  <section style="margin-bottom:14px">
-    <div class="panel section">
-    <div class="section-head"><div><h3>Portfolio allocation</h3><p>Share of each asset in your total value</p></div></div>
-    <div class="alloc"><canvas id="allocChart" width="180" height="180"></canvas><div class="alloc-legend" id="allocLegend"></div></div>
-  </div>
-  </section>
+  <div class="section-head" style="margin-top:6px"><div><h3>Your assets</h3><p>Live market prices and individual holdings</p></div><span class="badge" id="assetBadge">0 assets</span></div>
+  <section class="asset-grid" id="assetGrid"></section>
 
-  <section class="panel section" style="margin-bottom:18px">
-    <div class="section-head">
-      <div><h3>Monthly profit</h3><p>Realized results from closed positions</p></div>
-      <div class="toolbar"><button class="btn" id="prevMonth" type="button">‹</button><strong id="tradeMonth" style="min-width:130px;text-align:center"></strong><button class="btn" id="nextMonth" type="button">›</button></div>
+  <section class="panel section dual-panel" style="margin-bottom:18px">
+    <div class="dual-col">
+      <div class="section-head"><div><h3>Portfolio allocation</h3><p>Share of each asset in your total value</p></div></div>
+      <div class="alloc"><canvas id="allocChart" width="180" height="180"></canvas><div class="alloc-legend" id="allocLegend"></div></div>
     </div>
-    <div class="stats stats3" style="margin-bottom:14px">
-      <div class="panel stat"><div class="stat-label">Profit</div><div class="stat-value green" id="mProfit">$0.00</div></div>
-      <div class="panel stat"><div class="stat-label">Loss</div><div class="stat-value red" id="mLoss">$0.00</div></div>
-      <div class="panel stat"><div class="stat-label">Net result</div><div class="stat-value" id="mNet">$0.00</div><div class="stat-foot" id="mNetEgp">—</div></div>
+    <div class="dual-col">
+      <div class="section-head">
+        <div><h3>Monthly profit</h3><p>Realized results from closed positions</p></div>
+        <div class="month-nav"><button class="btn" id="prevMonth" type="button">‹</button><strong id="tradeMonth"></strong><button class="btn" id="nextMonth" type="button">›</button></div>
+      </div>
+      <div class="mstats">
+        <div class="panel stat"><div class="stat-label">Profit</div><div class="stat-value green" id="mProfit">$0.00</div></div>
+        <div class="panel stat"><div class="stat-label">Loss</div><div class="stat-value red" id="mLoss">$0.00</div></div>
+        <div class="panel stat"><div class="stat-label">Net result</div><div class="stat-value" id="mNet">$0.00</div></div>
+      </div>
+      <div class="stat-foot" id="mNetEgp" style="margin:-4px 0 12px">—</div>
+      <div class="trade-list" id="tradeList"></div>
     </div>
-    <div class="table-scroll"><table style="min-width:900px">
-      <thead><tr><th>Date</th><th>Asset</th><th>Qty sold</th><th>Buy → Sell</th><th>Bought for</th><th>Sold for</th><th>Fees</th><th>P/L</th><th></th></tr></thead>
-      <tbody id="tradeTable"></tbody>
-    </table></div>
   </section>
 
   <section class="panel section" style="margin-bottom:18px">
@@ -260,9 +324,6 @@ tbody tr:last-child td{border-bottom:0}
     </div>
     <div class="watch-grid" id="watchGrid"></div>
   </section>
-
-  <div class="section-head"><div><h3>Your assets</h3><p>Live market prices and individual holdings</p></div><span class="badge" id="assetBadge">0 assets</span></div>
-  <section class="asset-grid" id="assetGrid"></section>
 
   <section class="panel table-panel">
     <div class="section-head">
@@ -360,13 +421,22 @@ const $ = id => document.getElementById(id);
 const num = value => Number.isFinite(Number(value)) ? Number(value) : 0;
 const safe = value => String(value ?? "");
 const money = (value, currency="USD") => {
-  const n = num(value);
+  const n = num(value), egp = currency === "EGP";
   try {
     return new Intl.NumberFormat("en-US", {
-      style:"currency",currency,maximumFractionDigits:n < 1 ? 8 : 2,
-      minimumFractionDigits:2
+      style:"currency", currency,
+      maximumFractionDigits: egp ? 0 : (Math.abs(n) < 1 ? 8 : 2),
+      minimumFractionDigits: egp ? 0 : 2
     }).format(n);
   } catch { return "$" + n.toFixed(2); }
+};
+const usd2 = v => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2,minimumFractionDigits:2}).format(num(v));
+/* Price formatter: 2 decimals for >= $1, more precision for small coins, no trailing noise */
+const priceFmt = value => {
+  const n = num(value);
+  if (!(n > 0)) return "$0.00";
+  const d = n >= 1 ? 2 : n >= 0.1 ? 4 : n >= 0.01 ? 5 : n >= 0.0001 ? 6 : 8;
+  return "$" + new Intl.NumberFormat("en-US",{minimumFractionDigits:2,maximumFractionDigits:d}).format(n);
 };
 const moneyRound = (value, currency="USD") => {
   try { return new Intl.NumberFormat("en-US",{style:"currency",currency,maximumFractionDigits:0,minimumFractionDigits:0}).format(num(value)); }
@@ -409,6 +479,7 @@ let reconnectTimer = null;
 let p2pTimer = null;
 let logoCache = {};
 let p2pSource = "";
+let rateUpdatedAt = 0;
 let searchTerm = "";
 let activeStorageKey = STORAGE_KEY;
 let cloudSaveTimer = null;
@@ -509,7 +580,9 @@ function render() {
   $("usdEgp").textContent = state.usdEgp > 0
     ? new Intl.NumberFormat("en-US",{maximumFractionDigits:3}).format(state.usdEgp)
     : "—";
-  $("p2pStatus").textContent = p2pSource || "Fetching USD/EGP rate";
+  $("p2pStatus").textContent = p2pSource
+    ? p2pSource + (rateUpdatedAt ? " · " + new Date(rateUpdatedAt).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"}) : "")
+    : "Fetching USD/EGP rate";
   $("assetBadge").textContent = `${state.portfolio.length} asset${state.portfolio.length===1?"":"s"}`;
 
   const first=state.history.length?num(state.history[0].value):0;
@@ -530,34 +603,64 @@ function render() {
   drawChart();
   drawAllocation();
 }
+
+const openDetails = new Set();
+let openMenuId = null;
 function renderCards() {
   const grid = $("assetGrid");
   if (!state.portfolio.length) {
     grid.innerHTML = `<div class="panel empty" style="grid-column:1/-1"><div class="empty-icon">✧</div><strong>No assets added yet</strong><br>Use “Add asset” to start your portfolio.</div>`;
     return;
   }
-  grid.innerHTML = state.portfolio.map(asset => {
-    const price = priceOf(asset), value = asset.amount*price;
-    const pnl = pnlFor(asset);
-    const change = num(asset.change24h);
+  const sorted = [...state.portfolio].sort((a,b)=>b.amount*priceOf(b)-a.amount*priceOf(a));
+  grid.innerHTML = sorted.map(asset => {
+    const price = priceOf(asset), value = asset.amount*price, p = pnlFor(asset);
+    const ch = num(asset.change24h), hasBuy = asset.buyPrice > 0;
+    const id = escapeHtml(asset.id);
+    const cls = p.pnl>0?"green":p.pnl<0?"red":"";
     return `<article class="panel asset-card">
-      <div class="asset-top">${logoMarkup(asset)}<div style="min-width:0"><div class="coin-name">${escapeHtml(asset.name)}</div><div class="coin-symbol">${escapeHtml(asset.symbol)} · ${quantity(asset.amount)} held</div></div></div>
-      <div class="asset-price">${money(price)}</div>
-      <div class="asset-change ${change>0?"green":change<0?"red":""}">${change>0?"+":""}${change.toFixed(2)}% <span style="color:var(--muted);font-weight:400">24h</span></div>
-      <div class="asset-details"><div>Holding value<strong>${money(value)}</strong></div><div style="text-align:right">Value in EGP<strong>${state.usdEgp>0?money(currentEgp(value),"EGP"):"—"}</strong></div></div>
-      <div class="asset-details"><div>Average buy<strong>${asset.buyPrice?money(asset.buyPrice):"Not set"}</strong>${asset.buyFee>0?`<span style="display:block;font-size:10px;margin-top:3px;color:var(--muted)">+ ${money(asset.buyFee)} fees</span>`:""}</div><div style="text-align:right">Unrealized P/L<strong class="${asset.buyPrice?(pnl.pnl>0?"green":pnl.pnl<0?"red":""):""}">${asset.buyPrice?(pnl.pnl>0?"+":"")+money(pnl.pnl):"—"}</strong>${asset.buyPrice&&state.usdEgp>0?`<span style="display:block;font-size:10px;margin-top:3px;color:var(--muted)">${egpSigned(pnl.pnl)}</span>`:""}</div></div>
-      <div class="asset-details"><div>Total invested<strong>${asset.buyPrice?money(pnl.cost):"—"}</strong></div><div style="text-align:right">Qty × buy price<strong>${quantity(asset.amount)} × ${asset.buyPrice?money(asset.buyPrice):"—"}</strong></div></div>
-      <div class="asset-buttons"><button class="btn" data-buy="${escapeHtml(asset.id)}">＋ Buy more</button><button class="btn" data-transfer="${escapeHtml(asset.id)}">⇄ Transfer</button></div>
-      <div class="asset-buttons" style="margin-top:7px"><button class="btn" data-close="${escapeHtml(asset.id)}">Close</button><button class="btn" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="btn danger" data-delete="${escapeHtml(asset.id)}">Delete</button></div>
+      <div class="asset-top">${logoMarkup(asset)}
+        <div style="min-width:0;flex:1"><div class="coin-name">${escapeHtml(asset.name)}</div><div class="coin-symbol">${quantity(asset.amount)} ${escapeHtml(asset.symbol)}</div></div>
+        <div class="menu-wrap"><button class="icon-btn" data-menu="${id}" aria-label="More actions">⋯</button>
+          <div class="menu ${openMenuId===asset.id?"open":""}">
+            <button data-transfer="${id}">⇄ Transfer</button>
+            <button data-close="${id}">Close position</button>
+            <button data-edit="${id}">Edit</button>
+            <button class="danger" data-delete="${id}">Delete</button>
+          </div>
+        </div>
+      </div>
+      <div class="card-value">${usd2(value)}</div>
+      <div class="card-sub">${state.usdEgp>0?money(currentEgp(value),"EGP"):"—"}</div>
+      <div class="card-row">
+        <span>${priceFmt(price)} <span class="asset-change ${ch>0?"green":ch<0?"red":""}">${ch>0?"+":""}${ch.toFixed(2)}%</span></span>
+        ${hasBuy?`<span class="pnl-pill ${cls}">${p.pnl>0?"+":""}${usd2(p.pnl)} (${p.pct>=0?"+":""}${p.pct.toFixed(1)}%)</span>`:`<span>No buy price</span>`}
+      </div>
+      <div class="card-details ${openDetails.has(asset.id)?"open":""}">
+        <div>Average buy<strong>${hasBuy?money(asset.buyPrice):"—"}</strong></div>
+        <div>Total invested<strong>${hasBuy?usd2(p.cost):"—"}</strong></div>
+        <div>Qty × buy price<strong>${quantity(asset.amount)} × ${hasBuy?money(asset.buyPrice):"—"}</strong></div>
+        <div>Fees paid<strong>${usd2(asset.buyFee)}</strong></div>
+        ${hasBuy&&state.usdEgp>0?`<div>P/L in EGP<strong class="${cls}">${egpSigned(p.pnl)}</strong></div>`:""}
+      </div>
+      <div class="asset-buttons"><button class="btn primary" data-buy="${id}">＋ Buy more</button><button class="btn" data-toggle="${id}">${openDetails.has(asset.id)?"Hide":"Details"}</button></div>
     </article>`;
   }).join("");
 }
+document.addEventListener("click", e => {
+  const tg = e.target.closest("[data-toggle]");
+  if (tg) { const id = tg.dataset.toggle; openDetails.has(id) ? openDetails.delete(id) : openDetails.add(id); renderCards(); return; }
+  const m = e.target.closest("[data-menu]");
+  if (m) { openMenuId = openMenuId === m.dataset.menu ? null : m.dataset.menu; renderCards(); return; }
+  if (openMenuId) { openMenuId = null; renderCards(); }
+});
+
 function renderWatchlist() {
   const grid=$("watchGrid");
   if(!grid) return;
   const list=Array.isArray(state.watchlist)?state.watchlist:[];
   if(!list.length) {
-    grid.innerHTML='<div class="empty" style="grid-column:1/-1;padding:24px 10px">No coins on your watchlist yet. Add a symbol like SOL or ETH above.</div>';
+    grid.innerHTML='<div class="empty" style="padding:24px 10px">No coins on your watchlist yet. Add a symbol like SOL or ETH above.</div>';
     return;
   }
   const changes=state.changes||{};
@@ -569,7 +672,8 @@ function renderWatchlist() {
     const fb=escapeHtml(sym.slice(0,3));
     return `<article class="panel watch-row">
       <span class="coin-logo"><img src="${escapeHtml(url)}" alt="${escapeHtml(sym)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${fb}'"></span>
-      <div style="min-width:0"><div class="watch-sym">${escapeHtml(sym)}</div><div class="watch-price">${price>0?money(price):"—"}</div></div>
+      <div class="watch-info" style="min-width:0"><div class="watch-sym">${escapeHtml(sym)}</div><div class="watch-sub">${escapeHtml(sym)}/USDT</div></div>
+      <div class="watch-price">${price>0?priceFmt(price):"—"}</div>
       <div class="asset-change ${ch>0?"green":ch<0?"red":""}">${ch>0?"+":""}${ch.toFixed(2)}%</div>
       <div class="watch-actions"><button class="btn" data-watch-add="${escapeHtml(sym)}">＋ Portfolio</button><button class="btn danger" data-watch-remove="${escapeHtml(sym)}">Remove</button></div>
     </article>`;
@@ -601,11 +705,11 @@ function renderTable() {
     const price=priceOf(asset),value=asset.amount*price,pnl=pnlFor(asset);
     return `<tr>
       <td><div class="coin-cell">${logoMarkup(asset,false)}<div><div class="coin-name">${escapeHtml(asset.name)}</div><div class="coin-symbol">${escapeHtml(asset.symbol)}</div></div></div></td>
-      <td>${money(price)}</td><td>${quantity(asset.amount)}</td><td>${money(value)}</td>
+      <td>${priceFmt(price)}</td><td>${quantity(asset.amount)}</td><td>${usd2(value)}</td>
       <td>${state.usdEgp>0?money(currentEgp(value),"EGP"):"—"}</td>
       <td>${asset.buyPrice?money(asset.buyPrice):"—"}</td>
-      <td>${asset.buyPrice?money(pnl.cost):"—"}</td>
-      <td class="${asset.buyPrice?(pnl.pnl>0?"green":pnl.pnl<0?"red":""):""}">${asset.buyPrice?(pnl.pnl>0?"+":"")+money(pnl.pnl):"—"}${asset.buyPrice?`<div style="font-size:10px;margin-top:4px">${pnl.pct>=0?"+":""}${pnl.pct.toFixed(2)}%</div>`:""}${asset.buyPrice&&state.usdEgp>0?`<div style="font-size:10px;margin-top:2px">${egpSigned(pnl.pnl)}</div>`:""}</td>
+      <td>${asset.buyPrice?usd2(pnl.cost):"—"}</td>
+      <td class="${asset.buyPrice?(pnl.pnl>0?"green":pnl.pnl<0?"red":""):""}">${asset.buyPrice?(pnl.pnl>0?"+":"")+usd2(pnl.pnl):"—"}${asset.buyPrice?`<div style="font-size:10px;margin-top:4px">${pnl.pct>=0?"+":""}${pnl.pct.toFixed(2)}%</div>`:""}${asset.buyPrice&&state.usdEgp>0?`<div style="font-size:10px;margin-top:2px">${egpSigned(pnl.pnl)}</div>`:""}</td>
       <td><button class="small-action" data-buy="${escapeHtml(asset.id)}">Buy</button><button class="small-action" data-transfer="${escapeHtml(asset.id)}">Transfer</button><button class="small-action" data-close="${escapeHtml(asset.id)}">Close</button><button class="small-action" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="small-action" data-delete="${escapeHtml(asset.id)}">Delete</button></td>
     </tr>`;
   }).join("");
@@ -675,7 +779,7 @@ function drawAllocation() {
   });
   legend.innerHTML=shown.map((item,i)=>{
     const pct=item.value/total*100;
-    return `<div class="alloc-row"><span class="alloc-dot" style="background:${ALLOC_COLORS[i%ALLOC_COLORS.length]}"></span><strong>${escapeHtml(item.symbol)}</strong><span class="val">${money(item.value)}</span><span class="pct">${pct.toFixed(1)}%</span></div>`;
+    return `<div class="alloc-row"><span class="alloc-dot" style="background:${ALLOC_COLORS[i%ALLOC_COLORS.length]}"></span><strong>${escapeHtml(item.symbol)}</strong><span class="val">${usd2(item.value)}</span><span class="pct">${pct.toFixed(1)}%</span></div>`;
   }).join("");
 }
 function openModal(asset=null) {
@@ -817,39 +921,42 @@ function connectLivePrices() {
   }
 }
 
-/* Automatic USD/EGP rate: Binance spot USDT/EGP, else open.er-api.com market rate. */
+/* Automatic USD/EGP rate with multiple sources, timeouts, and visible failure state. */
+async function getJson(url, ms=8000) {
+  const ctrl = new AbortController(), t = setTimeout(()=>ctrl.abort(), ms);
+  try {
+    const r = await fetch(url, {cache:"no-store", signal:ctrl.signal});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return await r.json();
+  } finally { clearTimeout(t); }
+}
+const RATE_SOURCES = [
+  {name:"Binance USDT/EGP", url:"https://api.binance.com/api/v3/ticker/price?symbol=USDTEGP", pick:j=>num(j.price)},
+  {name:"open.er-api.com", url:"https://open.er-api.com/v6/latest/USD", pick:j=>num(j?.rates?.EGP)},
+  {name:"currency-api", url:"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json", pick:j=>num(j?.usd?.egp)},
+  {name:"currency-api (backup)", url:"https://latest.currency-api.pages.dev/v1/currencies/usd.json", pick:j=>num(j?.usd?.egp)}
+];
 async function fetchMarketRate() {
-  try {
-    const r = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTEGP",{cache:"no-store"});
-    if (r.ok) {
-      const j = await r.json();
-      const p = num(j.price);
-      if (p > 0) return {price:p,source:"Binance spot USDT/EGP"};
-    }
-  } catch {}
-  try {
-    const r = await fetch("https://open.er-api.com/v6/latest/USD",{cache:"no-store"});
-    if (r.ok) {
-      const j = await r.json();
-      const p = num(j?.rates?.EGP);
-      if (p > 0) return {price:p,source:"Market USD/EGP"};
-    }
-  } catch {}
+  for (const s of RATE_SOURCES) {
+    try {
+      const p = s.pick(await getJson(s.url));
+      if (p > 1) return {price:p, source:s.name};
+    } catch (e) { console.warn("Rate source failed:", s.name, e); }
+  }
   return null;
 }
 async function fetchP2PRate() {
-  state.manualRate = 0; state.premiumPct = 0;
   const result = await fetchMarketRate();
   if (result) {
-    const pct = num(state.premiumPct);
-    state.usdEgp = result.price * (1 + pct/100);
-    p2pSource = result.source + (pct ? ` ${pct>0?"+":""}${pct}%` : "");
-    persist(); render();
+    state.usdEgp = result.price;
+    rateUpdatedAt = Date.now();
+    p2pSource = result.source;
   } else {
-    p2pSource = state.usdEgp > 0 ? "Last saved rate · refresh failed" : "Rate unavailable";
-    render();
+    p2pSource = "⚠ Refresh failed · using last saved rate";
   }
+  persist(); render();
 }
+document.addEventListener("visibilitychange", () => { if (!document.hidden) fetchP2PRate(); });
 
 function saveAsset(event) {
   event.preventDefault();
@@ -927,23 +1034,20 @@ function renderTrades(){
   for(const t of list){if(t.pnl>=0)profit+=t.pnl;else loss+=t.pnl;}
   const net=profit+loss,[y,m]=viewMonth.split("-").map(Number);
   $("tradeMonth").textContent=new Date(y,m-1,1).toLocaleDateString("en-US",{month:"long",year:"numeric"});
-  $("mProfit").textContent=(profit>0?"+":"")+money(profit);
-  $("mLoss").textContent=money(loss);
-  $("mNet").textContent=(net>0?"+":"")+money(net);
+  $("mProfit").textContent=(profit>0?"+":"")+usd2(profit);
+  $("mLoss").textContent=usd2(loss);
+  $("mNet").textContent=(net>0?"+":"")+usd2(net);
   $("mNet").className="stat-value "+(net>0?"green":net<0?"red":"");
   const fees=list.reduce((x,t)=>x+num(t.buyFee)+num(t.sellFee),0);
-  $("mNetEgp").textContent=(state.usdEgp>0?egpSigned(net)+" · ":"")+"Fees paid: "+money(fees);
-  $("tradeTable").innerHTML=list.length?list.map(t=>`<tr>
-    <td>${new Date(t.time).toLocaleDateString("en-GB")}</td>
-    <td><strong>${escapeHtml(t.symbol)}</strong></td>
-    <td>${quantity(t.qty)}</td>
-    <td>${money(t.buy)} → ${money(t.sell)}</td>
-    <td>${money(t.qty*t.buy)}</td>
-    <td>${money(t.qty*t.sell)}</td>
-    <td>${money(num(t.buyFee)+num(t.sellFee))}</td>
-    <td class="${t.pnl>0?"green":t.pnl<0?"red":""}">${t.pnl>0?"+":""}${money(t.pnl)}</td>
-    <td><button class="small-action" data-trade-del="${escapeHtml(t.id)}">Delete</button></td>
-  </tr>`).join(""):`<tr><td colspan="9" class="empty" style="padding:26px">No closed positions this month.</td></tr>`;
+  $("mNetEgp").textContent=(state.usdEgp>0?egpSigned(net)+" · ":"")+"Fees paid: "+usd2(fees);
+  $("tradeList").innerHTML=list.length?list.map(t=>`<div class="trade-row">
+    <div style="min-width:0">
+      <div><strong>${escapeHtml(t.symbol)}</strong><span class="trade-date">${new Date(t.time).toLocaleDateString("en-GB")}</span></div>
+      <div class="trade-meta">${quantity(t.qty)} · ${priceFmt(t.buy)} → ${priceFmt(t.sell)}</div>
+    </div>
+    <div class="trade-pnl ${t.pnl>0?"green":t.pnl<0?"red":""}">${t.pnl>0?"+":""}${usd2(t.pnl)}</div>
+    <button class="small-action" data-trade-del="${escapeHtml(t.id)}" aria-label="Delete trade">✕</button>
+  </div>`).join(""):`<div class="empty" style="padding:22px 10px">No closed positions this month.</div>`;
 }
 function openClose(id){
   const a=state.portfolio.find(x=>x.id===id);if(!a)return;
