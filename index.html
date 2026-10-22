@@ -308,6 +308,15 @@ body{background:radial-gradient(900px 500px at 12% -10%,rgba(79,140,255,.14),tra
 .wk-cell small{display:block;color:var(--muted);font-size:9px}
 .phase{font-weight:700}
 .phase.acc{color:var(--green)}.phase.dis{color:var(--red)}
+.an-top{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:800px){.an-top{grid-template-columns:1fr}}
+.an-verdict{font-size:24px;font-weight:800;margin:4px 0 8px;letter-spacing:-.02em}
+.an-reason{font-size:12px;padding:3px 0;color:var(--muted)}
+.an-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #1c2530;font-size:13px}
+.an-row:last-child{border-bottom:0}
+.an-row small{color:var(--muted);display:block;font-size:11px;margin-top:2px}
+.an-row .r{text-align:right;font-weight:700;white-space:nowrap}
+.an-note{font-size:11px;color:var(--muted);line-height:1.7;margin-top:12px}
 </style>
 </head>
 <body>
@@ -397,6 +406,14 @@ body{background:radial-gradient(900px 500px at 12% -10%,rgba(79,140,255,.14),tra
 
 
     <section class="panel section" style="margin-bottom:18px">
+    <div class="section-head">
+      <div><h3>Chart Analyzer</h3><p>Reads the chart and suggests entry, stop-loss and exit points</p></div>
+      <div class="season-ctl"><select id="anSym" aria-label="Coin"></select><select id="anTf" aria-label="Timeframe"><option value="1h">1H</option><option value="4h" selected>4H</option><option value="1d">1D</option><option value="1w">1W</option></select><button class="btn primary" id="anBtn" type="button">Analyze</button></div>
+    </div>
+    <div id="anOut"><div class="empty" style="padding:24px 10px">Pick a coin and timeframe, then press Analyze.</div></div>
+  </section>
+
+  <section class="panel section" style="margin-bottom:18px">
     <div class="section-head">
       <div><h3>Seasonality</h3><p>Monthly / weekly behavior, correlation, and accumulation phases (Binance data)</p></div>
       <div class="season-ctl"><select id="seasonSym" aria-label="Coin"></select><button class="btn primary" id="seasonBtn" type="button">Analyze</button></div>
@@ -1513,11 +1530,127 @@ async function runSeason(){
 }
 $("seasonBtn").addEventListener("click",runSeason);
 $("seasonSym").addEventListener("focus",fillSeasonSelect);
+/* ===== Chart Analyzer ===== */
+const ema=(a,n)=>{const k=2/(n+1);let e=a[0];return a.map((v,i)=>i?(e=v*k+e*(1-k)):e);};
+function rsiCalc(c,n=14){let g=0,l=0;const o=Array(c.length).fill(null);for(let i=1;i<c.length;i++){const d=c[i]-c[i-1],u=Math.max(d,0),w=Math.max(-d,0);if(i<=n){g+=u;l+=w;if(i===n){g/=n;l/=n;o[i]=100-100/(1+g/(l||1e-9));}}else{g=(g*(n-1)+u)/n;l=(l*(n-1)+w)/n;o[i]=100-100/(1+g/(l||1e-9));}}return o;}
+function atrCalc(k,n=14){let a=0;const o=Array(k.length).fill(null);for(let i=1;i<k.length;i++){const t=Math.max(k[i].h-k[i].l,Math.abs(k[i].h-k[i-1].c),Math.abs(k[i].l-k[i-1].c));if(i<=n){a+=t;if(i===n){a/=n;o[i]=a;}}else{a=(a*(n-1)+t)/n;o[i]=a;}}return o;}
+function srLevels(k,price,a){
+  const piv=[],w=5;
+  for(let i=w;i<k.length-w;i++){let hi=true,lo=true;for(let j=i-w;j<=i+w;j++){if(k[j].h>k[i].h)hi=false;if(k[j].l<k[i].l)lo=false;}if(hi)piv.push(k[i].h);if(lo)piv.push(k[i].l);}
+  piv.sort((x,y)=>x-y);
+  const cl=[],tol=Math.max(a*.6,price*.004);
+  for(const p of piv){const c=cl[cl.length-1];if(c&&p-c.max<=tol){c.sum+=p;c.n++;c.max=p;}else cl.push({sum:p,n:1,max:p});}
+  return cl.map(c=>({p:c.sum/c.n,n:c.n}));
+}
+function analyze(k){
+  const c=k.map(x=>x.c),n=k.length,price=c[n-1];
+  const e20=ema(c,20),e50=ema(c,50),e200=ema(c,200);
+  const R=rsiCalc(c)[n-1];
+  const m12=ema(c,12),m26=ema(c,26),macd=m12.map((v,i)=>v-m26[i]),sig=ema(macd,9),hist=macd[n-1]-sig[n-1];
+  const a=atrCalc(k)[n-1]||price*.02;
+  const vr=mean(k.slice(-3).map(x=>x.v))/(mean(k.slice(-21,-1).map(x=>x.v))||1);
+  let s=0;const reasons=[];
+  const add=(ok,g,b)=>{s+=ok?1:-1;reasons.push({ok,t:ok?g:b});};
+  add(price>e50[n-1],"Price is above EMA50","Price is below EMA50");
+  add(e20[n-1]>e50[n-1],"EMA20 above EMA50 (short-term trend up)","EMA20 below EMA50 (short-term trend down)");
+  add(e50[n-1]>e200[n-1],"EMA50 above EMA200 (long-term trend up)","EMA50 below EMA200 (long-term trend down)");
+  if(R>55){s++;reasons.push({ok:true,t:"RSI "+R.toFixed(0)+" shows buying momentum"});}
+  else if(R<45){s--;reasons.push({ok:false,t:"RSI "+R.toFixed(0)+" shows selling momentum"});}
+  else reasons.push({ok:null,t:"RSI "+R.toFixed(0)+" is neutral"});
+  add(hist>0,"MACD histogram positive","MACD histogram negative");
+  const notes=[];
+  if(R>70)notes.push("RSI is overbought: avoid chasing, wait for a pullback.");
+  if(R<30)notes.push("RSI is oversold: a bounce is possible but the trend is still weak.");
+  if(vr>1.3)notes.push("Recent volume is above average (move has participation).");
+  else if(vr<.7)notes.push("Recent volume is weak (moves are less reliable).");
+  const lv=srLevels(k,price,a);
+  const sup=lv.filter(l=>l.p<price*.998).sort((x,y)=>y.p-x.p),res=lv.filter(l=>l.p>price*1.002).sort((x,y)=>x.p-y.p);
+  const S1=sup[0]?sup[0].p:price-2*a,S2=sup[1]?sup[1].p:S1-2*a,R1=res[0]?res[0].p:price+2*a,R2=res[1]?res[1].p:R1+2*a,R3=res[2]?res[2].p:R2+2*a;
+  const mode=s>=2?"buy":s<=-2?"avoid":"range";
+  const rows=[],lines=[];
+  const row=(label,p,cls,color,extra)=>{rows.push({label,p,cls,extra});(Array.isArray(p)?p:[p]).forEach(x=>lines.push({p:x,color,label}));};
+  let title,verdict,vcls;
+  if(mode==="buy"){
+    verdict=s>=4?"Strong bullish":"Bullish";vcls="green";title="Buy plan (pullback entry)";
+    const near=price-S1<=3*a,hi=near?Math.min(price,S1+.6*a):price,lo=near?S1:price-.8*a,entry=(hi+lo)/2,stop=lo-.6*a,risk=entry-stop;
+    const tps=[R1,R2,R3].map((t,i)=>t>entry+risk*.8?t:entry+risk*[1.5,2.5,4][i]).sort((x,y)=>x-y);
+    row("Entry zone",[lo,hi],"","#4f8cff","Buy on a pullback into this zone");
+    row("Stop loss",stop,"red","#ff6b70","Exit if price closes below this");
+    tps.forEach((t,i)=>row("Target "+(i+1),t,"green","#22c993","Risk/reward "+((t-entry)/risk).toFixed(1)+":1"));
+  } else if(mode==="avoid"){
+    verdict=s<=-4?"Strong bearish":"Bearish";vcls="red";title="Avoid buying now. Levels to watch";
+    row("Turns bullish above",Math.max(R1,e50[n-1]),"green","#22c993","Reclaim with volume before buying");
+    row("Exit / trim zone 1",R1,"red","#ff6b70","If you hold, sell into strength here");
+    row("Exit / trim zone 2",R2,"red","#ff6b70","Second resistance");
+    row("Breakdown level",S1,"red","#ff6b70","Losing this opens the way down");
+    row("Re-entry zone (only after reversal)",[S2,S1],"","#4f8cff","Wait for a bounce confirmation here");
+  } else {
+    verdict="Mixed / sideways";vcls="";title="Range plan";
+    const lo=S1,hi=S1+.4*a,entry=(lo+hi)/2,stop=lo-.6*a,risk=entry-stop,mid=(S1+R1)/2;
+    row("Buy zone (near support)",[lo,hi],"","#4f8cff","Only if price holds the level");
+    row("Stop loss",stop,"red","#ff6b70","Exit if support breaks");
+    row("Target 1 (mid-range)",mid,"green","#22c993","Risk/reward "+((mid-entry)/risk).toFixed(1)+":1");
+    row("Target 2 (resistance)",R1,"green","#22c993","Risk/reward "+((R1-entry)/risk).toFixed(1)+":1");
+  }
+  return {price,s,verdict,vcls,title,reasons,notes,rows,lines,sup:sup.slice(0,3),res:res.slice(0,3),e20,e50,e200,a};
+}
+function anHtml(sym,tf,A){
+  const pc=p=>{const d=(p/A.price-1)*100;return (d>0?"+":"")+d.toFixed(1)+"%";};
+  const rows=A.rows.map(r=>`<div class="an-row"><div>${r.label}<small>${r.extra||""}</small></div><div class="r ${r.cls}">${Array.isArray(r.p)?priceFmt(r.p[0])+" – "+priceFmt(r.p[1]):priceFmt(r.p)}<small>${Array.isArray(r.p)?pc((r.p[0]+r.p[1])/2):pc(r.p)}</small></div></div>`).join("");
+  const rs=A.reasons.map(r=>`<div class="an-reason"><span class="${r.ok===true?"green":r.ok===false?"red":""}">${r.ok===true?"✓":r.ok===false?"✗":"•"}</span> ${r.t}</div>`).join("");
+  return `<div class="an-top"><div>
+    <div class="stat-label">${escapeHtml(sym)}/USDT · ${tf.toUpperCase()} · now ${priceFmt(A.price)}</div>
+    <div class="an-verdict ${A.vcls}">${A.verdict} <span style="font-size:13px;color:var(--muted);font-weight:500">score ${A.s>0?"+":""}${A.s}/5</span></div>${rs}
+    ${A.notes.map(x=>`<div class="an-reason">⚠ ${x}</div>`).join("")}
+  </div><div><div class="stat-label" style="margin-bottom:6px">${A.title}</div>${rows}</div></div>
+  <canvas id="anCanvas" style="height:340px;margin-top:16px;background:#0b1017;border-radius:12px"></canvas>
+  <div class="an-note">Blue / orange / purple lines are EMA20 / EMA50 / EMA200. Dashed lines are the plan levels. This is automatic technical analysis based on indicators and past price levels. It does not predict the future and is not financial advice. Always size your position so the stop loss is a loss you can accept.</div>`;
+}
+function drawAn(k,A){
+  const cv=$("anCanvas");if(!cv)return;
+  const r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1,ctx=cv.getContext("2d");
+  cv.width=r.width*dpr;cv.height=r.height*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+  const W=r.width,H=r.height,padR=70,N=Math.min(90,k.length),off=k.length-N,v=k.slice(off);
+  let lo=Math.min(...v.map(x=>x.l)),hi=Math.max(...v.map(x=>x.h));const rg=hi-lo;
+  const L=A.lines.filter(l=>l.p>lo-rg*.3&&l.p<hi+rg*.3);
+  L.forEach(l=>{lo=Math.min(lo,l.p);hi=Math.max(hi,l.p);});
+  const y=p=>12+(hi-p)/(hi-lo)*(H-24),bw=(W-padR)/N,x=i=>i*bw+bw/2;
+  ctx.font="10px Inter,sans-serif";ctx.textBaseline="middle";
+  v.forEach((c,i)=>{const up=c.c>=c.o,col=up?"#22c993":"#ff6b70";ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x(i),y(c.h));ctx.lineTo(x(i),y(c.l));ctx.stroke();const t=y(Math.max(c.o,c.c)),b=y(Math.min(c.o,c.c));ctx.fillRect(x(i)-bw*.33,t,bw*.66,Math.max(1,b-t));});
+  [[A.e20,"#4f8cff"],[A.e50,"#f59e0b"],[A.e200,"#8b5cf6"]].forEach(([e,col])=>{ctx.strokeStyle=col;ctx.lineWidth=1.4;ctx.beginPath();for(let i=0;i<N;i++){const yy=y(e[off+i]);i?ctx.lineTo(x(i),yy):ctx.moveTo(x(i),yy);}ctx.stroke();});
+  ctx.setLineDash([5,4]);
+  L.forEach(l=>{ctx.strokeStyle=l.color;ctx.fillStyle=l.color;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,y(l.p));ctx.lineTo(W-padR,y(l.p));ctx.stroke();ctx.fillText(priceFmt(l.p),W-padR+4,y(l.p));});
+  ctx.setLineDash([]);
+  const yp=y(A.price);ctx.fillStyle="#e7ecf3";ctx.fillText(priceFmt(A.price),W-padR+4,yp);
+}
+async function runAn(){
+  const sym=$("anSym").value,tf=$("anTf").value,out=$("anOut"),btn=$("anBtn");
+  if(!sym)return;
+  btn.disabled=true;btn.textContent="Analyzing…";
+  out.innerHTML='<div class="empty" style="padding:24px 10px">Reading the chart…</div>';
+  try{
+    delete kcache[sym+tf+300];
+    const k=await klines(sym,tf,300);
+    if(k.length<60)throw new Error("short");
+    const A=analyze(k);
+    out.innerHTML=anHtml(sym,tf,A);
+    drawAn(k,A);
+  }catch(e){out.innerHTML='<div class="empty" style="padding:24px 10px;color:var(--red)">Could not analyze '+escapeHtml(sym)+'. It needs a Binance USDT market with enough history.</div>';}
+  btn.disabled=false;btn.textContent="Analyze";
+}
+function fillAnSelect(){
+  const sel=$("anSym"),cur=sel.value;
+  sel.innerHTML=seasonSymbols().map(s=>`<option>${escapeHtml(s)}</option>`).join("");
+  if(cur)sel.value=cur;
+}
+$("anBtn").addEventListener("click",runAn);
+$("anSym").addEventListener("focus",fillAnSelect);
+
 function startApp() {
   $("mainApp").classList.add("intro");setTimeout(()=>$("mainApp").classList.remove("intro"),1200);
 
   render();
-  fillSeasonSelect();
+  fillSeasonSelect();fillAnSelect();
   if(!Array.isArray(state.watchlist)) state.watchlist=[];
   if(!state.changes||typeof state.changes!=="object") state.changes={};
   if(allSymbols().length) {
