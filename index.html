@@ -140,8 +140,14 @@ tbody tr:last-child td{border-bottom:0}
 /* ===== Watchlist: one coin per row ===== */
 .watch-add{display:flex;gap:8px;flex-wrap:wrap}
 .watch-grid{display:flex;flex-direction:column;gap:8px}
-.watch-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto 84px auto;align-items:center;gap:14px;padding:11px 14px;min-width:0;border-radius:12px;box-shadow:none}
+.watch-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto 84px auto;align-items:center;gap:14px;padding:11px 14px;min-width:0;border-radius:12px;box-shadow:none}
 .watch-row .coin-logo{width:34px;height:34px;flex:0 0 34px;font-size:10px}
+.watch-left{display:flex;align-items:center;gap:6px}
+.drag-handle{width:26px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:16px;line-height:1;letter-spacing:-2px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:0}
+.drag-handle:hover,.drag-handle:focus-visible{background:#1b2531;color:var(--text)}
+.watch-row.dragging{opacity:.9;border-color:var(--accent);box-shadow:0 8px 24px rgba(0,0,0,.55);position:relative;z-index:3}
+.watch-row.dragging .drag-handle{cursor:grabbing}
+.watch-grid.sorting{user-select:none;-webkit-user-select:none}
 .watch-sym{font-weight:600;font-size:14px;line-height:1.1}
 .watch-sub{font-size:11px;color:var(--muted);margin-top:3px}
 .watch-price{font-size:15px;font-weight:700;text-align:right;white-space:nowrap}
@@ -209,13 +215,13 @@ tbody tr:last-child td{border-bottom:0}
   .dual-col+.dual-col{border-left:0;border-top:1px solid var(--border)}
 }
 @media(max-width:700px){
-  .watch-row{grid-template-columns:34px minmax(0,1fr) auto;gap:10px 12px;padding:12px}
+  .watch-row{grid-template-columns:auto minmax(0,1fr) auto;gap:10px 12px;padding:12px}
   .watch-row .asset-change{grid-column:3;grid-row:2;text-align:right}
   .watch-price{grid-column:3;grid-row:1}
   .watch-actions{grid-column:1/-1;grid-row:3}
   .watch-actions .btn{flex:1}
   .watch-row .watch-info{grid-column:2;grid-row:1/3}
-  .watch-row .coin-logo{grid-row:1/3}
+  .watch-row .watch-left{grid-row:1/3}
 }
 @media(max-width:600px){
   .dual-col{padding:16px}
@@ -655,7 +661,9 @@ document.addEventListener("click", e => {
   if (openMenuId) { openMenuId = null; renderCards(); }
 });
 
+let watchDragging=false;
 function renderWatchlist() {
+  if(watchDragging) return;
   const grid=$("watchGrid");
   if(!grid) return;
   const list=Array.isArray(state.watchlist)?state.watchlist:[];
@@ -670,8 +678,8 @@ function renderWatchlist() {
     const held=(state.portfolio||[]).find(a=>a.symbol===sym&&a.logo);
     const url=(held&&held.logo)||state.watchLogos[sym]||("https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/"+sym.toLowerCase()+".png");
     const fb=escapeHtml(sym.slice(0,3));
-    return `<article class="panel watch-row">
-      <span class="coin-logo"><img src="${escapeHtml(url)}" alt="${escapeHtml(sym)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${fb}'"></span>
+    return `<article class="panel watch-row" data-sym="${escapeHtml(sym)}">
+      <div class="watch-left"><button type="button" class="drag-handle" aria-label="Drag to reorder ${escapeHtml(sym)}" title="Drag to reorder">⋮⋮</button><span class="coin-logo"><img src="${escapeHtml(url)}" alt="${escapeHtml(sym)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${fb}'"></span></div>
       <div class="watch-info" style="min-width:0"><div class="watch-sym">${escapeHtml(sym)}</div><div class="watch-sub">${escapeHtml(sym)}/USDT</div></div>
       <div class="watch-price">${price>0?priceFmt(price):"—"}</div>
       <div class="asset-change ${ch>0?"green":ch<0?"red":""}">${ch>0?"+":""}${ch.toFixed(2)}%</div>
@@ -930,11 +938,15 @@ async function getJson(url, ms=8000) {
     return await r.json();
   } finally { clearTimeout(t); }
 }
+/* The sources below give the mid-market rate. To get your SELL rate, set the % difference here.
+   Example: sources show 50.50 and your actual sell price is 50.10 -> (50.10/50.50 - 1) * 100 = -0.8 */
+const RATE_SELL_ADJUST_PCT = 0;
 const RATE_SOURCES = [
-  {name:"Binance USDT/EGP", url:"https://api.binance.com/api/v3/ticker/price?symbol=USDTEGP", pick:j=>num(j.price)},
+  {name:"CoinGecko USDT/EGP", url:"https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=egp", pick:j=>num(j?.tether?.egp)},
+  {name:"Coinbase USD/EGP", url:"https://api.coinbase.com/v2/exchange-rates?currency=USD", pick:j=>num(j?.data?.rates?.EGP)},
   {name:"open.er-api.com", url:"https://open.er-api.com/v6/latest/USD", pick:j=>num(j?.rates?.EGP)},
   {name:"currency-api", url:"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json", pick:j=>num(j?.usd?.egp)},
-  {name:"currency-api (backup)", url:"https://latest.currency-api.pages.dev/v1/currencies/usd.json", pick:j=>num(j?.usd?.egp)}
+  {name:"currency-api backup", url:"https://latest.currency-api.pages.dev/v1/currencies/usd.json", pick:j=>num(j?.usd?.egp)}
 ];
 async function fetchMarketRate() {
   for (const s of RATE_SOURCES) {
@@ -946,11 +958,12 @@ async function fetchMarketRate() {
   return null;
 }
 async function fetchP2PRate() {
+  state.manualRate = 0;
   const result = await fetchMarketRate();
   if (result) {
-    state.usdEgp = result.price;
+    state.usdEgp = result.price * (1 + RATE_SELL_ADJUST_PCT / 100);
     rateUpdatedAt = Date.now();
-    p2pSource = result.source;
+    p2pSource = "Sell · " + result.source + (RATE_SELL_ADJUST_PCT ? ` (${RATE_SELL_ADJUST_PCT > 0 ? "+" : ""}${RATE_SELL_ADJUST_PCT}%)` : "");
   } else {
     p2pSource = "⚠ Refresh failed · using last saved rate";
   }
@@ -1238,6 +1251,56 @@ $("watchForm").addEventListener("submit",async event=>{
   state.watchlist.push(symbol);
   input.value="";
   markPortfolioChanged();render();connectLivePrices();resolveWatchLogos();
+});
+/* ===== Watchlist reordering: drag the ⋮⋮ handle (mouse + touch), or use ↑/↓ on the focused handle ===== */
+$("watchGrid").addEventListener("pointerdown",e=>{
+  const handle=e.target.closest(".drag-handle");
+  if(!handle) return;
+  const row=handle.closest(".watch-row"), grid=$("watchGrid");
+  if(!row) return;
+  e.preventDefault();
+  watchDragging=true;
+  grid.classList.add("sorting");
+  row.classList.add("dragging");
+  try{handle.setPointerCapture(e.pointerId);}catch{}
+  const move=ev=>{
+    if(ev.clientY<70) window.scrollBy(0,-12);
+    else if(ev.clientY>window.innerHeight-70) window.scrollBy(0,12);
+    const others=[...grid.querySelectorAll(".watch-row:not(.dragging)")];
+    const next=others.find(r=>{const b=r.getBoundingClientRect();return ev.clientY<b.top+b.height/2;});
+    if(next) { if(row.nextElementSibling!==next) grid.insertBefore(row,next); }
+    else if(grid.lastElementChild!==row) grid.appendChild(row);
+  };
+  const end=()=>{
+    handle.removeEventListener("pointermove",move);
+    handle.removeEventListener("pointerup",end);
+    handle.removeEventListener("pointercancel",end);
+    row.classList.remove("dragging");
+    grid.classList.remove("sorting");
+    const order=[...grid.querySelectorAll(".watch-row")].map(r=>r.dataset.sym);
+    watchDragging=false;
+    if(order.length===(state.watchlist||[]).length && order.join()!==state.watchlist.join()) {
+      state.watchlist=order;
+      markPortfolioChanged();
+    }
+    renderWatchlist();
+  };
+  handle.addEventListener("pointermove",move);
+  handle.addEventListener("pointerup",end);
+  handle.addEventListener("pointercancel",end);
+});
+$("watchGrid").addEventListener("keydown",e=>{
+  const handle=e.target.closest(".drag-handle");
+  if(!handle||(e.key!=="ArrowUp"&&e.key!=="ArrowDown")) return;
+  e.preventDefault();
+  const sym=handle.closest(".watch-row").dataset.sym;
+  const list=state.watchlist, i=list.indexOf(sym), j=i+(e.key==="ArrowUp"?-1:1);
+  if(i<0||j<0||j>=list.length) return;
+  [list[i],list[j]]=[list[j],list[i]];
+  markPortfolioChanged();
+  renderWatchlist();
+  const again=$("watchGrid").querySelector(`.watch-row[data-sym="${sym}"] .drag-handle`);
+  if(again) again.focus();
 });
 document.addEventListener("keydown",event=>{if(event.key==="Escape")closeModal();});
 window.addEventListener("resize",()=>drawChart());
