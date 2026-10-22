@@ -1496,11 +1496,11 @@ async function runSeason(){
   btn.disabled=true;btn.textContent="Loading…";
   out.innerHTML='<div class="empty" style="padding:24px 10px">Loading history…</div>';
   try{
-    const [mk,wk]=await Promise.all([klines(sym,"1M",120),klines(sym,"1w",520)]);
+    const [mk,wk]=await Promise.all([klines(sym,"1M",1000),klines(sym,"1w",1000)]);
     const syms=seasonSymbols();
     const [corr,acc]=await Promise.all([corrTable(syms),accumTable(syms)]);
     out.innerHTML=`
-      <div class="sblock"><h4>${escapeHtml(sym)} best months to buy &amp; sell</h4><p>Buy = months that were historically weakest (cheaper entries). Sell = months that were strongest. Based on the average monthly return below; past patterns do not guarantee the future.</p>${bestMonths(mk)}</div>
+      <div class="sblock"><h4>${escapeHtml(sym)} best months to buy &amp; sell</h4><p>Based on the coin\'s full history on Binance, from ${new Date(mk[0].t).toLocaleDateString("en-US",{month:"short",year:"numeric",timeZone:"UTC"})} until now. Buy = months that were historically weakest (cheaper entries). Sell = months that were strongest. Past patterns do not guarantee the future.</p>${bestMonths(mk)}</div>
       
       <div class="sblock"><h4>${escapeHtml(sym)} monthly returns</h4><p>Each cell is the month's open→close change. Bottom rows show the average and how often that month closed green.</p>${monthlyHeat(mk)}</div>
       <div class="sblock"><h4>${escapeHtml(sym)} average weekly return by week of year</h4><p>Average across all years available. Hover a cell for sample count.</p>${weeklyGrid(wk)}</div>
