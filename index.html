@@ -360,7 +360,7 @@ tbody tr:last-child td{border-bottom:0}
       <div class="empty" id="emptyState"><div class="empty-icon">✧</div><strong>Your portfolio starts here</strong><br>Add your first crypto asset to see live prices, coin logos, and portfolio analytics.</div>
     </div>
   </section>
-  <footer class="footer"><span>Coinfolio · Personal portfolio tracker</span><span>Market prices are indicative. The USD/EGP rate is a market rate and may differ from actual P2P prices.</span></footer>
+  <footer class="footer"><span>Coinfolio · Personal portfolio tracker</span><span>Market prices are indicative. USD/EGP uses the Binance P2P sell rate (median of top ads) when available, otherwise a market rate.</span></footer>
 </div>
 
 <div class="chart-backdrop" id="chartBackdrop">
@@ -749,13 +749,15 @@ function renderTable() {
     </tr>`;
   }).join("");
 }
+/* Records a portfolio value point every 15 minutes, keeping ~7 days of history (700 points). */
 function recordHistory() {
   const value = totals().value;
+  if (!(value > 0)) return;
   const last = state.history[state.history.length-1];
   const now = Date.now();
-  if (!last || now-last.time > 60000) {
+  if (!last || now-last.time > 15*60000) {
     state.history.push({time:now,value});
-    state.history = state.history.slice(-120);
+    state.history = state.history.slice(-700);
     persist();
   }
 }
@@ -965,10 +967,24 @@ async function getJson(url, ms=8000) {
     return await r.json();
   } finally { clearTimeout(t); }
 }
-/* The sources below give the mid-market rate. To get your SELL rate, set the % difference here.
+/* The market sources below give the mid-market rate. To adjust them toward your real sell price, set the % difference here.
    Example: sources show 50.50 and your actual sell price is 50.10 -> (50.10/50.50 - 1) * 100 = -0.8 */
 const RATE_SELL_ADJUST_PCT = 0;
+
+/* Binance P2P SELL rate through your Cloudflare Worker.
+   Put your Worker URL here (e.g. "https://coinfolio-p2p.yourname.workers.dev").
+   While it still contains "YOUR-WORKER", the P2P source is skipped and the market sources are used. */
+const P2P_WORKER_URL = "https://YOUR-WORKER.workers.dev";
+const medianOf = arr => {
+  const p = arr.map(Number).filter(x => x > 1).sort((a,b) => a-b);
+  if (!p.length) return 0;
+  const m = Math.floor(p.length/2);
+  return p.length % 2 ? p[m] : (p[m-1] + p[m]) / 2;
+};
 const RATE_SOURCES = [
+  ...(P2P_WORKER_URL.includes("YOUR-WORKER") ? [] : [
+    {name:"Binance P2P", url:P2P_WORKER_URL, pick:j=>medianOf(j?.prices||[])}
+  ]),
   {name:"CoinGecko USDT/EGP", url:"https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=egp", pick:j=>num(j?.tether?.egp)},
   {name:"Coinbase USD/EGP", url:"https://api.coinbase.com/v2/exchange-rates?currency=USD", pick:j=>num(j?.data?.rates?.EGP)},
   {name:"open.er-api.com", url:"https://open.er-api.com/v6/latest/USD", pick:j=>num(j?.rates?.EGP)},
@@ -988,9 +1004,12 @@ async function fetchP2PRate() {
   state.manualRate = 0;
   const result = await fetchMarketRate();
   if (result) {
-    state.usdEgp = result.price * (1 + RATE_SELL_ADJUST_PCT / 100);
+    const isP2P = result.source === "Binance P2P";
+    state.usdEgp = result.price * (isP2P ? 1 : (1 + RATE_SELL_ADJUST_PCT / 100));
     rateUpdatedAt = Date.now();
-    p2pSource = "Sell · " + result.source + (RATE_SELL_ADJUST_PCT ? ` (${RATE_SELL_ADJUST_PCT > 0 ? "+" : ""}${RATE_SELL_ADJUST_PCT}%)` : "");
+    p2pSource = isP2P
+      ? "P2P Sell · Binance"
+      : "Market rate · " + result.source + (RATE_SELL_ADJUST_PCT ? ` (${RATE_SELL_ADJUST_PCT > 0 ? "+" : ""}${RATE_SELL_ADJUST_PCT}%)` : "");
   } else {
     p2pSource = "⚠ Refresh failed · using last saved rate";
   }
@@ -1017,10 +1036,14 @@ function saveAsset(event) {
   if(duplicate) {
     const merge=confirm(`${symbol} is already in your portfolio. Add the quantity to the existing asset?`);
     if(!merge)return;
-    const oldCost=duplicate.amount*duplicate.buyPrice;
-    const newCost=amount*buyPrice;
-    const combined=duplicate.amount+amount;
-    duplicate.buyPrice=combined>0?(oldCost+newCost)/combined:0;
+    /* Quantity without a buy price is valued at the current price, so the average is not diluted. */
+    const cur = priceOf(duplicate) || duplicate.buyPrice || buyPrice;
+    const oldP = duplicate.buyPrice > 0 ? duplicate.buyPrice : cur;
+    const newP = buyPrice > 0 ? buyPrice : cur;
+    const combined = duplicate.amount + amount;
+    duplicate.buyPrice = (oldP > 0 || newP > 0) && combined > 0
+      ? (duplicate.amount*oldP + amount*newP) / combined
+      : 0;
     duplicate.amount=combined;
     duplicate.buyFee=num(duplicate.buyFee)+fee;
     if($("coinLogo").value.trim())duplicate.logo=$("coinLogo").value.trim();
