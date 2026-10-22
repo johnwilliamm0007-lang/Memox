@@ -144,8 +144,6 @@ tbody tr:last-child td{border-bottom:0}
 
 /* ===== Watchlist: one coin per row ===== */
 .watch-add{display:flex;gap:8px;flex-wrap:wrap}
-.watch-row{cursor:pointer;transition:border-color .15s,background .15s}
-.watch-row:hover{border-color:var(--accent)}
 .chart-backdrop{display:none;position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.7);padding:20px;align-items:center;justify-content:center}
 .chart-backdrop.open{display:flex}
 .chart-modal{width:min(100%,1200px);height:min(88vh,780px);display:flex;flex-direction:column;border-radius:16px;background:var(--card);border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.6);overflow:hidden}
@@ -155,21 +153,6 @@ tbody tr:last-child td{border-bottom:0}
 .chart-head .btn{padding:6px 12px}
 #chartBox{flex:1;min-height:0;background:#131722}
 @media (max-width:640px){.chart-backdrop{padding:0}.chart-modal{width:100%;height:100%;border-radius:0}}
-.watch-grid{display:flex;flex-direction:column;gap:8px}
-.watch-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto 84px auto;align-items:center;gap:14px;padding:11px 14px;min-width:0;border-radius:12px;box-shadow:none}
-.watch-row .coin-logo{width:34px;height:34px;flex:0 0 34px;font-size:10px}
-.watch-left{display:flex;align-items:center;gap:6px}
-.drag-handle{width:26px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:16px;line-height:1;letter-spacing:-2px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:0}
-.drag-handle:hover,.drag-handle:focus-visible{background:#1b2531;color:var(--text)}
-.watch-row.dragging{opacity:.9;border-color:var(--accent);box-shadow:0 8px 24px rgba(0,0,0,.55);position:relative;z-index:3}
-.watch-row.dragging .drag-handle{cursor:grabbing}
-.watch-grid.sorting{user-select:none;-webkit-user-select:none}
-.watch-sym{font-weight:600;font-size:14px;line-height:1.1}
-.watch-sub{font-size:11px;color:var(--muted);margin-top:3px}
-.watch-price{font-size:15px;font-weight:700;text-align:right;white-space:nowrap}
-.watch-row .asset-change{font-size:13px;font-weight:600;text-align:right;white-space:nowrap}
-.watch-actions{display:flex;gap:6px}
-.watch-actions .btn{padding:6px 10px;font-size:12px;white-space:nowrap}
 
 /* ===== Asset card (new) ===== */
 .menu-wrap{position:relative;margin-left:auto}
@@ -231,15 +214,6 @@ tbody tr:last-child td{border-bottom:0}
   .dual-panel{grid-template-columns:1fr}
   .dual-col+.dual-col{border-left:0;border-top:1px solid var(--border)}
 }
-@media(max-width:700px){
-  .watch-row{grid-template-columns:auto minmax(0,1fr) auto;gap:10px 12px;padding:12px}
-  .watch-row .asset-change{grid-column:3;grid-row:2;text-align:right}
-  .watch-price{grid-column:3;grid-row:1}
-  .watch-actions{grid-column:1/-1;grid-row:3}
-  .watch-actions .btn{flex:1}
-  .watch-row .watch-info{grid-column:2;grid-row:1/3}
-  .watch-row .watch-left{grid-row:1/3}
-}
 @media(max-width:600px){
   .dual-col{padding:16px}
   .alloc{justify-content:center}
@@ -265,6 +239,27 @@ body{background:radial-gradient(900px 500px at 12% -10%,rgba(79,140,255,.14),tra
 .user-pop{position:absolute;right:0;top:calc(100% + 8px);z-index:6;min-width:170px;padding:6px;background:#0f151c;border:1px solid #2a3441;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.55)}
 .user-pop button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--text);padding:10px;border-radius:8px;font-size:13px}
 .user-pop button:hover{background:#1b2531}
+
+/* ===== Watchlist (compact list) ===== */
+.watch-grid{display:block;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.015)}
+.watch-row{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.watch-row:last-child{border-bottom:0}
+.watch-row:hover{background:rgba(79,140,255,.07)}
+.watch-row .coin-logo{width:36px;height:36px;flex:0 0 36px;font-size:10px}
+.watch-sym{font-weight:600;font-size:15px;line-height:1.1}
+.watch-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.watch-quote{text-align:right}
+.watch-price{font-weight:700;font-size:15px;white-space:nowrap}
+.chg-pill{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;background:#1b2531;color:var(--muted)}
+.chg-pill.green{background:rgba(34,201,147,.14)}.chg-pill.red{background:rgba(255,107,112,.14)}
+.watch-actions{display:flex;gap:4px}
+.watch-actions .icon-btn{border-color:var(--border);width:34px;height:34px;font-size:16px}
+.watch-actions .icon-btn.danger:hover{color:var(--red)}
+.drag-handle{width:20px;height:34px;border:0;background:transparent;color:#4a5563;font-size:15px;letter-spacing:-2px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:0}
+.drag-handle:hover,.drag-handle:focus-visible{color:var(--text)}
+.watch-row.dragging{background:#17202a;box-shadow:0 8px 24px rgba(0,0,0,.55);position:relative;z-index:3;cursor:grabbing}
+.watch-grid.sorting{user-select:none;-webkit-user-select:none}
+@media(max-width:600px){.watch-row{gap:10px;padding:11px 10px}.drag-handle{width:16px}.watch-row .coin-logo{width:32px;height:32px;flex-basis:32px}}
 </style>
 </head>
 <body>
@@ -694,12 +689,12 @@ function renderWatchlist() {
     const held=(state.portfolio||[]).find(a=>a.symbol===sym&&a.logo);
     const url=(held&&held.logo)||state.watchLogos[sym]||("https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/"+sym.toLowerCase()+".png");
     const fb=escapeHtml(sym.slice(0,3));
-    return `<article class="panel watch-row" data-sym="${escapeHtml(sym)}">
-      <div class="watch-left"><button type="button" class="drag-handle" aria-label="Drag to reorder ${escapeHtml(sym)}" title="Drag to reorder">⋮⋮</button><span class="coin-logo"><img src="${escapeHtml(url)}" alt="${escapeHtml(sym)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${fb}'"></span></div>
+    return `<article class="watch-row" data-sym="${escapeHtml(sym)}">
+      <button type="button" class="drag-handle" aria-label="Drag to reorder ${escapeHtml(sym)}" title="Drag to reorder">⋮⋮</button>
+      <span class="coin-logo"><img src="${escapeHtml(url)}" alt="${escapeHtml(sym)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${fb}'"></span>
       <div class="watch-info" style="min-width:0"><div class="watch-sym">${escapeHtml(sym)}</div><div class="watch-sub">${escapeHtml(sym)}/USDT</div></div>
-      <div class="watch-price">${price>0?priceFmt(price):"—"}</div>
-      <div class="asset-change ${ch>0?"green":ch<0?"red":""}">${ch>0?"+":""}${ch.toFixed(2)}%</div>
-      <div class="watch-actions"><button class="btn" data-watch-chart="${escapeHtml(sym)}">📈 Chart</button><button class="btn" data-watch-add="${escapeHtml(sym)}">＋ Portfolio</button><button class="btn danger" data-watch-remove="${escapeHtml(sym)}">Remove</button></div>
+      <div class="watch-quote"><div class="watch-price">${price>0?priceFmt(price):"—"}</div><span class="chg-pill ${ch>0?"green":ch<0?"red":""}">${ch>0?"+":""}${ch.toFixed(2)}%</span></div>
+      <div class="watch-actions"><button class="icon-btn" data-watch-add="${escapeHtml(sym)}" title="Add to portfolio" aria-label="Add ${escapeHtml(sym)} to portfolio">＋</button><button class="icon-btn danger" data-watch-remove="${escapeHtml(sym)}" title="Remove" aria-label="Remove ${escapeHtml(sym)}">✕</button></div>
     </article>`;
   }).join("");
 }
