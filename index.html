@@ -441,7 +441,7 @@ const usd2 = v => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"
 const priceFmt = value => {
   const n = num(value);
   if (!(n > 0)) return "$0.00";
-  const d = n >= 1 ? 2 : n >= 0.1 ? 4 : n >= 0.01 ? 5 : n >= 0.0001 ? 6 : 8;
+  const d = n >= 1000 ? 2 : n >= 100 ? 3 : n >= 10 ? 4 : n >= 1 ? 5 : n >= 0.1 ? 5 : n >= 0.01 ? 6 : 8;
   return "$" + new Intl.NumberFormat("en-US",{minimumFractionDigits:2,maximumFractionDigits:d}).format(n);
 };
 const moneyRound = (value, currency="USD") => {
@@ -643,9 +643,9 @@ function renderCards() {
         ${hasBuy?`<span class="pnl-pill ${cls}">${p.pnl>0?"+":""}${usd2(p.pnl)} (${p.pct>=0?"+":""}${p.pct.toFixed(1)}%)</span>`:`<span>No buy price</span>`}
       </div>
       <div class="card-details ${openDetails.has(asset.id)?"open":""}">
-        <div>Average buy<strong>${hasBuy?money(asset.buyPrice):"—"}</strong></div>
+        <div>Average buy<strong>${hasBuy?priceFmt(asset.buyPrice):"—"}</strong></div>
         <div>Total invested<strong>${hasBuy?usd2(p.cost):"—"}</strong></div>
-        <div>Qty × buy price<strong>${quantity(asset.amount)} × ${hasBuy?money(asset.buyPrice):"—"}</strong></div>
+        <div>Qty × buy price<strong>${quantity(asset.amount)} × ${hasBuy?priceFmt(asset.buyPrice):"—"}</strong></div>
         <div>Fees paid<strong>${usd2(asset.buyFee)}</strong></div>
         ${hasBuy&&state.usdEgp>0?`<div>P/L in EGP<strong class="${cls}">${egpSigned(p.pnl)}</strong></div>`:""}
       </div>
@@ -715,7 +715,7 @@ function renderTable() {
       <td><div class="coin-cell">${logoMarkup(asset,false)}<div><div class="coin-name">${escapeHtml(asset.name)}</div><div class="coin-symbol">${escapeHtml(asset.symbol)}</div></div></div></td>
       <td>${priceFmt(price)}</td><td>${quantity(asset.amount)}</td><td>${usd2(value)}</td>
       <td>${state.usdEgp>0?money(currentEgp(value),"EGP"):"—"}</td>
-      <td>${asset.buyPrice?money(asset.buyPrice):"—"}</td>
+      <td>${asset.buyPrice?priceFmt(asset.buyPrice):"—"}</td>
       <td>${asset.buyPrice?usd2(pnl.cost):"—"}</td>
       <td class="${asset.buyPrice?(pnl.pnl>0?"green":pnl.pnl<0?"red":""):""}">${asset.buyPrice?(pnl.pnl>0?"+":"")+usd2(pnl.pnl):"—"}${asset.buyPrice?`<div style="font-size:10px;margin-top:4px">${pnl.pct>=0?"+":""}${pnl.pct.toFixed(2)}%</div>`:""}${asset.buyPrice&&state.usdEgp>0?`<div style="font-size:10px;margin-top:2px">${egpSigned(pnl.pnl)}</div>`:""}</td>
       <td><button class="small-action" data-buy="${escapeHtml(asset.id)}">Buy</button><button class="small-action" data-transfer="${escapeHtml(asset.id)}">Transfer</button><button class="small-action" data-close="${escapeHtml(asset.id)}">Close</button><button class="small-action" data-edit="${escapeHtml(asset.id)}">Edit</button><button class="small-action" data-delete="${escapeHtml(asset.id)}">Delete</button></td>
@@ -1067,7 +1067,7 @@ function openClose(id){
   if(!(a.buyPrice>0)){alert("Set the average buy price for "+a.symbol+" first (Edit), so profit can be calculated.");return;}
   $("closeId").value=id;
   $("closeTitle").textContent="Close "+a.symbol;
-  $("closeInfo").textContent=`You hold ${quantity(a.amount)} · avg buy ${money(a.buyPrice)}`;
+  $("closeInfo").textContent=`You hold ${quantity(a.amount)} · avg buy ${priceFmt(a.buyPrice)}`;
   $("closeQty").value=a.amount;
   $("closePrice").value=priceOf(a)||"";
   $("closeDate").value=new Date().toISOString().slice(0,10);
@@ -1085,7 +1085,7 @@ function calcClose(a){
 function previewClose(){
   const a=state.portfolio.find(x=>x.id===$("closeId").value);if(!a)return;
   const c=calcClose(a);
-  $("closePreview").innerHTML=`Bought: ${quantity(c.q)} × ${money(a.buyPrice)} = ${money(c.q*a.buyPrice)}${c.buyFeePart>0?` + ${money(c.buyFeePart)} fee`:""} → <strong>${money(c.cost)}</strong><br>Sold: ${quantity(c.q)} × ${money(c.p)} = ${money(c.q*c.p)}${c.sellFee>0?` − ${money(c.sellFee)} fee`:""} → <strong>${money(c.proceeds)}</strong><br>Net result: <strong class="${c.pnl>0?"green":c.pnl<0?"red":""}">${c.pnl>0?"+":""}${money(c.pnl)}</strong>${state.usdEgp>0?" · "+egpSigned(c.pnl):""}`;
+  $("closePreview").innerHTML=`Bought: ${quantity(c.q)} × ${priceFmt(a.buyPrice)} = ${money(c.q*a.buyPrice)}${c.buyFeePart>0?` + ${money(c.buyFeePart)} fee`:""} → <strong>${money(c.cost)}</strong><br>Sold: ${quantity(c.q)} × ${priceFmt(c.p)} = ${money(c.q*c.p)}${c.sellFee>0?` − ${money(c.sellFee)} fee`:""} → <strong>${money(c.proceeds)}</strong><br>Net result: <strong class="${c.pnl>0?"green":c.pnl<0?"red":""}">${c.pnl>0?"+":""}${money(c.pnl)}</strong>${state.usdEgp>0?" · "+egpSigned(c.pnl):""}`;
 }
 function submitClose(e){
   e.preventDefault();
@@ -1127,7 +1127,7 @@ function openMove(id,mode){
   const a=state.portfolio.find(x=>x.id===id);if(!a)return;
   $("mvId").value=id;$("mvMode").value=mode;
   $("mvTitle").textContent=(mode==="buy"?"Buy more ":"Transfer ")+a.symbol;
-  $("mvInfo").textContent=`You hold ${quantity(a.amount)}${a.buyPrice>0?" · avg buy "+money(a.buyPrice):""}`;
+  $("mvInfo").textContent=`You hold ${quantity(a.amount)}${a.buyPrice>0?" · avg buy "+priceFmt(a.buyPrice):""}`;
   $("mvDirRow").style.display=mode==="transfer"?"":"none";
   $("mvDir").value="in";$("mvQty").value="";
   $("mvPrice").value=priceOf(a)||"";
@@ -1158,11 +1158,11 @@ function previewMove(){
   const a=mvAsset();if(!a)return;
   const c=calcMove(a);
   if(c.k==="out"){
-    $("mvPreview").innerHTML=c.q>0?`After transfer: <strong>${quantity(c.newAmount)}</strong> held · avg buy stays ${a.buyPrice>0?money(a.buyPrice):"—"}.<br>No profit or loss is recorded.`:"Enter the quantity sent out.";
+    $("mvPreview").innerHTML=c.q>0?`After transfer: <strong>${quantity(c.newAmount)}</strong> held · avg buy stays ${a.buyPrice>0?priceFmt(a.buyPrice):"—"}.<br>No profit or loss is recorded.`:"Enter the quantity sent out.";
     return;
   }
   $("mvPreview").innerHTML=c.q>0&&c.p>0
-    ?`This ${c.k==="buy"?"purchase":"transfer"}: ${quantity(c.q)} × ${money(c.p)} = ${money(c.q*c.p)}${c.fee>0?` + ${money(c.fee)} fee`:""}<br>New quantity: <strong>${quantity(c.newAmount)}</strong> · New average: <strong>${money(c.newAvg)}</strong>${c.k==="in"?"<br>Cost basis defaults to the current price, so your profit/loss doesn't change.":""}${a.buyPrice>0?"":"<br>No previous buy price was set, so the average uses this entry only."}`
+    ?`This ${c.k==="buy"?"purchase":"transfer"}: ${quantity(c.q)} × ${priceFmt(c.p)} = ${money(c.q*c.p)}${c.fee>0?` + ${money(c.fee)} fee`:""}<br>New quantity: <strong>${quantity(c.newAmount)}</strong> · New average: <strong>${priceFmt(c.newAvg)}</strong>${c.k==="in"?"<br>Cost basis defaults to the current price, so your profit/loss doesn't change.":""}${a.buyPrice>0?"":"<br>No previous buy price was set, so the average uses this entry only."}`
     :"Enter quantity and price.";
 }
 function submitMove(e){
@@ -1199,7 +1199,7 @@ $("modalBackdrop").addEventListener("click",event=>{if(event.target===$("modalBa
 function previewBuy(){
   const q=num($("coinAmount").value),pr=num($("coinBuy").value),fi=num($("coinFee").value);
   const fee=$("coinFeeUnit").value==="pct"?q*pr*fi/100:fi;
-  $("buyPreview").innerHTML=pr>0&&q>0?`Total purchase: ${quantity(q)} × ${money(pr)} = ${money(q*pr)}${fee>0?` + ${money(fee)} fee`:""} → <strong>${money(q*pr+fee)}</strong>`:"Enter quantity and buy price to see the total cost.";
+  $("buyPreview").innerHTML=pr>0&&q>0?`Total purchase: ${quantity(q)} × ${priceFmt(pr)} = ${money(q*pr)}${fee>0?` + ${money(fee)} fee`:""} → <strong>${money(q*pr+fee)}</strong>`:"Enter quantity and buy price to see the total cost.";
 }
 ["coinAmount","coinBuy","coinFee"].forEach(id=>$(id).addEventListener("input",previewBuy));
 $("coinFeeUnit").addEventListener("change",previewBuy);
