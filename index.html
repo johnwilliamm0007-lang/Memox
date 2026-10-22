@@ -260,6 +260,39 @@ body{background:radial-gradient(900px 500px at 12% -10%,rgba(79,140,255,.14),tra
 .watch-row.dragging{background:#17202a;box-shadow:0 8px 24px rgba(0,0,0,.55);position:relative;z-index:3;cursor:grabbing}
 .watch-grid.sorting{user-select:none;-webkit-user-select:none}
 @media(max-width:600px){.watch-row{gap:10px;padding:11px 10px}.drag-handle{width:16px}.watch-row .coin-logo{width:32px;height:32px;flex-basis:32px}}
+
+/* ===== Motion + bolder look ===== */
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,201,147,.6)}70%{box-shadow:0 0 0 8px rgba(34,201,147,0)}100%{box-shadow:0 0 0 0 rgba(34,201,147,0)}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 rgba(79,140,255,0)}50%{box-shadow:0 0 44px rgba(79,140,255,.22)}}
+@keyframes flashUp{from{background:rgba(34,201,147,.38)}to{background:transparent}}
+@keyframes flashDown{from{background:rgba(255,107,112,.38)}to{background:transparent}}
+.intro .panel,.intro .watch-row{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+.intro .stats .stat:nth-child(2){animation-delay:.07s}.intro .stats .stat:nth-child(3){animation-delay:.14s}
+.intro .perf-strip{animation-delay:.2s}
+.intro .asset-card:nth-child(2){animation-delay:.1s}.intro .asset-card:nth-child(3){animation-delay:.15s}.intro .asset-card:nth-child(n+4){animation-delay:.2s}
+.intro .watch-row:nth-child(2){animation-delay:.1s}.intro .watch-row:nth-child(n+3){animation-delay:.16s}
+.modal-backdrop.open,.chart-backdrop.open{animation:fade .18s ease-out}
+.modal-backdrop.open .modal{animation:pop .24s cubic-bezier(.2,.9,.3,1.15)}
+.dot.live{animation:pulse 2s infinite}
+.btn,.small-action,.icon-btn{transition:transform .12s,background .15s,border-color .15s}
+.btn:active,.icon-btn:active{transform:scale(.96)}
+.flash-up{animation:flashUp .9s ease-out;border-radius:6px}
+.flash-down{animation:flashDown .9s ease-out;border-radius:6px}
+.topbar{position:sticky;top:0;z-index:8;margin:-24px -24px 22px;padding:14px 24px;background:rgba(7,10,15,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.05)}
+@media(max-width:600px){.topbar{margin:-14px -14px 18px;padding:12px 14px}}
+.panel{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.stats .stat:first-child{animation:glow 5s ease-in-out infinite}
+.intro .stats .stat:first-child{animation:rise .55s cubic-bezier(.2,.8,.2,1) both,glow 5s ease-in-out 1s infinite}
+.stats .stat:first-child .stat-value{background:linear-gradient(90deg,#fff 30%,#9fc0ff);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+.asset-card{position:relative}
+.asset-card::before{content:"";position:absolute;left:18px;right:18px;top:0;height:2px;border-radius:0 0 4px 4px;background:var(--border)}
+.asset-card.up::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.asset-card.down::before{background:linear-gradient(90deg,transparent,var(--red),transparent)}
+.asset-card:hover{box-shadow:0 14px 34px rgba(0,0,0,.5);border-color:rgba(79,140,255,.4)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -467,6 +500,17 @@ const quantity = value => new Intl.NumberFormat("en-US",{
   maximumFractionDigits:8
 }).format(num(value));
 
+const _tw={};
+function tween(id,to,fmt){
+  const el=$(id),from=_tw[id]??to;_tw[id]=to;
+  if(from===to||matchMedia("(prefers-reduced-motion: reduce)").matches){el.textContent=fmt(to);return;}
+  const t0=performance.now();cancelAnimationFrame(_tw[id+"r"]);
+  const step=n=>{const k=Math.min(1,(n-t0)/600),e=1-Math.pow(1-k,3);el.textContent=fmt(from+(to-from)*e);if(k<1)_tw[id+"r"]=requestAnimationFrame(step);};
+  _tw[id+"r"]=requestAnimationFrame(step);
+}
+const _lastP={};
+function flash(key,price){const prev=_lastP[key];_lastP[key]=price;return !(prev>0)||price===prev?"":(price>prev?"flash-up":"flash-down");}
+
 function uid() {
   return "asset_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
 }
@@ -588,7 +632,7 @@ function pnlFor(asset) {
 
 function render() {
   const t = totals();
-  $("totalUsd").textContent = money(t.value);
+  tween("totalUsd",t.value,v=>money(v));
   $("totalEgp").textContent = state.usdEgp > 0 ? money(currentEgp(t.value),"EGP") : "EGP rate unavailable";
   $("totalPnl").textContent = t.hasBuy ? (t.pnl > 0 ? "+" : "") + moneyRound(t.pnl) : "—";
   $("totalPnl").className = "stat-value " + (t.pnl > 0 ? "green" : t.pnl < 0 ? "red" : "");
@@ -604,7 +648,7 @@ function render() {
   $("assetBadge").textContent = `${state.portfolio.length} asset${state.portfolio.length===1?"":"s"}`;
 
   const first=state.history.length?num(state.history[0].value):0;
-  $("perfValue").textContent=money(t.value);
+  tween("perfValue",t.value,v=>money(v));
   if(first>0&&state.history.length>1){
     const pc=(t.value-first)/first*100;
     $("perfChange").textContent=`${pc>=0?"+":""}${pc.toFixed(2)}% since first record`;
@@ -635,7 +679,7 @@ function renderCards() {
     const ch = num(asset.change24h), hasBuy = asset.buyPrice > 0;
     const id = escapeHtml(asset.id);
     const cls = p.pnl>0?"green":p.pnl<0?"red":"";
-    return `<article class="panel asset-card">
+    return `<article class="panel asset-card ${ch>0?"up":ch<0?"down":""}">
       <div class="asset-top">${logoMarkup(asset)}
         <div style="min-width:0;flex:1"><div class="coin-name">${escapeHtml(asset.name)}</div><div class="coin-symbol">${quantity(asset.amount)} ${escapeHtml(asset.symbol)}</div></div>
         <div class="menu-wrap"><button class="icon-btn" data-menu="${id}" aria-label="More actions">⋯</button>
@@ -647,7 +691,7 @@ function renderCards() {
           </div>
         </div>
       </div>
-      <div class="card-value">${usd2(value)}</div>
+      <div class="card-value ${flash("c:"+asset.symbol,price)}">${usd2(value)}</div>
       <div class="card-sub">${state.usdEgp>0?money(currentEgp(value),"EGP"):"—"}</div>
       <div class="card-row">
         <span>${priceFmt(price)} <span class="asset-change ${ch>0?"green":ch<0?"red":""}">${ch>0?"+":""}${ch.toFixed(2)}%</span></span>
@@ -693,7 +737,7 @@ function renderWatchlist() {
       <button type="button" class="drag-handle" aria-label="Drag to reorder ${escapeHtml(sym)}" title="Drag to reorder">⋮⋮</button>
       <span class="coin-logo"><img src="${escapeHtml(url)}" alt="${escapeHtml(sym)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${fb}'"></span>
       <div class="watch-info" style="min-width:0"><div class="watch-sym">${escapeHtml(sym)}</div><div class="watch-sub">${escapeHtml(sym)}/USDT</div></div>
-      <div class="watch-quote"><div class="watch-price">${price>0?priceFmt(price):"—"}</div><span class="chg-pill ${ch>0?"green":ch<0?"red":""}">${ch>0?"+":""}${ch.toFixed(2)}%</span></div>
+      <div class="watch-quote"><div class="watch-price ${flash("w:"+sym,price)}">${price>0?priceFmt(price):"—"}</div><span class="chg-pill ${ch>0?"green":ch<0?"red":""}">${ch>0?"+":""}${ch.toFixed(2)}%</span></div>
       <div class="watch-actions"><button class="icon-btn" data-watch-add="${escapeHtml(sym)}" title="Add to portfolio" aria-label="Add ${escapeHtml(sym)} to portfolio">＋</button><button class="icon-btn danger" data-watch-remove="${escapeHtml(sym)}" title="Remove" aria-label="Remove ${escapeHtml(sym)}">✕</button></div>
     </article>`;
   }).join("");
@@ -1338,6 +1382,7 @@ document.addEventListener("keydown",event=>{if(event.key==="Escape")closeModal()
 window.addEventListener("resize",()=>drawChart());
 
 function startApp() {
+  $("mainApp").classList.add("intro");setTimeout(()=>$("mainApp").classList.remove("intro"),1200);
   render();
   if(!Array.isArray(state.watchlist)) state.watchlist=[];
   if(!state.changes||typeof state.changes!=="object") state.changes={};
