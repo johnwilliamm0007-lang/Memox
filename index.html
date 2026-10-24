@@ -381,6 +381,30 @@ button.hz-card:hover{border-color:#3a4658}
 @media(max-width:520px){.w-spark{display:none}.watch-row{grid-template-columns:auto auto minmax(0,1fr) auto auto;padding:12px}.watch-row .coin-logo{width:38px;height:38px;flex-basis:38px}.w-name{display:none}}
 .an-chart{direction:ltr;height:480px;margin:16px 0;border-radius:14px;overflow:hidden;border:1px solid #2a2e39;background:#131722}
 @media(max-width:600px){.an-chart{height:380px}}
+
+/* ===== Tabs + compact header ===== */
+.rate-pill{display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#0f151c;border:1px solid var(--border);font-size:12px;color:var(--muted)}
+.rate-pill strong{color:var(--text);font-size:13px}
+.rate-pill small{font-size:10px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stats{grid-template-columns:1.4fr 1fr}
+.tabs{display:flex;gap:6px;padding:5px;margin:18px 0;background:#0b1017;border:1px solid var(--border);border-radius:16px;width:fit-content;max-width:100%;overflow-x:auto}
+.tab{display:flex;align-items:center;gap:8px;padding:10px 18px;border:0;border-radius:12px;background:transparent;color:var(--muted);font-weight:600;white-space:nowrap;transition:background .15s,color .15s}
+.tab:hover{color:var(--text)}
+.tab.active{background:linear-gradient(135deg,var(--accent),#3b6fe0);color:#fff;box-shadow:0 6px 18px rgba(79,140,255,.35)}
+.tab-i{font-size:14px}
+.tab-n{min-width:18px;padding:1px 6px;border-radius:999px;background:rgba(255,255,255,.14);font-size:11px;text-align:center}
+.tab-n:empty{display:none}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:rise .35s cubic-bezier(.2,.8,.2,1) both}
+@media(max-width:700px){
+  .stats{grid-template-columns:1fr}
+  .tabs{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:9;width:auto;margin:0;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:6px;background:rgba(11,16,23,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(0,0,0,.6);overflow:visible}
+  .tab{flex-direction:column;gap:3px;padding:8px 4px;font-size:11px;position:relative;justify-content:center}
+  .tab-i{font-size:17px}
+  .tab-n{position:absolute;top:3px;right:10px;font-size:9px;padding:0 5px;min-width:0}
+  .app{padding-bottom:96px}
+  .rate-pill small{display:none}
+}
 </style>
 </head>
 <body>
@@ -407,6 +431,7 @@ button.hz-card:hover{border-color:#3a4658}
       <div><h1>Coinfolio</h1><p>Your crypto, one view</p></div>
     </div>
     <div class="top-actions">
+      <div class="rate-pill" title="USD / EGP"><span>USD/EGP</span><strong id="usdEgp">—</strong><small id="p2pStatus"></small></div>
       <div class="status"><span class="dot" id="liveDot"></span><span id="liveStatus">Connecting to markets...</span></div>
       <span class="badge" id="lastUpdated">Waiting for prices</span>
       <button class="btn" id="refreshBtn" type="button">↻ Refresh</button>
@@ -426,11 +451,6 @@ button.hz-card:hover{border-color:#3a4658}
       <div class="stat-value" id="totalPnl">$0.00</div>
       <div class="stat-foot" id="totalPnlPct">Add your buy prices to track P/L</div>
     </div>
-    <div class="panel stat">
-      <div class="stat-label">＄ USD / EGP rate</div>
-      <div class="stat-value" id="usdEgp">—</div>
-      <div class="stat-foot" id="p2pStatus">Fetching USD/EGP rate</div>
-    </div>
   </section>
 
   <section class="panel perf-strip">
@@ -438,9 +458,24 @@ button.hz-card:hover{border-color:#3a4658}
     <div class="perf-chart"><canvas id="portfolioChart"></canvas></div>
   </section>
 
-  <div class="section-head" style="margin-top:6px"><div><h3>Your assets</h3><p>Live market prices and individual holdings</p></div><span class="badge" id="assetBadge">0 assets</span></div>
-  <section class="asset-grid" id="assetGrid"></section>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
+    <button class="tab active" data-tab="portfolio" type="button" role="tab"><span class="tab-i">◈</span><span class="tab-t">Portfolio</span></button>
+    <button class="tab" data-tab="watch" type="button" role="tab"><span class="tab-i">☆</span><span class="tab-t">Watchlist</span><span class="tab-n" id="tabWatchN"></span></button>
+    <button class="tab" data-tab="analysis" type="button" role="tab"><span class="tab-i">◎</span><span class="tab-t">Analysis</span></button>
+    <button class="tab" data-tab="trades" type="button" role="tab"><span class="tab-i">⇅</span><span class="tab-t">Trades</span></button>
+  </nav>
 
+  <div class="tab-panel active" data-panel="portfolio">
+    <div class="section-head" style="margin-top:6px"><div><h3>Your assets</h3><p>Live market prices and individual holdings</p></div><span class="badge" id="assetBadge">0 assets</span></div>
+    <section class="asset-grid" id="assetGrid"></section>
+
+    <section class="panel section" style="margin-bottom:18px">
+      <div class="section-head"><div><h3>Portfolio allocation</h3><p>Share of each asset in your total value</p></div></div>
+      <div class="alloc"><canvas id="allocChart" width="180" height="180"></canvas><div class="alloc-legend" id="allocLegend"></div></div>
+    </section>
+  </div>
+
+  <div class="tab-panel" data-panel="watch">
   <section class="panel section" style="margin-bottom:18px">
     <div class="section-head">
       <div><h3>Watchlist</h3><p>Coins you follow without holding them</p></div>
@@ -449,13 +484,20 @@ button.hz-card:hover{border-color:#3a4658}
     <div class="watch-sum" id="watchSummary"></div>
     <div class="watch-grid" id="watchGrid"></div>
   </section>
+  </div>
 
-  <section class="panel section dual-panel" style="margin-bottom:18px">
-    <div class="dual-col">
-      <div class="section-head"><div><h3>Portfolio allocation</h3><p>Share of each asset in your total value</p></div></div>
-      <div class="alloc"><canvas id="allocChart" width="180" height="180"></canvas><div class="alloc-legend" id="allocLegend"></div></div>
+  <div class="tab-panel" data-panel="analysis">
+    <section class="panel section" style="margin-bottom:18px">
+    <div class="section-head">
+      <div><h3>Chart Analyzer</h3><p>تحليل بالعربي: الاتجاه، الشراء، وقف الخسارة، الأهداف، والتصفيات الحقيقية</p></div>
+      <div class="season-ctl"><select id="anSym" aria-label="Coin"></select><select id="anTf" aria-label="Plan timeframe" title="Plan and chart timeframe"><option value="1h">1H</option><option value="4h" selected>4H</option><option value="1d">1D</option><option value="1w">1W</option></select><button class="btn primary" id="anBtn" type="button">حلّل</button></div>
     </div>
-    <div class="dual-col">
+    <div id="anOut"><div class="empty" style="padding:24px 10px">اختار العملة وبعدين دوس حلّل.</div></div>
+  </section>
+  </div>
+
+  <div class="tab-panel" data-panel="trades">
+    <section class="panel section" style="margin-bottom:18px">
       <div class="section-head">
         <div><h3>Monthly profit</h3><p>Realized results from closed positions</p></div>
         <div class="month-nav"><button class="btn" id="prevMonth" type="button">‹</button><strong id="tradeMonth"></strong><button class="btn" id="nextMonth" type="button">›</button></div>
@@ -467,17 +509,8 @@ button.hz-card:hover{border-color:#3a4658}
       </div>
       <div class="stat-foot" id="mNetEgp" style="margin:-4px 0 12px">—</div>
       <div class="trade-list" id="tradeList"></div>
-    </div>
-  </section>
-
-
-    <section class="panel section" style="margin-bottom:18px">
-    <div class="section-head">
-      <div><h3>Chart Analyzer</h3><p>تحليل بالعربي: الاتجاه، الشراء، وقف الخسارة، الأهداف، والتصفيات الحقيقية</p></div>
-      <div class="season-ctl"><select id="anSym" aria-label="Coin"></select><select id="anTf" aria-label="Plan timeframe" title="Plan and chart timeframe"><option value="1h">1H</option><option value="4h" selected>4H</option><option value="1d">1D</option><option value="1w">1W</option></select><button class="btn primary" id="anBtn" type="button">حلّل</button></div>
-    </div>
-    <div id="anOut"><div class="empty" style="padding:24px 10px">اختار العملة وبعدين دوس حلّل.</div></div>
-  </section>
+    </section>
+  </div>
 
 <footer class="footer"><span>Coinfolio · Personal portfolio tracker</span><span>Market prices are indicative. The USD/EGP rate comes from CoinGecko and may differ from actual P2P prices.</span></footer>
 </div>
@@ -785,6 +818,7 @@ function render() {
     $("perfChange").className="perf-change";
   }
 
+  {const tw=$("tabWatchN");if(tw){const n=(state.watchlist||[]).length;tw.textContent=n||"";}}
   renderCards();
   renderWatchlist();
   renderTrades();
@@ -2071,7 +2105,22 @@ $("anSym").addEventListener("focus",fillAnSelect);
 $("anTf").addEventListener("change",()=>{if(anState){anState.tf=$("anTf").value;renderAn();}});
 $("anOut").addEventListener("click",e=>{const b=e.target.closest("[data-hz]");if(!b||!anState)return;anState.tf=b.dataset.hz;renderAn();});
 
+/* ===== Tabs ===== */
+const TAB_KEY="coinfolio_tab";
+function setTab(name,save=true){
+  if(!["portfolio","watch","analysis","trades"].includes(name)) name="portfolio";
+  document.querySelectorAll(".tab").forEach(b=>{const on=b.dataset.tab===name;b.classList.toggle("active",on);b.setAttribute("aria-selected",on?"true":"false");});
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.toggle("active",p.dataset.panel===name));
+  if(save){try{localStorage.setItem(TAB_KEY,name);}catch{}}
+  if(name==="portfolio") drawAllocation();
+  else if(name==="watch") renderWatchlist();
+  else if(name==="analysis") fillAnSelect();
+  else if(name==="trades") renderTrades();
+}
+$("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)setTab(b.dataset.tab);});
+
 function startApp() {
+  {let t="portfolio";try{t=localStorage.getItem(TAB_KEY)||"portfolio";}catch{}setTab(t,false);}
   $("mainApp").classList.add("intro");setTimeout(()=>$("mainApp").classList.remove("intro"),1200);
 
   render();
