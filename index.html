@@ -379,6 +379,8 @@ button.hz-card:hover{border-color:#3a4658}
 .watch-actions .icon-btn:hover{background:#1b2531}
 @media(max-width:700px){.w-range{display:none}.watch-row{grid-template-columns:auto auto minmax(0,1fr) minmax(60px,84px) auto auto;gap:10px}}
 @media(max-width:520px){.w-spark{display:none}.watch-row{grid-template-columns:auto auto minmax(0,1fr) auto auto;padding:12px}.watch-row .coin-logo{width:38px;height:38px;flex-basis:38px}.w-name{display:none}}
+.an-chart{direction:ltr;height:480px;margin:16px 0;border-radius:14px;overflow:hidden;border:1px solid #2a2e39;background:#131722}
+@media(max-width:600px){.an-chart{height:380px}}
 </style>
 </head>
 <body>
@@ -1815,7 +1817,13 @@ function analyze(k,tf,events){
   const rc=events&&events.length>=8?realClusters(events,price,tf):null;
   const zones=rc&&(rc.below.length||rc.above.length)?{below:rc.below,above:rc.above,real:true}:{below:lq.below,above:lq.above,real:false};
   const sup=lv.filter(l=>l.p<price*.998).sort((x,y)=>y.p-x.p),res=lv.filter(l=>l.p>price*1.002).sort((x,y)=>x.p-y.p);
-  const S1=sup[0]?sup[0].p:price-2*a,S2=sup[1]?sup[1].p:S1-2*a,R1=res[0]?res[0].p:price+2*a,R2=res[1]?res[1].p:R1+2*a,R3=res[2]?res[2].p:R2+2*a;
+  const CAP={"1h":.04,"4h":.07,"1d":.12,"1w":.22}[tf]||.12;
+  const S1=Math.max(sup[0]?sup[0].p:price-2*a,price*(1-CAP));
+  const S2=Math.min(Math.max(sup[1]?sup[1].p:S1-2*a,price*(1-CAP*1.5)),S1-a);
+  const R1=Math.min(res[0]?res[0].p:price+2*a,price*(1+CAP));
+  const R2=Math.max(Math.min(res[1]?res[1].p:R1+2*a,price*(1+CAP*1.6)),R1+a);
+  const R3=Math.max(Math.min(res[2]?res[2].p:R2+2*a,price*(1+CAP*2.2)),R2+a);
+  const clStop=(st,lo)=>Math.min(Math.max(st,price*(1-CAP*1.25)),lo-.3*a);
   const ratio=max?s/max:0;
   const mode=ratio>=.35?"buy":ratio<=-.35?"avoid":"range";
   const adjStop=(stop,entry)=>{const z=zones.below.find(z=>z.p<entry&&z.p>stop);return z?z.p-.3*a:stop;};
@@ -1823,17 +1831,18 @@ function analyze(k,tf,events){
   if(mode==="buy"){
     verdict=ratio>=.65?"صاعد بقوة":"صاعد";vcls="green";
     const near=price-S1<=3*a,hi=near?Math.min(price,S1+.6*a):price,lo=near?S1:price-.8*a,entry=(hi+lo)/2;
-    const stop=adjStop(lo-.6*a,entry),risk=entry-stop;
+    const stop=clStop(adjStop(lo-.6*a,entry),lo),risk=entry-stop;
     const tps=[R1,R2,R3].map((t,i)=>t>entry+risk*.8?t:entry+risk*[1.5,2.5,4][i]).sort((x,y)=>x-y);
     plan={buyLo:lo,buyHi:hi,stop,targets:tps,trigger:R1,rr:(tps[0]-entry)/risk};
   }else if(mode==="avoid"){
     verdict=ratio<=-.65?"هابط بقوة":"هابط";vcls="red";
-    plan={buyLo:S2,buyHi:S1,stop:S2-.6*a,targets:[R1,R2],trigger:Math.max(R1,e50[n-1]),rr:null};
+    plan={buyLo:S1-.5*a,buyHi:S1+.3*a,stop:clStop(S1-1.1*a,S1-.5*a),targets:[R1,R2],trigger:Math.max(R1,e50[n-1]),rr:null};
   }else{
     verdict="عرضي / غير واضح";vcls="";
-    const lo=S1,hi=S1+.4*a,entry=(lo+hi)/2,stop=adjStop(lo-.6*a,entry),risk=entry-stop,mid=(S1+R1)/2;
+    const lo=S1,hi=S1+.4*a,entry=(lo+hi)/2,stop=clStop(adjStop(lo-.6*a,entry),lo),risk=entry-stop,mid=(S1+R1)/2;
     plan={buyLo:lo,buyHi:hi,stop,targets:[mid,R1,R2],trigger:R1,rr:(mid-entry)/risk};
   }
+  {const cap=Math.max(2*a,price*.03);if(plan.buyHi-plan.buyLo>cap)plan.buyLo=plan.buyHi-cap;}
   Object.assign(plan,{mode,S1,S2,R1,R2});
   const lines=[];
   lines.push({p:plan.buyLo,color:"#4f8cff"},{p:plan.buyHi,color:"#4f8cff"},{p:plan.stop,color:"#ff6b70"});
@@ -1868,7 +1877,7 @@ function refreshLiq(){
   const box=$("liqPanel");if(!box)return;
   const r=anState.res[anState.tf];if(!r)return;
   box.innerHTML=liqPanelHtml();
-  drawAn(r.k,r.A,allEvents());
+  if($("anCanvas"))drawAn(r.k,r.A,allEvents());
 }
 function renderAn(){
   const S=anState;if(!S)return;
@@ -1914,9 +1923,10 @@ function renderAn(){
     <div class="an-verdict ${ovCls}">الحكم العام: ${ovTxt}</div>
     <div class="an-reason">${stance}</div>
     <div class="hz-grid">${cards}</div>
+    <div class="an-chart" id="anChart"><div style="padding:20px;color:var(--muted)">جارٍ تحميل الشارت…</div></div>
     <div class="decision"><strong>الخلاصة (${tf.toUpperCase()}):</strong> ${decision}</div>
     <div class="tri-grid">
-      <div class="tri-card"><div class="tri-t green">🟢 ${P.mode==="avoid"?"منطقة شراء بعد الارتداد":"اشتري فين"}</div><div class="tri-v">${range}</div><div class="muted">${fpc((P.buyLo+P.buyHi)/2,price)} عن السعر الحالي</div></div>
+      <div class="tri-card"><div class="tri-t green">🟢 ${P.mode==="avoid"?"الشراء بعد الارتداد":"اشتري فين"}</div><div class="tri-line">شراء 1: ${fp(P.buyHi)} <span class="muted">${fpc(P.buyHi,price)}</span></div><div class="tri-line">شراء 2: ${fp(P.buyLo)} <span class="muted">${fpc(P.buyLo,price)}</span></div><div class="muted">لو دخلت الاتنين (نص ونص) متوسط الدخول ${fp((P.buyHi+P.buyLo)/2)}</div></div>
       <div class="tri-card"><div class="tri-t red">🔴 وقف الخسارة</div><div class="tri-v">${fp(P.stop)}</div><div class="muted">${fpc(P.stop,price)} عن السعر الحالي</div></div>
       <div class="tri-card"><div class="tri-t" style="color:#4f8cff">🎯 بيع فين</div>${sellList}${P.rr!=null&&P.rr>0?`<div class="muted">العائد/المخاطرة للهدف 1: ${P.rr.toFixed(1)} : 1</div>`:""}</div>
     </div>
@@ -1924,13 +1934,12 @@ function renderAn(){
       <div class="scn"><div class="tri-t green">لو صعد</div>لو السعر ثبت فوق ${fp(P.trigger)} ${upTxt}.</div>
       <div class="scn"><div class="tri-t red">لو نزل</div>${dnTxt}</div>
     </div>
-    <canvas id="anCanvas" style="direction:ltr;height:360px;margin-top:16px;background:#0b1017;border-radius:12px"></canvas>
-    <div class="an-note">الدوائر = تصفيات حقيقية (أصفر لونج، سماوي شورت). الخطوط المتقطعة = مستويات الخطة. EMA20 أزرق، EMA50 برتقالي، EMA200 بنفسجي. دوس على أي كارت مدى فوق عشان تغيّر الخطة والشارت.</div>
+    <div class="an-note">على الشارت: أزرق = الشراء، أحمر = ستوب لوز، أخضر = الأهداف، أصفر وسماوي منقط = مناطق التصفية (والدوائر الصغيرة تصفيات حقيقية حصلت). EMA20 أزرق فاتح، EMA50 برتقالي، EMA200 بنفسجي. دوس على أي كارت مدى فوق عشان تغيّر الخطة والشارت.</div>
     <div class="an-sec" id="liqPanel">${liqPanelHtml()}</div>
     <details class="an-details"><summary>التفاصيل: أسباب الحكم والمؤشرات</summary>${rs}${A.notes.map(x=>`<div class="an-reason">⚠ ${x}</div>`).join("")}<h4 style="margin:14px 0 8px">سياق المشتقات</h4>${dn}</details>
     <div class="an-note">تحليل آلي من المؤشرات والأسعار السابقة، مش توصية مالية. حجّم صفقتك بحيث وقف الخسارة يكون خسارة تقدر تتحملها.</div>
   </div>`;
-  drawAn(k,A,allEvents());
+  drawTV(k,A,allEvents());
 }
 function drawAn(k,A,events){
   const cv=$("anCanvas");if(!cv)return;
@@ -1958,6 +1967,76 @@ function drawAn(k,A,events){
   L.forEach(l=>{ctx.strokeStyle=l.color;ctx.fillStyle=l.color;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,y(l.p));ctx.lineTo(W-padR,y(l.p));ctx.stroke();ctx.fillText(priceFmt(l.p),W-padR+4,y(l.p));});
   ctx.setLineDash([]);
   const yp=y(A.price);ctx.fillStyle="#e7ecf3";ctx.fillText(priceFmt(A.price),W-padR+4,yp);
+}
+/* ---- TradingView-style chart (Lightweight Charts) with the plan drawn on it ---- */
+let lwcPromise=null,anChart=null,anRO=null;
+function loadLWC(){
+  if(window.LightweightCharts)return Promise.resolve();
+  if(!lwcPromise)lwcPromise=new Promise((res,rej)=>{
+    const sc=document.createElement("script");
+    sc.src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js";
+    sc.onload=res;sc.onerror=()=>{lwcPromise=null;rej();};
+    document.head.appendChild(sc);
+  });
+  return lwcPromise;
+}
+async function drawTV(k,A,events){
+  const box=$("anChart");if(!box)return;
+  try{await loadLWC();}catch{
+    if(!box.isConnected)return;
+    box.style.height="auto";
+    box.innerHTML='<canvas id="anCanvas" style="direction:ltr;height:360px;background:#0b1017"></canvas>';
+    drawAn(k,A,events);return;
+  }
+  if(!box.isConnected)return;
+  if(anRO){anRO.disconnect();anRO=null;}
+  if(anChart){try{anChart.remove();}catch{}anChart=null;}
+  box.innerHTML="";
+  const P=A.plan;
+  const chart=LightweightCharts.createChart(box,{
+    width:box.clientWidth,height:box.clientHeight,
+    layout:{background:{type:"solid",color:"#131722"},textColor:"#d1d4dc",fontFamily:"Inter, sans-serif"},
+    grid:{vertLines:{color:"rgba(42,46,57,.55)"},horzLines:{color:"rgba(42,46,57,.55)"}},
+    rightPriceScale:{borderColor:"#2a2e39",scaleMargins:{top:.08,bottom:.08}},
+    timeScale:{borderColor:"#2a2e39",timeVisible:true,secondsVisible:false,rightOffset:6},
+    crosshair:{mode:0}
+  });
+  const lv=[P.buyHi,P.buyLo,P.stop,...P.targets],lmin=Math.min(...lv),lmax=Math.max(...lv);
+  const series=chart.addCandlestickSeries({
+    upColor:"#26a69a",downColor:"#ef5350",borderVisible:false,wickUpColor:"#26a69a",wickDownColor:"#ef5350",
+    autoscaleInfoProvider:orig=>{const o=orig();if(!o)return o;return {priceRange:{minValue:Math.min(o.priceRange.minValue,lmin),maxValue:Math.max(o.priceRange.maxValue,lmax)},margins:o.margins};}
+  });
+  const T=x=>Math.floor(x.t/1000);
+  series.setData(k.map(x=>({time:T(x),open:x.o,high:x.h,low:x.l,close:x.c})));
+  const addEma=(arr,color)=>{
+    const s=chart.addLineSeries({color,lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+    s.setData(k.map((x,i)=>({time:T(x),value:arr[i]})).slice(30));
+  };
+  addEma(A.e20,"#4f8cff");addEma(A.e50,"#f59e0b");if(A.has200)addEma(A.e200,"#8b5cf6");
+  const pl=(price,color,title,style,width)=>series.createPriceLine({price,color,lineWidth:width,lineStyle:style,axisLabelVisible:true,title});
+  pl(P.buyHi,"#2962ff","شراء 1",2,2);
+  pl(P.buyLo,"#2962ff","شراء 2",2,2);
+  pl(P.stop,"#ef5350","ستوب لوز",0,2);
+  P.targets.forEach((t,i)=>pl(t,"#26a69a","هدف "+(i+1),2,2));
+  if(P.mode==="avoid")pl(P.trigger,"#26a69a","يتحول صاعد فوق",1,1);
+  const tag=A.zones.real?"":" (تقدير)";
+  A.zones.below.forEach(z=>pl(z.p,"#f59e0b","تصفية لونج"+tag,3,1));
+  A.zones.above.forEach(z=>pl(z.p,"#06b6d4","تصفية شورت"+tag,3,1));
+  /* real liquidation events as small markers on the candle where they happened */
+  const from=k[Math.max(0,k.length-110)].t,agg={};
+  (events||[]).forEach(e=>{
+    if(e.t<from)return;
+    let idx=k.length-1;for(let i=k.length-1;i>=0;i--){if(k[i].t<=e.t){idx=i;break;}}
+    const key=idx+(e.long?"L":"S");agg[key]=(agg[key]||0)+e.usd;
+  });
+  const mk=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,40).map(([key])=>{
+    const long=key.endsWith("L"),idx=parseInt(key,10);
+    return {time:T(k[idx]),position:long?"belowBar":"aboveBar",color:long?"#f59e0b":"#06b6d4",shape:"circle",size:1};
+  }).sort((a,b)=>a.time-b.time);
+  if(mk.length)series.setMarkers(mk);
+  chart.timeScale().setVisibleLogicalRange({from:Math.max(0,k.length-110),to:k.length+8});
+  anChart=chart;
+  if(window.ResizeObserver){anRO=new ResizeObserver(()=>{if(anChart)anChart.applyOptions({width:box.clientWidth});});anRO.observe(box);}
 }
 async function runAn(){
   const sym=$("anSym").value,out=$("anOut"),btn=$("anBtn");
