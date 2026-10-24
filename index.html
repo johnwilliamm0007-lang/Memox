@@ -329,6 +329,56 @@ button.hz-card:hover{border-color:#3a4658}
 .auth-screen{display:none}
 .splash{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:var(--bg)}
 .splash .brand-mark{width:56px;height:56px;font-size:26px;animation:pulse 1.4s infinite}
+
+/* ===== Arabic analyzer panels ===== */
+.ar{direction:rtl;text-align:right}
+.ar .an-row .r{text-align:left}
+.ar .an-top{direction:rtl}
+.muted{color:var(--muted);font-size:12px}
+.decision{padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,rgba(79,140,255,.14),rgba(34,211,238,.05));border:1px solid rgba(79,140,255,.3);line-height:1.9;font-size:14px}
+.tri-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.tri-card{padding:14px;border-radius:14px;background:#0f151c;border:1px solid var(--border);min-width:0}
+.tri-t{font-weight:700;font-size:13px;margin-bottom:8px}
+.tri-v{font-size:16px;font-weight:700;line-height:1.7;margin-bottom:4px}
+.tri-line{font-weight:600;font-size:13px;line-height:1.9}
+.scn-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.scn{padding:14px;border-radius:14px;background:#0f151c;border:1px solid var(--border);font-size:13px;line-height:1.9}
+.an-details{margin-top:18px;padding:12px 14px;border-radius:14px;border:1px solid var(--border);background:#0f151c}
+.an-details summary{cursor:pointer;font-weight:600;font-size:13px}
+.an-details[open] summary{margin-bottom:10px}
+@media(max-width:800px){.tri-grid,.scn-grid{grid-template-columns:1fr}}
+
+/* ===== Watchlist v2 ===== */
+.watch-sum{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 14px}
+.wchip{padding:5px 11px;border-radius:999px;background:#131b24;border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
+.wchip.green{color:var(--green);background:rgba(34,201,147,.10);border-color:rgba(34,201,147,.25)}
+.wchip.red{color:var(--red);background:rgba(255,107,112,.10);border-color:rgba(255,107,112,.25)}
+.watch-grid{display:grid;gap:10px;border:0;border-radius:0;overflow:visible;background:none}
+.watch-row{grid-template-columns:auto auto minmax(0,1.4fr) minmax(80px,130px) auto auto;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)),#0d1218;position:relative;overflow:hidden;transition:transform .15s,border-color .15s,box-shadow .15s,background .15s}
+.watch-row:last-child{border-bottom:1px solid var(--border)}
+.watch-row::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 4px 4px 0;background:var(--border)}
+.watch-row.up::before{background:var(--green);box-shadow:0 0 14px rgba(34,201,147,.6)}
+.watch-row.down::before{background:var(--red);box-shadow:0 0 14px rgba(255,107,112,.6)}
+.watch-row:hover{transform:translateY(-1px);border-color:rgba(79,140,255,.45);box-shadow:0 10px 28px rgba(0,0,0,.45);background:linear-gradient(180deg,rgba(79,140,255,.08),rgba(255,255,255,0)),#0d1218}
+.watch-row .coin-logo{width:44px;height:44px;flex:0 0 44px;font-size:11px;box-shadow:0 0 0 2px var(--border)}
+.watch-row.up .coin-logo{box-shadow:0 0 0 2px rgba(34,201,147,.55)}
+.watch-row.down .coin-logo{box-shadow:0 0 0 2px rgba(255,107,112,.55)}
+.watch-sym{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.w-name{font-weight:500;font-size:12px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.w-held{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(79,140,255,.15);color:#8fb4ff}
+.w-range{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:10px;color:var(--muted);max-width:260px}
+.w-rbar{flex:1;height:5px;border-radius:4px;position:relative;background:linear-gradient(90deg,rgba(255,107,112,.55),rgba(139,151,167,.25),rgba(34,201,147,.55))}
+.w-rbar i{position:absolute;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px #0d1218,0 0 8px rgba(255,255,255,.5)}
+.w-spark{min-width:0;display:flex;flex-direction:column;align-items:center}
+.spark{width:100%;height:38px;display:block}
+.spark-empty{height:38px}
+.w-spark small{font-size:9px;color:var(--muted);margin-top:2px}
+.watch-price{font-size:17px}
+.chg-pill{padding:3px 10px;font-size:12px}
+.watch-actions .icon-btn{width:36px;height:36px;border-radius:10px;background:#131b24}
+.watch-actions .icon-btn:hover{background:#1b2531}
+@media(max-width:700px){.w-range{display:none}.watch-row{grid-template-columns:auto auto minmax(0,1fr) minmax(60px,84px) auto auto;gap:10px}}
+@media(max-width:520px){.w-spark{display:none}.watch-row{grid-template-columns:auto auto minmax(0,1fr) auto auto;padding:12px}.watch-row .coin-logo{width:38px;height:38px;flex-basis:38px}.w-name{display:none}}
 </style>
 </head>
 <body>
@@ -394,6 +444,7 @@ button.hz-card:hover{border-color:#3a4658}
       <div><h3>Watchlist</h3><p>Coins you follow without holding them</p></div>
       <form class="watch-add" id="watchForm"><input class="search" id="watchInput" placeholder="Add symbol, e.g. SOL" maxlength="20" autocomplete="off" aria-label="Add a coin to your watchlist"><button class="btn primary" type="submit">＋ Watch</button></form>
     </div>
+    <div class="watch-sum" id="watchSummary"></div>
     <div class="watch-grid" id="watchGrid"></div>
   </section>
 
@@ -420,10 +471,10 @@ button.hz-card:hover{border-color:#3a4658}
 
     <section class="panel section" style="margin-bottom:18px">
     <div class="section-head">
-      <div><h3>Chart Analyzer</h3><p>Short / medium / long-term outlook, entry, stop-loss, targets and estimated liquidation zones</p></div>
-      <div class="season-ctl"><select id="anSym" aria-label="Coin"></select><select id="anTf" aria-label="Plan timeframe" title="Plan and chart timeframe"><option value="1h">1H</option><option value="4h" selected>4H</option><option value="1d">1D</option><option value="1w">1W</option></select><button class="btn primary" id="anBtn" type="button">Analyze</button></div>
+      <div><h3>Chart Analyzer</h3><p>تحليل بالعربي: الاتجاه، الشراء، وقف الخسارة، الأهداف، والتصفيات الحقيقية</p></div>
+      <div class="season-ctl"><select id="anSym" aria-label="Coin"></select><select id="anTf" aria-label="Plan timeframe" title="Plan and chart timeframe"><option value="1h">1H</option><option value="4h" selected>4H</option><option value="1d">1D</option><option value="1w">1W</option></select><button class="btn primary" id="anBtn" type="button">حلّل</button></div>
     </div>
-    <div id="anOut"><div class="empty" style="padding:24px 10px">Pick a coin and timeframe, then press Analyze.</div></div>
+    <div id="anOut"><div class="empty" style="padding:24px 10px">اختار العملة وبعدين دوس حلّل.</div></div>
   </section>
 
 <footer class="footer"><span>Coinfolio · Personal portfolio tracker</span><span>Market prices are indicative. The USD/EGP rate comes from CoinGecko and may differ from actual P2P prices.</span></footer>
@@ -581,7 +632,7 @@ function normalizeAsset(raw) {
   };
 }
 
-const defaultState = () => ({portfolio:[],prices:{},usdEgp:0,history:[],watchlist:[],watchLogos:{},changes:{},trades:[],updatedAt:null});
+const defaultState = () => ({portfolio:[],prices:{},usdEgp:0,history:[],watchlist:[],watchLogos:{},changes:{},stats:{},trades:[],updatedAt:null});
 let state = defaultState();
 let currentUser = null;
 let cloudReady = false;
@@ -793,30 +844,79 @@ document.addEventListener("click", e => {
 });
 
 let watchDragging=false;
+let sparkTimer=null;
+const spark={};
+function sparkSvg(sym,pts){
+  if(!pts||pts.length<2)return '<div class="spark-empty"></div>';
+  const w=110,h=36,mn=Math.min(...pts),mx=Math.max(...pts),rg=(mx-mn)||1;
+  const up=pts[pts.length-1]>=pts[0],col=up?"#22c993":"#ff6b70";
+  const xy=pts.map((v,i)=>[i/(pts.length-1)*w,3+(mx-v)/rg*(h-6)]);
+  const line=xy.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+  const gid="sg_"+sym.replace(/[^A-Za-z0-9]/g,"");
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".35"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs><path d="${line} L${w} ${h} L0 ${h} Z" fill="url(#${gid})"/><path d="${line}" fill="none" stroke="${col}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;
+}
 function renderWatchlist() {
   if(watchDragging) return;
-  const grid=$("watchGrid");
+  const grid=$("watchGrid"),sumEl=$("watchSummary");
   if(!grid) return;
   const list=Array.isArray(state.watchlist)?state.watchlist:[];
   if(!list.length) {
     grid.innerHTML='<div class="empty" style="padding:24px 10px">No coins on your watchlist yet. Add a symbol like SOL or ETH above.</div>';
+    if(sumEl) sumEl.innerHTML="";
     return;
   }
-  const changes=state.changes||{};
+  const changes=state.changes||{},stats=state.stats||{};
   state.watchLogos=state.watchLogos||{};
+  const sgn=v=>(v>0?"+":"")+v.toFixed(2)+"%";
+  if(sumEl){
+    const items=list.map(s=>({s,c:num(changes[s]),ok:num(state.prices[s])>0})).filter(x=>x.ok);
+    if(items.length>=2){
+      const best=items.reduce((a,b)=>b.c>a.c?b:a),worst=items.reduce((a,b)=>b.c<a.c?b:a),avg=items.reduce((t,x)=>t+x.c,0)/items.length;
+      sumEl.innerHTML=`<span class="wchip green">▲ ${escapeHtml(best.s)} ${sgn(best.c)}</span><span class="wchip red">▼ ${escapeHtml(worst.s)} ${sgn(worst.c)}</span><span class="wchip">Avg ${sgn(avg)}</span><span class="wchip">${list.length} coins</span>`;
+    } else sumEl.innerHTML=`<span class="wchip">${list.length} coin${list.length===1?"":"s"}</span>`;
+  }
   grid.innerHTML=list.map(sym=>{
-    const price=num(state.prices[sym]),ch=num(changes[sym]);
-    const held=(state.portfolio||[]).find(a=>a.symbol===sym&&a.logo);
+    const price=num(state.prices[sym]),ch=num(changes[sym]),st=stats[sym]||{};
+    const held=(state.portfolio||[]).find(a=>a.symbol===sym);
     const url=(held&&held.logo)||state.watchLogos[sym]||("https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/"+sym.toLowerCase()+".png");
     const fb=escapeHtml(sym.slice(0,3));
-    return `<article class="watch-row" data-sym="${escapeHtml(sym)}">
+    const nm=(held&&held.name&&held.name!==sym?held.name:(logoCache[sym.toLowerCase()]||{}).name)||"";
+    const cls=ch>0?"up":ch<0?"down":"";
+    const sp=spark[sym];
+    let pts=sp?sp.pts.slice():null;
+    if(pts&&pts.length&&price>0) pts[pts.length-1]=price;
+    let range="";
+    if(st.high>st.low&&price>0){
+      const pos=Math.max(0,Math.min(100,(price-st.low)/(st.high-st.low)*100));
+      range=`<div class="w-range" title="24h low / high"><span>${priceFmt(st.low)}</span><div class="w-rbar"><i style="left:${pos.toFixed(1)}%"></i></div><span>${priceFmt(st.high)}</span></div>`;
+    }
+    return `<article class="watch-row ${cls}" data-sym="${escapeHtml(sym)}">
       <button type="button" class="drag-handle" aria-label="Drag to reorder ${escapeHtml(sym)}" title="Drag to reorder">⋮⋮</button>
       <span class="coin-logo"><img src="${escapeHtml(url)}" alt="${escapeHtml(sym)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${fb}'"></span>
-      <div class="watch-info" style="min-width:0"><div class="watch-sym">${escapeHtml(sym)}</div><div class="watch-sub">${escapeHtml(sym)}/USDT</div></div>
-      <div class="watch-quote"><div class="watch-price ${flash("w:"+sym,price)}">${price>0?priceFmt(price):"—"}</div><span class="chg-pill ${ch>0?"green":ch<0?"red":""}">${ch>0?"+":""}${ch.toFixed(2)}%</span></div>
+      <div class="watch-info" style="min-width:0">
+        <div class="watch-sym">${escapeHtml(sym)}${nm?` <span class="w-name">${escapeHtml(nm)}</span>`:""}${held?' <span class="w-held">Held</span>':""}</div>
+        <div class="watch-sub">${escapeHtml(sym)}/USDT${st.vol>0?" · Vol "+usdShort(st.vol):""}</div>
+        ${range}
+      </div>
+      <div class="w-spark">${sparkSvg(sym,pts)}<small>48h</small></div>
+      <div class="watch-quote"><div class="watch-price ${flash("w:"+sym,price)}">${price>0?priceFmt(price):"—"}</div><span class="chg-pill ${ch>0?"green":ch<0?"red":""}">${ch>0?"▲ ":ch<0?"▼ ":""}${Math.abs(ch).toFixed(2)}%</span></div>
       <div class="watch-actions"><button class="icon-btn" data-watch-add="${escapeHtml(sym)}" title="Add to portfolio" aria-label="Add ${escapeHtml(sym)} to portfolio">＋</button><button class="icon-btn danger" data-watch-remove="${escapeHtml(sym)}" title="Remove" aria-label="Remove ${escapeHtml(sym)}">✕</button></div>
     </article>`;
   }).join("");
+}
+async function loadSparks(){
+  const list=(state.watchlist||[]).slice();
+  await Promise.all(list.map(async sym=>{
+    const c=spark[sym];
+    if(c&&Date.now()-c.t<300000) return;
+    try{
+      const r=await fetch(`https://api.binance.com/api/v3/klines?symbol=${sym}USDT&interval=1h&limit=48`);
+      if(!r.ok) return;
+      const d=await r.json();
+      spark[sym]={t:Date.now(),pts:d.map(x=>+x[4])};
+    }catch{}
+  }));
+  renderWatchlist();
 }
 async function resolveWatchLogos(){
   state.watchLogos=state.watchLogos||{};
@@ -969,7 +1069,7 @@ async function fetchPrices() {
       state.prices[symbol]=price;
       const asset=state.portfolio.find(a=>a.symbol===symbol);
       if(asset) asset.change24h=num(ticker.priceChangePercent);
-      state.changes=state.changes||{};state.changes[symbol]=num(ticker.priceChangePercent);
+      state.changes=state.changes||{};state.changes[symbol]=num(ticker.priceChangePercent);state.stats=state.stats||{};state.stats[symbol]={high:num(ticker.highPrice),low:num(ticker.lowPrice),vol:num(ticker.quoteVolume)};
       succeeded++;
     }
   };
@@ -1029,7 +1129,7 @@ function connectLivePrices() {
           state.prices[symbol]=price;
           const asset=state.portfolio.find(a=>a.symbol===symbol);
           if(asset) asset.change24h=num(ticker.P);
-          state.changes=state.changes||{};state.changes[symbol]=num(ticker.P);
+          state.changes=state.changes||{};state.changes[symbol]=num(ticker.P);state.stats=state.stats||{};state.stats[symbol]={high:num(ticker.h),low:num(ticker.l),vol:num(ticker.q)};
           state.updatedAt=Date.now();
           scheduleLiveRender();
         }
@@ -1403,13 +1503,13 @@ $("watchForm").addEventListener("submit",async event=>{
     const price=num(t.lastPrice);
     if(!(price>0)) throw new Error("no price");
     state.prices[symbol]=price;
-    state.changes=state.changes||{};state.changes[symbol]=num(t.priceChangePercent);
+    state.changes=state.changes||{};state.changes[symbol]=num(t.priceChangePercent);state.stats=state.stats||{};state.stats[symbol]={high:num(t.highPrice),low:num(t.lowPrice),vol:num(t.quoteVolume)};
   } catch {
     alert(symbol+"/USDT was not found on Binance.");return;
   }
   state.watchlist.push(symbol);
   input.value="";
-  markPortfolioChanged();render();connectLivePrices();resolveWatchLogos();
+  markPortfolioChanged();render();connectLivePrices();resolveWatchLogos();loadSparks();
 });
 /* ===== Watchlist reordering: drag the ⋮⋮ handle (mouse + touch), or use ↑/↓ on the focused handle ===== */
 $("watchGrid").addEventListener("pointerdown",e=>{
@@ -1464,7 +1564,7 @@ $("watchGrid").addEventListener("keydown",e=>{
 document.addEventListener("keydown",event=>{if(event.key==="Escape")closeModal();});
 window.addEventListener("resize",()=>drawChart());
 
-/* ===== Chart Analyzer: multi-horizon outlook + estimated liquidation zones ===== */
+/* ===== Chart Analyzer (Arabic): multi-horizon outlook, buy/sell plan, real liquidations ===== */
 const kcache={};
 async function klines(sym,iv,limit){
   const key=sym+iv+limit;if(kcache[key])return kcache[key];
@@ -1474,6 +1574,9 @@ async function klines(sym,iv,limit){
 }
 const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
 function analyzerSymbols(){return [...new Set(["BTC",...allSymbols()])];}
+const fp=x=>`<bdi dir="ltr">${priceFmt(x)}</bdi>`;
+const fpc=(p,base)=>{const d=(p/base-1)*100;return `<bdi dir="ltr">${d>0?"+":""}${d.toFixed(1)}%</bdi>`;};
+const usdShort=v=>v>=1e6?"$"+(v/1e6).toFixed(2)+"M":v>=1e3?"$"+(v/1e3).toFixed(1)+"K":"$"+Math.round(v);
 
 /* ---- indicators ---- */
 const ema=(a,n)=>{const k=2/(n+1);let e=a[0];return a.map((v,i)=>i?(e=v*k+e*(1-k)):e);};
@@ -1513,10 +1616,7 @@ function srLevels(k,price,a){
   return cl.map(c=>({p:c.sum/c.n,n:c.n}));
 }
 
-/* ---- estimated liquidation map ----
-   Every candle is treated as a batch of new positions opened near its typical price.
-   Taker-buy share splits it into longs / shorts, and typical leverage tiers give each position a liquidation price.
-   Positions whose liquidation level was already touched by later price action are removed (already liquidated). */
+/* ---- fallback only: estimated liquidation map (used when no real liquidation data is available) ---- */
 const LIQ_LEV=[[5,.10],[10,.25],[25,.30],[50,.20],[100,.15]];
 const LIQ_RANGE={"1h":.08,"4h":.15,"1d":.25,"1w":.45};
 function liqModel(k,price,tf){
@@ -1539,12 +1639,85 @@ function liqModel(k,price,tf){
     const peaks=cand.filter(b=>b.w>maxW*.15&&b.w>=(bins[b.i-1]?bins[b.i-1].w:0)&&b.w>=(bins[b.i+1]?bins[b.i+1].w:0)).sort((x,y)=>y.w-x.w);
     const out=[];
     for(const p of peaks){
-      if(out.every(o=>Math.abs(o.p-p.p)>step*4))out.push({p:p.p,pct:p.w/maxW*100,dist:(p.p/price-1)*100});
-      if(out.length>=3)break;
+      if(out.every(o=>Math.abs(o.p-p.p)>step*4))out.push({p:p.p,pct:p.w/maxW*100,dist:(p.p/price-1)*100,long:below});
+      if(out.length>=2)break;
     }
     return out.sort((x,y)=>below?y.p-x.p:x.p-y.p);
   };
-  return {bins,maxW,step,below:pick(true),above:pick(false)};
+  return {below:pick(true),above:pick(false)};
+}
+
+/* ---- REAL liquidations from free public feeds ----
+   1) OKX REST: recent filled liquidation orders (history, no key needed)
+   2) Binance Futures WebSocket forceOrder: live liquidations while this page is open */
+async function okxLiq(sym){
+  const base=sym+"-USDT";
+  const [ins,liq]=await Promise.all([
+    getJson("https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId="+base+"-SWAP").catch(()=>null),
+    getJson("https://www.okx.com/api/v5/public/liquidation-orders?instType=SWAP&uly="+base+"&state=filled").catch(()=>null)
+  ]);
+  const ct=num(ins&&ins.data&&ins.data[0]&&ins.data[0].ctVal)||1;
+  const out=[];
+  for(const row of ((liq&&liq.data)||[])){
+    for(const d of (row.details||[])){
+      const p=num(d.bkPx),sz=num(d.sz);
+      if(!(p>0&&sz>0))continue;
+      const long=d.posSide==="long"||(d.posSide!=="short"&&d.side==="sell");
+      out.push({p,usd:sz*ct*p,long,t:num(d.ts)||Date.now(),src:"OKX"});
+    }
+  }
+  return out;
+}
+let liqSock=null,liqSym="",liqLive=[],liqTimer=null,liqFails=0;
+function stopLiqSocket(){
+  clearTimeout(liqTimer);
+  if(liqSock){liqSock.onclose=null;liqSock.onmessage=null;try{liqSock.close();}catch{}liqSock=null;}
+}
+function startLiqSocket(sym){
+  stopLiqSocket();
+  if(liqSym!==sym){liqSym=sym;liqLive=[];liqFails=0;}
+  try{
+    const ws=new WebSocket("wss://fstream.binance.com/ws/"+sym.toLowerCase()+"usdt@forceOrder");
+    liqSock=ws;
+    ws.onopen=()=>{liqFails=0;scheduleLiqRefresh();};
+    ws.onmessage=ev=>{
+      try{
+        const o=JSON.parse(ev.data).o;if(!o)return;
+        const p=num(o.ap)>0?num(o.ap):num(o.p),q=num(o.q);
+        if(!(p>0&&q>0))return;
+        liqLive.push({p,usd:p*q,long:o.S==="SELL",t:num(o.T)||Date.now(),src:"Binance"});
+        if(liqLive.length>500)liqLive.shift();
+        scheduleLiqRefresh();
+      }catch{}
+    };
+    ws.onclose=()=>{
+      if(liqSock!==ws||!anState||anState.sym!==sym||++liqFails>3)return;
+      liqTimer=setTimeout(()=>startLiqSocket(sym),5000);
+    };
+  }catch{}
+}
+let liqRefTimer=null;
+function scheduleLiqRefresh(){clearTimeout(liqRefTimer);liqRefTimer=setTimeout(refreshLiq,2500);}
+const allEvents=()=>((anState&&anState.okx)||[]).concat(liqLive);
+function realClusters(ev,price,tf){
+  const R=LIQ_RANGE[tf]||.2,lo=price*(1-R),hi=price*(1+R),B=50,step=(hi-lo)/B;
+  const L=Array(B).fill(0),S=Array(B).fill(0);
+  let tl=0,ts=0;
+  ev.forEach(e=>{
+    if(e.long)tl+=e.usd;else ts+=e.usd;
+    if(e.p<lo||e.p>hi)return;
+    (e.long?L:S)[Math.min(B-1,Math.floor((e.p-lo)/step))]+=e.usd;
+  });
+  const pickSide=above=>{
+    const cand=L.map((l,i)=>({w:l+S[i],l,s:S[i],p:lo+step*(i+.5)})).filter(b=>b.w>0&&(above?b.p>price:b.p<price)).sort((a,b)=>b.w-a.w);
+    const out=[];
+    for(const c of cand){
+      if(out.every(o=>Math.abs(o.p-c.p)>step*3))out.push({p:c.p,usd:c.w,long:c.l>=c.s,dist:(c.p/price-1)*100});
+      if(out.length>=2)break;
+    }
+    return out.sort((a,b)=>above?a.p-b.p:b.p-a.p);
+  };
+  return {above:pickSide(true),below:pickSide(false),totalLong:tl,totalShort:ts,count:ev.length};
 }
 
 /* ---- derivatives context from Binance Futures public data (optional) ---- */
@@ -1571,35 +1744,35 @@ async function futContext(sym){
   return out;
 }
 function derivNotes(ctx,pc){
-  if(!ctx)return [{ok:null,t:"Futures data is unavailable for this coin or region. Liquidation zones are estimated from spot volume only."}];
+  if(!ctx)return [{ok:null,t:"بيانات الـ Futures مش متاحة للعملة دي أو في منطقتك."}];
   const o=[];
   if(ctx.funding!=null){
     const f=ctx.funding;
-    o.push(f>0.05?{ok:false,t:`Funding ${f.toFixed(3)}%: longs are crowded, so a long squeeze (sharp flush down) is more likely.`}
-      :f<-0.02?{ok:true,t:`Funding ${f.toFixed(3)}%: shorts are crowded, so a short squeeze (sharp pump) is more likely.`}
-      :{ok:null,t:`Funding ${f.toFixed(3)}%: neutral, no crowded side.`});
+    o.push(f>0.05?{ok:false,t:`الـ Funding ${f.toFixed(3)}%: اللونج مزدحم، فخطر تصفية اللونجات (هبوط حاد) أعلى.`}
+      :f<-0.02?{ok:true,t:`الـ Funding ${f.toFixed(3)}%: الشورت مزدحم، فاحتمال Short Squeeze (صعود حاد) أعلى.`}
+      :{ok:null,t:`الـ Funding ${f.toFixed(3)}%: متعادل، مفيش طرف مزدحم.`});
   }
   if(ctx.ls!=null){
     const r=ctx.ls;
-    o.push(r>1.8?{ok:false,t:`Long/short accounts ratio ${r.toFixed(2)}: most traders are long, which is a contrarian risk.`}
-      :r<0.8?{ok:true,t:`Long/short accounts ratio ${r.toFixed(2)}: most traders are short, which favors a squeeze up.`}
-      :{ok:null,t:`Long/short accounts ratio ${r.toFixed(2)}: balanced.`});
+    o.push(r>1.8?{ok:false,t:`نسبة Long/Short ${r.toFixed(2)}: أغلب المتداولين لونج، وده خطر عكسي.`}
+      :r<0.8?{ok:true,t:`نسبة Long/Short ${r.toFixed(2)}: أغلبهم شورت، وده يدعم صعود مفاجئ.`}
+      :{ok:null,t:`نسبة Long/Short ${r.toFixed(2)}: متوازنة.`});
   }
   if(ctx.oiChg!=null){
-    const up=ctx.oiChg>0;let t=`Open interest ${up?"+":""}${ctx.oiChg.toFixed(1)}% in 24h`;
+    const up=ctx.oiChg>0;let t=`الـ Open Interest ${up?"+":""}${ctx.oiChg.toFixed(1)}% في 24 ساعة`;
     if(pc!=null){
-      if(up&&pc>0)t+=" while price rises: new longs are entering, a healthy trend.";
-      else if(up&&pc<0)t+=" while price falls: new shorts are piling in, bearish pressure.";
-      else if(!up&&pc>0)t+=" while price rises: mostly short covering, a weaker rally.";
-      else t+=" while price falls: longs are closing, selling may be fading.";
+      if(up&&pc>0)t+=" مع صعود السعر: مراكز شراء جديدة بتدخل، ترند صحي.";
+      else if(up&&pc<0)t+=" مع نزول السعر: مراكز بيع جديدة بتتراكم، ضغط هبوطي.";
+      else if(!up&&pc>0)t+=" مع صعود السعر: غالباً تغطية شورت، صعود أضعف.";
+      else t+=" مع نزول السعر: اللونجات بتقفل، والبيع ممكن يهدى.";
     }else t+=".";
     o.push({ok:null,t});
   }
-  return o.length?o:[{ok:null,t:"No derivatives data returned for this coin."}];
+  return o.length?o:[{ok:null,t:"مفيش بيانات مشتقات للعملة دي."}];
 }
 
 /* ---- single-timeframe analysis ---- */
-function analyze(k,tf){
+function analyze(k,tf,events){
   const c=k.map(x=>x.c),n=k.length,price=c[n-1];
   const e20=ema(c,20),e50=ema(c,50),e200=ema(c,200),has200=n>=200;
   const rs=rsiCalc(c),R=rs[n-1]==null?50:rs[n-1];
@@ -1609,136 +1782,157 @@ function analyze(k,tf){
   const adx=adxCalc(k),sw=swings(k,3),obv=obvArr(k),obvE=ema(obv,20);
   let s=0,max=0;const reasons=[];
   const add=(ok,g,b)=>{max++;s+=ok?1:-1;reasons.push({ok,t:ok?g:b});};
-  add(price>e50[n-1],"Price is above EMA50","Price is below EMA50");
-  add(e20[n-1]>e50[n-1],"EMA20 above EMA50 (short-term trend up)","EMA20 below EMA50 (short-term trend down)");
-  if(has200)add(e50[n-1]>e200[n-1],"EMA50 above EMA200 (long-term trend up)","EMA50 below EMA200 (long-term trend down)");
+  add(price>e50[n-1],"السعر فوق EMA50","السعر تحت EMA50");
+  add(e20[n-1]>e50[n-1],"EMA20 فوق EMA50 (الاتجاه القصير صاعد)","EMA20 تحت EMA50 (الاتجاه القصير هابط)");
+  if(has200)add(e50[n-1]>e200[n-1],"EMA50 فوق EMA200 (الاتجاه الطويل صاعد)","EMA50 تحت EMA200 (الاتجاه الطويل هابط)");
   max++;
-  if(R>55){s++;reasons.push({ok:true,t:"RSI "+R.toFixed(0)+" shows buying momentum"});}
-  else if(R<45){s--;reasons.push({ok:false,t:"RSI "+R.toFixed(0)+" shows selling momentum"});}
-  else reasons.push({ok:null,t:"RSI "+R.toFixed(0)+" is neutral"});
-  add(hist>0,"MACD histogram positive","MACD histogram negative");
+  if(R>55){s++;reasons.push({ok:true,t:"RSI "+R.toFixed(0)+": زخم شراء"});}
+  else if(R<45){s--;reasons.push({ok:false,t:"RSI "+R.toFixed(0)+": زخم بيع"});}
+  else reasons.push({ok:null,t:"RSI "+R.toFixed(0)+": محايد"});
+  add(hist>0,"MACD إيجابي","MACD سلبي");
   const h2=sw.hi.slice(-2),l2=sw.lo.slice(-2);
   max++;
   if(h2.length===2&&l2.length===2){
-    if(h2[1].p>h2[0].p&&l2[1].p>l2[0].p){s++;reasons.push({ok:true,t:"Market structure: higher highs and higher lows"});}
-    else if(h2[1].p<h2[0].p&&l2[1].p<l2[0].p){s--;reasons.push({ok:false,t:"Market structure: lower highs and lower lows"});}
-    else reasons.push({ok:null,t:"Market structure is mixed (no clean HH/HL or LH/LL)"});
-  }else reasons.push({ok:null,t:"Not enough swings to read market structure"});
-  add(obv[n-1]>obvE[n-1],"OBV above its average (volume flowing in)","OBV below its average (volume flowing out)");
+    if(h2[1].p>h2[0].p&&l2[1].p>l2[0].p){s++;reasons.push({ok:true,t:"هيكل السوق: قمم وقيعان أعلى"});}
+    else if(h2[1].p<h2[0].p&&l2[1].p<l2[0].p){s--;reasons.push({ok:false,t:"هيكل السوق: قمم وقيعان أدنى"});}
+    else reasons.push({ok:null,t:"هيكل السوق مختلط"});
+  }else reasons.push({ok:null,t:"مفيش قمم وقيعان كفاية لقراءة الهيكل"});
+  add(obv[n-1]>obvE[n-1],"OBV فوق متوسطه (سيولة داخلة)","OBV تحت متوسطه (سيولة خارجة)");
   max++;
-  if(adx.adx>=22){const up=adx.pdi>adx.mdi;s+=up?1:-1;reasons.push({ok:up,t:"ADX "+adx.adx.toFixed(0)+": strong "+(up?"uptrend":"downtrend")});}
-  else reasons.push({ok:null,t:"ADX "+adx.adx.toFixed(0)+": weak trend (ranging market)"});
+  if(adx.adx>=22){const up=adx.pdi>adx.mdi;s+=up?1:-1;reasons.push({ok:up,t:"ADX "+adx.adx.toFixed(0)+": "+(up?"ترند صاعد قوي":"ترند هابط قوي")});}
+  else reasons.push({ok:null,t:"ADX "+adx.adx.toFixed(0)+": ترند ضعيف (السوق عرضي)"});
   const notes=[];
-  if(R>70)notes.push("RSI is overbought: avoid chasing, wait for a pullback.");
-  if(R<30)notes.push("RSI is oversold: a bounce is possible but the trend is still weak.");
-  if(vr>1.3)notes.push("Recent volume is above average (move has participation).");
-  else if(vr<.7)notes.push("Recent volume is weak (moves are less reliable).");
-  if(h2.length===2&&rs[h2[0].i]!=null&&rs[h2[1].i]!=null&&h2[1].p>h2[0].p&&rs[h2[1].i]<rs[h2[0].i]-2&&n-h2[1].i<=40)notes.push("Bearish RSI divergence at the latest high: momentum is fading.");
-  if(l2.length===2&&rs[l2[0].i]!=null&&rs[l2[1].i]!=null&&l2[1].p<l2[0].p&&rs[l2[1].i]>rs[l2[0].i]+2&&n-l2[1].i<=40)notes.push("Bullish RSI divergence at the latest low: selling pressure is fading.");
+  if(R>70)notes.push("RSI في تشبع شراء: متطاردش السعر، استنى تراجع.");
+  if(R<30)notes.push("RSI في تشبع بيع: ارتداد ممكن، بس الاتجاه لسه ضعيف.");
+  if(vr>1.3)notes.push("الحجم الأخير أعلى من المتوسط (الحركة عليها مشاركة).");
+  else if(vr<.7)notes.push("الحجم الأخير ضعيف (الحركات أقل موثوقية).");
+  if(h2.length===2&&rs[h2[0].i]!=null&&rs[h2[1].i]!=null&&h2[1].p>h2[0].p&&rs[h2[1].i]<rs[h2[0].i]-2&&n-h2[1].i<=40)notes.push("تباعد سلبي في RSI عند آخر قمة: الزخم بيضعف.");
+  if(l2.length===2&&rs[l2[0].i]!=null&&rs[l2[1].i]!=null&&l2[1].p<l2[0].p&&rs[l2[1].i]>rs[l2[0].i]+2&&n-l2[1].i<=40)notes.push("تباعد إيجابي في RSI عند آخر قاع: ضغط البيع بيضعف.");
   const w20=c.slice(-20),m20=mean(w20),sd=Math.sqrt(mean(w20.map(v=>(v-m20)**2)));
-  if(price>m20+2*sd)notes.push("Price is above the upper Bollinger band: stretched, pullback risk.");
-  if(price<m20-2*sd)notes.push("Price is below the lower Bollinger band: stretched down, bounce possible.");
+  if(price>m20+2*sd)notes.push("السعر فوق باند بولينجر العلوي: مبالغ فيه، وخطر تراجع.");
+  if(price<m20-2*sd)notes.push("السعر تحت باند بولينجر السفلي: مبالغ في النزول، وارتداد ممكن.");
   const lv=srLevels(k,price,a),lq=liqModel(k,price,tf);
+  const rc=events&&events.length>=8?realClusters(events,price,tf):null;
+  const zones=rc&&(rc.below.length||rc.above.length)?{below:rc.below,above:rc.above,real:true}:{below:lq.below,above:lq.above,real:false};
   const sup=lv.filter(l=>l.p<price*.998).sort((x,y)=>y.p-x.p),res=lv.filter(l=>l.p>price*1.002).sort((x,y)=>x.p-y.p);
   const S1=sup[0]?sup[0].p:price-2*a,S2=sup[1]?sup[1].p:S1-2*a,R1=res[0]?res[0].p:price+2*a,R2=res[1]?res[1].p:R1+2*a,R3=res[2]?res[2].p:R2+2*a;
   const ratio=max?s/max:0;
   const mode=ratio>=.35?"buy":ratio<=-.35?"avoid":"range";
-  const rows=[],lines=[];
-  const row=(label,p,cls,color,extra)=>{rows.push({label,p,cls,extra});(Array.isArray(p)?p:[p]).forEach(x=>lines.push({p:x,color,label}));};
-  const adjStop=(stop,entry)=>{const z=lq.below.find(z=>z.p<entry&&z.p>stop);return z?{stop:z.p-.3*a,note:"Placed below the long-liquidation cluster to avoid a stop hunt"}:{stop,note:null};};
-  const magUp=()=>{if(lq.above[0])row("Short-liq magnet ↑",lq.above[0].p,"green","#06b6d4","Shorts get liquidated here, so price is often pulled up to it");};
-  const magDn=()=>{if(lq.below[0])row("Long-liq magnet ↓",lq.below[0].p,"red","#f59e0b","Longs get liquidated here, so price is often flushed down to it");};
-  let title,verdict,vcls;
+  const adjStop=(stop,entry)=>{const z=zones.below.find(z=>z.p<entry&&z.p>stop);return z?z.p-.3*a:stop;};
+  let plan,verdict,vcls;
   if(mode==="buy"){
-    verdict=ratio>=.65?"Strong bullish":"Bullish";vcls="green";title="Buy plan (pullback entry)";
+    verdict=ratio>=.65?"صاعد بقوة":"صاعد";vcls="green";
     const near=price-S1<=3*a,hi=near?Math.min(price,S1+.6*a):price,lo=near?S1:price-.8*a,entry=(hi+lo)/2;
-    const st=adjStop(lo-.6*a,entry),stop=st.stop,risk=entry-stop;
+    const stop=adjStop(lo-.6*a,entry),risk=entry-stop;
     const tps=[R1,R2,R3].map((t,i)=>t>entry+risk*.8?t:entry+risk*[1.5,2.5,4][i]).sort((x,y)=>x-y);
-    row("Entry zone",[lo,hi],"","#4f8cff","Buy on a pullback into this zone");
-    row("Stop loss",stop,"red","#ff6b70",st.note||"Exit if price closes below this");
-    tps.forEach((t,i)=>row("Target "+(i+1),t,"green","#22c993","Risk/reward "+((t-entry)/risk).toFixed(1)+":1"));
-    magUp();
-  } else if(mode==="avoid"){
-    verdict=ratio<=-.65?"Strong bearish":"Bearish";vcls="red";title="Avoid buying now. Levels to watch";
-    row("Turns bullish above",Math.max(R1,e50[n-1]),"green","#22c993","Reclaim with volume before buying");
-    row("Exit / trim zone 1",R1,"red","#ff6b70","If you hold, sell into strength here");
-    row("Exit / trim zone 2",R2,"red","#ff6b70","Second resistance");
-    row("Breakdown level",S1,"red","#ff6b70","Losing this opens the way down");
-    magDn();
-    row("Re-entry zone (only after reversal)",[S2,S1],"","#4f8cff","Wait for a bounce confirmation here");
-  } else {
-    verdict="Mixed / sideways";vcls="";title="Range plan";
-    const lo=S1,hi=S1+.4*a,entry=(lo+hi)/2,st=adjStop(lo-.6*a,entry),stop=st.stop,risk=entry-stop,mid=(S1+R1)/2;
-    row("Buy zone (near support)",[lo,hi],"","#4f8cff","Only if price holds the level");
-    row("Stop loss",stop,"red","#ff6b70",st.note||"Exit if support breaks");
-    row("Target 1 (mid-range)",mid,"green","#22c993","Risk/reward "+((mid-entry)/risk).toFixed(1)+":1");
-    row("Target 2 (resistance)",R1,"green","#22c993","Risk/reward "+((R1-entry)/risk).toFixed(1)+":1");
-    magUp();magDn();
+    plan={buyLo:lo,buyHi:hi,stop,targets:tps,trigger:R1,rr:(tps[0]-entry)/risk};
+  }else if(mode==="avoid"){
+    verdict=ratio<=-.65?"هابط بقوة":"هابط";vcls="red";
+    plan={buyLo:S2,buyHi:S1,stop:S2-.6*a,targets:[R1,R2],trigger:Math.max(R1,e50[n-1]),rr:null};
+  }else{
+    verdict="عرضي / غير واضح";vcls="";
+    const lo=S1,hi=S1+.4*a,entry=(lo+hi)/2,stop=adjStop(lo-.6*a,entry),risk=entry-stop,mid=(S1+R1)/2;
+    plan={buyLo:lo,buyHi:hi,stop,targets:[mid,R1,R2],trigger:R1,rr:(mid-entry)/risk};
   }
-  lq.below.forEach(z=>lines.push({p:z.p,color:"#f59e0b",label:"Long liq",liq:true}));
-  lq.above.forEach(z=>lines.push({p:z.p,color:"#06b6d4",label:"Short liq",liq:true}));
-  return {price,s,max,ratio,verdict,vcls,title,reasons,notes,rows,lines,e20,e50,e200,has200,a,R,adx:adx.adx,lq};
+  Object.assign(plan,{mode,S1,S2,R1,R2});
+  const lines=[];
+  lines.push({p:plan.buyLo,color:"#4f8cff"},{p:plan.buyHi,color:"#4f8cff"},{p:plan.stop,color:"#ff6b70"});
+  plan.targets.forEach(t=>lines.push({p:t,color:"#22c993"}));
+  if(mode==="avoid")lines.push({p:plan.trigger,color:"#22c993"});
+  zones.below.forEach(z=>lines.push({p:z.p,color:"#f59e0b",liq:true}));
+  zones.above.forEach(z=>lines.push({p:z.p,color:"#06b6d4",liq:true}));
+  return {price,s,max,ratio,verdict,vcls,reasons,notes,plan,lines,e20,e50,e200,has200,a,R,adx:adx.adx,zones};
 }
 
 /* ---- rendering ---- */
-const HZ=[["1h","Short term","hours – days"],["4h","Medium term","days – weeks"],["1d","Long term","weeks – months"],["1w","Macro","months +"]];
+const HZ=[["1h","قصير المدى","ساعات – أيام"],["4h","متوسط المدى","أيام – أسابيع"],["1d","طويل المدى","أسابيع – شهور"],["1w","ماكرو","شهور +"]];
 let anState=null;
-function planHtml(tf,A){
-  const pc=p=>{const d=(p/A.price-1)*100;return (d>0?"+":"")+d.toFixed(1)+"%";};
-  const rows=A.rows.map(r=>`<div class="an-row"><div>${r.label}<small>${r.extra||""}</small></div><div class="r ${r.cls}">${Array.isArray(r.p)?priceFmt(r.p[0])+" – "+priceFmt(r.p[1]):priceFmt(r.p)}<small>${Array.isArray(r.p)?pc((r.p[0]+r.p[1])/2):pc(r.p)}</small></div></div>`).join("");
-  const rs=A.reasons.map(r=>`<div class="an-reason"><span class="${r.ok===true?"green":r.ok===false?"red":""}">${r.ok===true?"✓":r.ok===false?"✗":"•"}</span> ${r.t}</div>`).join("");
-  return `<div class="an-top"><div>
-    <div class="stat-label">${tf.toUpperCase()} detail</div>
-    <div class="an-verdict ${A.vcls}" style="font-size:20px">${A.verdict} <span style="font-size:13px;color:var(--muted);font-weight:500">score ${A.s>0?"+":""}${A.s}/${A.max}</span></div>${rs}
-    ${A.notes.map(x=>`<div class="an-reason">⚠ ${x}</div>`).join("")}
-  </div><div><div class="stat-label" style="margin-bottom:6px">${A.title} · ${tf.toUpperCase()}</div>${rows}</div></div>`;
+function liqPanelHtml(){
+  const S=anState,tf=S.tf,A=S.res[tf].A,ev=allEvents();
+  const rc=ev.length>=8?realClusters(ev,A.price,tf):null;
+  const real=!!(rc&&(rc.above.length||rc.below.length));
+  const zs=real?{above:rc.above,below:rc.below}:A.zones;
+  const row=(z,above)=>`<div class="an-row"><div>${(z.long!=null?z.long:!above)?"تصفيات لونج":"تصفيات شورت"} · ${z.usd!=null?usdShort(z.usd):"قوة "+z.pct.toFixed(0)+"%"}</div><div class="r">${fp(z.p)}<small>${fpc(z.p,A.price)}</small></div></div>`;
+  const col=(list,above)=>list.length?list.map(z=>row(z,above)).join(""):'<div class="an-reason">مفيش تجمع واضح.</div>';
+  const live=liqSock&&liqSock.readyState===1;
+  const src=real?`المصدر: تصفيات حقيقية. OKX (${S.okx.length} أمر حديث) + Binance مباشر (${liqLive.length} أمر من وقت فتح الصفحة، ${live?"متصل":"غير متصل"}).`
+    :`مفيش بيانات تصفية حقيقية كفاية دلوقتي (OKX: ${S.okx.length}، Binance مباشر: ${liqLive.length}). المناطق المعروضة تقدير من الحجم، فاعتبرها إشارة ضعيفة.`;
+  const tot=real?`<div class="an-reason">اللونج اللي اتصفّى: ${usdShort(rc.totalLong)} · الشورت اللي اتصفّى: ${usdShort(rc.totalShort)}</div>`:"";
+  return `<h4>مناطق التصفية</h4><div class="an-reason" style="margin-bottom:8px">${src}</div>${tot}
+    <div class="an-top"><div><div class="stat-label" style="margin-bottom:6px;color:#06b6d4">↑ فوق السعر</div>${col(zs.above,true)}</div>
+    <div><div class="stat-label" style="margin-bottom:6px;color:#f59e0b">↓ تحت السعر</div>${col(zs.below,false)}</div></div>
+    <div class="an-note">التصفيات الحقيقية بتبيّن فين الناس اتضربت فعلاً. المناطق دي فيها سيولة، والسعر غالباً بيتفاعل معاها (ارتداد أو اختراق سريع).</div>`;
 }
-function liqHtml(A){
-  const zs=(list,color,up)=>list.length?list.map(z=>`<div class="an-row"><div>${up?"Short liquidations":"Long liquidations"}<span class="liq-bar" style="width:${Math.max(6,z.pct)}%;background:${color}"></span></div><div class="r">${priceFmt(z.p)}<small>${z.dist>0?"+":""}${z.dist.toFixed(1)}% · strength ${z.pct.toFixed(0)}%</small></div></div>`).join(""):'<div class="an-reason">No significant cluster in range.</div>';
-  return `<div class="an-top"><div><div class="stat-label" style="margin-bottom:6px;color:#06b6d4">↑ Above price: short liquidations (squeeze up)</div>${zs(A.lq.above,"#06b6d4",true)}</div><div><div class="stat-label" style="margin-bottom:6px;color:#f59e0b">↓ Below price: long liquidations (flush down)</div>${zs(A.lq.below,"#f59e0b",false)}</div></div>
-  <div class="an-note">Estimated from volume, taker-buy share and typical leverage (5x to 100x) on candles that have not been swept yet. This is a model, not real exchange liquidation data. Price is often attracted to large clusters and tends to wick through them.</div>`;
+function refreshLiq(){
+  if(!anState)return;
+  const box=$("liqPanel");if(!box)return;
+  const r=anState.res[anState.tf];if(!r)return;
+  box.innerHTML=liqPanelHtml();
+  drawAn(r.k,r.A,allEvents());
 }
 function renderAn(){
   const S=anState;if(!S)return;
   const {sym,res,ctx}=S;
   let tf=S.tf;if(!res[tf])tf=["4h","1d","1h","1w"].find(x=>res[x]);
   S.tf=tf;$("anTf").value=tf;
-  const A=res[tf].A,k=res[tf].k;
+  const A=res[tf].A,k=res[tf].k,P=A.plan,price=A.price;
   const W={"1h":1,"4h":2,"1d":2,"1w":1};
   let sw=0,sr=0;HZ.forEach(([t])=>{if(res[t]){sw+=W[t];sr+=W[t]*res[t].A.ratio;}});
   const ov=sw?sr/sw:0;
-  const ovTxt=ov>=.5?"Strong bullish":ov>=.2?"Bullish":ov<=-.5?"Strong bearish":ov<=-.2?"Bearish":"Mixed / sideways";
+  const ovTxt=ov>=.5?"صاعد بقوة":ov>=.2?"صاعد":ov<=-.5?"هابط بقوة":ov<=-.2?"هابط":"عرضي / غير واضح";
   const ovCls=ov>=.2?"green":ov<=-.2?"red":"";
   const avg=ts=>{const v=ts.filter(t=>res[t]).map(t=>res[t].A.ratio);return v.length?mean(v):0;};
   const near=avg(["1h","4h"]),far=avg(["1d","1w"]);
-  const stance=near>=.2&&far>=.2?"All horizons point up: buy dips toward support, and stay with the trend."
-    :near<=-.2&&far<=-.2?"All horizons point down: avoid new longs. Rallies into resistance are sell or trim zones."
-    :far>=.2&&near<=-.2?"Long-term trend is up but the short term is pulling back: wait for price to reach the entry zone instead of chasing."
-    :far<=-.2&&near>=.2?"Short-term bounce inside a long-term downtrend: be cautious and take profits quickly."
-    :"Horizons disagree: range-trade between support and resistance, and keep position size small.";
+  const stance=near>=.2&&far>=.2?"كل المدايات صاعدة: اشتري على التراجعات قرب الدعم وامشي مع الاتجاه."
+    :near<=-.2&&far<=-.2?"كل المدايات هابطة: تجنّب الشراء الجديد. الصعود لحد المقاومة فرصة بيع أو تخفيف."
+    :far>=.2&&near<=-.2?"الاتجاه الطويل صاعد بس القصير بيصحّح: استنى السعر يوصل منطقة الشراء، ومتطاردوش."
+    :far<=-.2&&near>=.2?"ارتداد قصير جوه اتجاه طويل هابط: حذر، وخد أرباحك بسرعة."
+    :"المدايات مختلفة: تداول بين الدعم والمقاومة وخلّي حجم الصفقة صغير.";
   const k1=res["1h"]&&res["1h"].k,pc24=k1&&k1.length>25?(k1[k1.length-1].c/k1[k1.length-25].c-1)*100:null;
   const cards=HZ.map(([t,name,span])=>{
     const r=res[t];
-    if(!r)return `<div class="hz-card" style="opacity:.5"><div class="hz-name">${name}</div><div class="hz-span">${t.toUpperCase()} · ${span}</div><div class="hz-meta">Not enough history</div></div>`;
+    if(!r)return `<div class="hz-card" style="opacity:.5"><div class="hz-name">${name}</div><div class="hz-span">${t.toUpperCase()} · ${span}</div><div class="hz-meta">التاريخ مش كفاية</div></div>`;
     const a=r.A,left=a.ratio<0?50+a.ratio*50:50;
-    return `<button type="button" class="hz-card ${t===tf?"active":""}" data-hz="${t}"><div class="hz-name">${name}</div><div class="hz-span">${t.toUpperCase()} · ${span}</div><div class="hz-verdict ${a.vcls}">${a.verdict}</div><div class="hz-meta">score ${a.s>0?"+":""}${a.s}/${a.max} · RSI ${a.R.toFixed(0)} · ADX ${a.adx.toFixed(0)}</div><div class="hz-bar"><i style="left:${left}%;width:${Math.abs(a.ratio)*50}%;background:${a.ratio>=0?"var(--green)":"var(--red)"}"></i></div></button>`;
+    return `<button type="button" class="hz-card ${t===tf?"active":""}" data-hz="${t}"><div class="hz-name">${name}</div><div class="hz-span">${t.toUpperCase()} · ${span}</div><div class="hz-verdict ${a.vcls}">${a.verdict}</div><div class="hz-bar"><i style="left:${left}%;width:${Math.abs(a.ratio)*50}%;background:${a.ratio>=0?"var(--green)":"var(--red)"}"></i></div></button>`;
   }).join("");
+  const range=`من ${fp(P.buyLo)} إلى ${fp(P.buyHi)}`;
+  const inZone=price>=P.buyLo*.998&&price<=P.buyHi*1.003;
+  const decision=P.mode==="buy"
+    ?`الاتجاه لصالح الشراء. الأفضل تدخل على تراجع في منطقة ${range} بدل ما تطارد السعر.${inZone?" السعر دلوقتي جوه المنطقة دي.":""}`
+    :P.mode==="range"
+    ?`السوق عرضي. اشتري قرب الدعم (${range}) وبيع قرب المقاومة، وتجنّب الدخول في نص المدى.${inZone?" السعر دلوقتي جوه منطقة الشراء.":""}`
+    :`مش وقت شراء. لو معاك العملة فكّر تخفف قرب ${fp(P.R1)}. ولو عايز تشتري، استنى ارتداد واضح من ${range} أو ثبات فوق ${fp(P.trigger)}.`;
+  const upT=P.targets.filter(x=>x>P.trigger*1.002).slice(0,2);
+  const upTxt=upT.length?`والهدف ${upT.map(fp).join(" ثم ")}`:"ويفتح الطريق لقمم جديدة";
+  const zb=A.zones.below[0];
+  const dnTxt=`لو كسر ${fp(P.S1)} وقفل تحته، ممكن ينزل لـ ${fp(P.S2)}.`+(zb?` وأقرب تجمع تصفيات تحت السعر عند ${fp(zb.p)} (${A.zones.real?"حقيقي":"تقديري"})، وغالباً هيسحب السعر له.`:"");
+  const sellList=P.targets.map((t,i)=>`<div class="tri-line">هدف ${i+1}: ${fp(t)} <span class="muted">${fpc(t,price)}</span></div>`).join("");
   const dn=derivNotes(ctx,pc24).map(r=>`<div class="an-reason"><span class="${r.ok===true?"green":r.ok===false?"red":""}">${r.ok===true?"✓":r.ok===false?"✗":"•"}</span> ${r.t}</div>`).join("");
-  $("anOut").innerHTML=`<div class="an-overall">
-      <div class="stat-label">${escapeHtml(sym)}/USDT · now ${priceFmt(A.price)}</div>
-      <div class="an-verdict ${ovCls}">Overall: ${ovTxt}</div>
-      <div class="an-reason">${stance}</div>
-    </div>
+  const rs=A.reasons.map(r=>`<div class="an-reason"><span class="${r.ok===true?"green":r.ok===false?"red":""}">${r.ok===true?"✓":r.ok===false?"✗":"•"}</span> ${r.t}</div>`).join("");
+  $("anOut").innerHTML=`<div class="ar">
+    <div class="stat-label">${escapeHtml(sym)}/USDT · السعر الحالي ${fp(price)}</div>
+    <div class="an-verdict ${ovCls}">الحكم العام: ${ovTxt}</div>
+    <div class="an-reason">${stance}</div>
     <div class="hz-grid">${cards}</div>
-    ${planHtml(tf,A)}
-    <canvas id="anCanvas" style="height:360px;margin-top:16px;background:#0b1017;border-radius:12px"></canvas>
-    <div class="an-note">Blue / orange / purple lines are EMA20 / EMA50 / EMA200. Amber bars and lines are estimated long liquidations (below price), cyan are short liquidations (above price). Click a horizon card to switch the plan and chart.</div>
-    <div class="an-sec"><h4>Estimated liquidation zones · ${tf.toUpperCase()} data</h4>${liqHtml(A)}</div>
-    <div class="an-sec"><h4>Derivatives context</h4>${dn}</div>
-    <div class="an-note">Automatic technical analysis based on indicators and past price levels. It does not predict the future and is not financial advice. Always size your position so the stop loss is a loss you can accept.</div>`;
-  drawAn(k,A);
+    <div class="decision"><strong>الخلاصة (${tf.toUpperCase()}):</strong> ${decision}</div>
+    <div class="tri-grid">
+      <div class="tri-card"><div class="tri-t green">🟢 ${P.mode==="avoid"?"منطقة شراء بعد الارتداد":"اشتري فين"}</div><div class="tri-v">${range}</div><div class="muted">${fpc((P.buyLo+P.buyHi)/2,price)} عن السعر الحالي</div></div>
+      <div class="tri-card"><div class="tri-t red">🔴 وقف الخسارة</div><div class="tri-v">${fp(P.stop)}</div><div class="muted">${fpc(P.stop,price)} عن السعر الحالي</div></div>
+      <div class="tri-card"><div class="tri-t" style="color:#4f8cff">🎯 بيع فين</div>${sellList}${P.rr!=null&&P.rr>0?`<div class="muted">العائد/المخاطرة للهدف 1: ${P.rr.toFixed(1)} : 1</div>`:""}</div>
+    </div>
+    <div class="scn-grid">
+      <div class="scn"><div class="tri-t green">لو صعد</div>لو السعر ثبت فوق ${fp(P.trigger)} ${upTxt}.</div>
+      <div class="scn"><div class="tri-t red">لو نزل</div>${dnTxt}</div>
+    </div>
+    <canvas id="anCanvas" style="direction:ltr;height:360px;margin-top:16px;background:#0b1017;border-radius:12px"></canvas>
+    <div class="an-note">الدوائر = تصفيات حقيقية (أصفر لونج، سماوي شورت). الخطوط المتقطعة = مستويات الخطة. EMA20 أزرق، EMA50 برتقالي، EMA200 بنفسجي. دوس على أي كارت مدى فوق عشان تغيّر الخطة والشارت.</div>
+    <div class="an-sec" id="liqPanel">${liqPanelHtml()}</div>
+    <details class="an-details"><summary>التفاصيل: أسباب الحكم والمؤشرات</summary>${rs}${A.notes.map(x=>`<div class="an-reason">⚠ ${x}</div>`).join("")}<h4 style="margin:14px 0 8px">سياق المشتقات</h4>${dn}</details>
+    <div class="an-note">تحليل آلي من المؤشرات والأسعار السابقة، مش توصية مالية. حجّم صفقتك بحيث وقف الخسارة يكون خسارة تقدر تتحملها.</div>
+  </div>`;
+  drawAn(k,A,allEvents());
 }
-function drawAn(k,A){
+function drawAn(k,A,events){
   const cv=$("anCanvas");if(!cv)return;
   const r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1,ctx=cv.getContext("2d");
   cv.width=r.width*dpr;cv.height=r.height*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -1748,16 +1942,18 @@ function drawAn(k,A){
   L.forEach(l=>{lo=Math.min(lo,l.p);hi=Math.max(hi,l.p);});
   const y=p=>12+(hi-p)/(hi-lo)*(H-24),bw=(W-padR)/N,x=i=>i*bw+bw/2;
   ctx.font="10px Inter,sans-serif";ctx.textBaseline="middle";
-  const q=A.lq,half=q.step/2,maxBar=(W-padR)*.35;
-  q.bins.forEach(b=>{
-    if(b.p<lo||b.p>hi||b.w<=0)return;
-    const bh=Math.max(1,y(b.p-half)-y(b.p+half)),bw2=b.w/q.maxW*maxBar;
-    ctx.fillStyle=b.p<A.price?"rgba(245,158,11,.38)":"rgba(6,182,212,.38)";
-    ctx.fillRect(W-padR-bw2,y(b.p+half),bw2,bh);
-  });
   v.forEach((c,i)=>{const up=c.c>=c.o,col=up?"#22c993":"#ff6b70";ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x(i),y(c.h));ctx.lineTo(x(i),y(c.l));ctx.stroke();const t=y(Math.max(c.o,c.c)),b=y(Math.min(c.o,c.c));ctx.fillRect(x(i)-bw*.33,t,bw*.66,Math.max(1,b-t));});
   const emas=[[A.e20,"#4f8cff"],[A.e50,"#f59e0b"]];if(A.has200)emas.push([A.e200,"#8b5cf6"]);
   emas.forEach(([e,col])=>{ctx.strokeStyle=col;ctx.lineWidth=1.4;ctx.beginPath();for(let i=0;i<N;i++){const yy=y(e[off+i]);i?ctx.lineTo(x(i),yy):ctx.moveTo(x(i),yy);}ctx.stroke();});
+  const ev=(events||[]).filter(e=>e.p>=lo&&e.p<=hi&&e.t>=v[0].t);
+  if(ev.length){
+    const mx=Math.max(...ev.map(e=>e.usd),1);
+    ev.forEach(e=>{
+      let idx=N-1;for(let i=N-1;i>=0;i--){if(v[i].t<=e.t){idx=i;break;}}
+      ctx.fillStyle=e.long?"rgba(245,158,11,.75)":"rgba(6,182,212,.75)";
+      ctx.beginPath();ctx.arc(x(idx),y(e.p),2+5*Math.sqrt(e.usd/mx),0,Math.PI*2);ctx.fill();
+    });
+  }
   ctx.setLineDash([5,4]);
   L.forEach(l=>{ctx.strokeStyle=l.color;ctx.fillStyle=l.color;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,y(l.p));ctx.lineTo(W-padR,y(l.p));ctx.stroke();ctx.fillText(priceFmt(l.p),W-padR+4,y(l.p));});
   ctx.setLineDash([]);
@@ -1766,23 +1962,25 @@ function drawAn(k,A){
 async function runAn(){
   const sym=$("anSym").value,out=$("anOut"),btn=$("anBtn");
   if(!sym)return;
-  btn.disabled=true;btn.textContent="Analyzing…";
-  out.innerHTML='<div class="empty" style="padding:24px 10px">Reading all timeframes and liquidity…</div>';
+  btn.disabled=true;btn.textContent="جارٍ التحليل…";
+  out.innerHTML='<div class="empty" style="padding:24px 10px">بقرا كل الفريمات وبيانات التصفية…</div>';
   try{
+    const okx=await okxLiq(sym).catch(()=>[]);
     const res={};
     await Promise.all(HZ.map(async([tf])=>{
       try{
         delete kcache[sym+tf+500];
         const k=await klines(sym,tf,500);
-        if(k.length>=60)res[tf]={k,A:analyze(k,tf)};
+        if(k.length>=60)res[tf]={k,A:analyze(k,tf,okx.concat(liqSym===sym?liqLive:[]))};
       }catch{}
     }));
     if(!Object.keys(res).length)throw new Error("no data");
     const ctx=await futContext(sym);
-    anState={sym,res,ctx,tf:$("anTf").value};
+    anState={sym,res,ctx,okx,tf:$("anTf").value};
+    startLiqSocket(sym);
     renderAn();
-  }catch(e){out.innerHTML='<div class="empty" style="padding:24px 10px;color:var(--red)">Could not analyze '+escapeHtml(sym)+'. It needs a Binance USDT market with enough history.</div>';}
-  btn.disabled=false;btn.textContent="Analyze";
+  }catch(e){out.innerHTML='<div class="empty" style="padding:24px 10px;color:var(--red)">مقدرتش أحلل '+escapeHtml(sym)+'. لازم يكون ليها سوق USDT على Binance وتاريخ كفاية.</div>';}
+  btn.disabled=false;btn.textContent="حلّل";
 }
 function fillAnSelect(){
   const sel=$("anSym"),cur=sel.value;
@@ -1804,7 +2002,7 @@ function startApp() {
   if(allSymbols().length) {
     setStatus(false,"Loading market prices...");
     fetchPrices().finally(()=>connectLivePrices());
-    resolveAllLogos();resolveWatchLogos();
+    resolveAllLogos();resolveWatchLogos();loadSparks();clearInterval(sparkTimer);sparkTimer=setInterval(loadSparks,300000);
   } else {
     setStatus(true,"Add assets to begin");
   }
@@ -1875,7 +2073,7 @@ let appStartedForUid = "";
 onAuthStateChanged(auth,async user=>{
   if(!user) {
     currentUser=null;cloudReady=false;appStartedForUid="";
-    clearTimeout(cloudSaveTimer);clearInterval(p2pTimer);clearTimeout(reconnectTimer);
+    clearTimeout(cloudSaveTimer);clearInterval(p2pTimer);clearTimeout(reconnectTimer);stopLiqSocket();clearInterval(sparkTimer);
     if(socket){socket.onclose=null;try{socket.close();}catch{}socket=null;}
     state=defaultState();activeStorageKey=STORAGE_KEY;
     $("mainApp").style.display="none";
