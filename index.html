@@ -317,6 +317,10 @@ body{background:radial-gradient(900px 500px at 12% -10%,rgba(79,140,255,.14),tra
 .an-row small{color:var(--muted);display:block;font-size:11px;margin-top:2px}
 .an-row .r{text-align:right;font-weight:700;white-space:nowrap}
 .an-note{font-size:11px;color:var(--muted);line-height:1.7;margin-top:12px}
+
+/* ===== Purchase lots ===== */
+.lot-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);color:var(--text);font-size:12px}
+.lot-row .small-action{margin:0;padding:3px 7px}
 </style>
 </head>
 <body>
@@ -570,7 +574,8 @@ function normalizeAsset(raw) {
     logo: safe(raw.logo || raw.image || raw.imageUrl || raw.logoUrl || ""),
     geckoId: safe(raw.geckoId || raw.coingeckoId || ""),
     price: num(raw.price || raw.currentPrice || raw.current_price),
-    change24h: num(raw.change24h || raw.priceChangePercent || raw.change || 0)
+    change24h: num(raw.change24h || raw.priceChangePercent || raw.change || 0),
+    lots: Array.isArray(raw.lots) ? raw.lots.map(l=>({id:safe(l.id||uid()),qty:num(l.qty),price:num(l.price),fee:num(l.fee),time:num(l.time)||Date.now()})) : []
   };
 }
 
@@ -669,6 +674,34 @@ function pnlFor(asset) {
   return {cost,value,pnl:value-cost,pct:cost ? (value-cost)/cost*100 : 0};
 }
 
+/* ===== Purchase lots: each buy is stored separately; amount / average / fees are derived from them ===== */
+function ensureLots(a){
+  if(!Array.isArray(a.lots)) a.lots=[];
+  if(!a.lots.length && a.amount>0) a.lots=[{id:uid(),qty:a.amount,price:a.buyPrice||0,fee:num(a.buyFee),time:Date.now()}];
+  return a.lots;
+}
+function recalc(a){
+  const L=a.lots||[];
+  const priced=L.filter(l=>l.price>0);
+  const pq=priced.reduce((s,l)=>s+l.qty,0);
+  a.amount=L.reduce((s,l)=>s+l.qty,0);
+  a.buyPrice=pq>0?priced.reduce((s,l)=>s+l.qty*l.price,0)/pq:0;
+  a.buyFee=L.reduce((s,l)=>s+num(l.fee),0);
+}
+function addLot(a,qty,price,fee){
+  ensureLots(a);
+  a.lots.push({id:uid(),qty,price,fee:num(fee),time:Date.now()});
+  recalc(a);
+}
+/* Scales every lot by the same ratio so the average buy price stays unchanged (sell / transfer out) */
+function scaleLots(a,newAmount){
+  ensureLots(a);
+  const f=a.amount>0?newAmount/a.amount:0;
+  a.lots.forEach(l=>{l.qty*=f;l.fee*=f;});
+  a.lots=a.lots.filter(l=>l.qty>1e-12);
+  recalc(a);
+}
+
 function render() {
   const t = totals();
   tween("totalUsd",t.value,v=>money(v));
@@ -717,6 +750,7 @@ function renderCards() {
     const price = priceOf(asset), value = asset.amount*price, p = pnlFor(asset);
     const ch = num(asset.change24h), hasBuy = asset.buyPrice > 0;
     const id = escapeHtml(asset.id);
+    const lots = ensureLots(asset);
     const cls = p.pnl>0?"green":p.pnl<0?"red":"";
     return `<article class="panel asset-card ${ch>0?"up":ch<0?"down":""}">
       <div class="asset-top">${logoMarkup(asset)}
@@ -742,6 +776,7 @@ function renderCards() {
         <div>Qty × buy price<strong>${quantity(asset.amount)} × ${hasBuy?money(asset.buyPrice):"—"}</strong></div>
         <div>Fees paid<strong>${usd2(asset.buyFee)}</strong></div>
         ${hasBuy&&state.usdEgp>0?`<div>P/L in EGP<strong class="${cls}">${egpSigned(p.pnl)}</strong></div>`:""}
+        <div style="grid-column:1/-1"><div style="margin-bottom:6px">Purchases (${lots.length})</div>${lots.map((l,i)=>`<div class="lot-row"><span>#${i+1} · ${new Date(l.time).toLocaleDateString("en-GB")}</span><span>${quantity(l.qty)} × ${l.price>0?priceFmt(l.price):"—"}</span><button class="small-action" data-lot-del="${id}|${escapeHtml(l.id)}" aria-label="Delete purchase">✕</button></div>`).join("")}</div>
       </div>
       <div class="asset-buttons"><button class="btn primary" data-buy="${id}">＋ Buy more</button><button class="btn" data-toggle="${id}">${openDetails.has(asset.id)?"Hide":"Details"}</button></div>
     </article>`;
@@ -1058,14 +1093,7 @@ function saveAsset(event) {
     if(!merge)return;
     /* Quantity without a buy price is valued at the current price, so the average is not diluted. */
     const cur = priceOf(duplicate) || duplicate.buyPrice || buyPrice;
-    const oldP = duplicate.buyPrice > 0 ? duplicate.buyPrice : cur;
-    const newP = buyPrice > 0 ? buyPrice : cur;
-    const combined = duplicate.amount + amount;
-    duplicate.buyPrice = (oldP > 0 || newP > 0) && combined > 0
-      ? (duplicate.amount*oldP + amount*newP) / combined
-      : 0;
-    duplicate.amount=combined;
-    duplicate.buyFee=num(duplicate.buyFee)+fee;
+    addLot(duplicate, amount, buyPrice>0?buyPrice:cur, fee);
     if($("coinLogo").value.trim())duplicate.logo=$("coinLogo").value.trim();
   } else if(existing) {
     existing.symbol=symbol;
@@ -1074,10 +1102,12 @@ function saveAsset(event) {
     existing.buyPrice=buyPrice;
     existing.buyFee=fee;
     existing.logo=$("coinLogo").value.trim();
+    existing.lots = amount>0 ? [{id:uid(),qty:amount,price:buyPrice,fee,time:Date.now()}] : [];
   } else {
     state.portfolio.push({
       id:uid(),symbol,name:$("coinName").value.trim()||symbol,
-      amount,buyPrice,buyFee:fee,logo:$("coinLogo").value.trim(),geckoId:"",price:0,change24h:0
+      amount,buyPrice,buyFee:fee,logo:$("coinLogo").value.trim(),geckoId:"",price:0,change24h:0,
+      lots: amount>0 ? [{id:uid(),qty:amount,price:buyPrice,fee,time:Date.now()}] : []
     });
   }
   markPortfolioChanged();closeModal();render();fetchPrices();connectLivePrices();resolveAllLogos();
@@ -1165,8 +1195,7 @@ function submitClose(e){
   const d=$("closeDate").value?new Date($("closeDate").value+"T12:00:00").getTime():Date.now();
   if(!Array.isArray(state.trades))state.trades=[];
   state.trades.push({id:uid(),symbol:a.symbol,name:a.name,qty:c.q,buy:a.buyPrice,sell:c.p,buyFee:c.buyFeePart,sellFee:c.sellFee,pnl:c.pnl,time:d});
-  a.buyFee=Math.max(0,num(a.buyFee)-c.buyFeePart);
-  a.amount=Math.max(0,a.amount-c.q);
+  scaleLots(a,Math.max(0,a.amount-c.q));
   if(a.amount<1e-12)state.portfolio=state.portfolio.filter(x=>x.id!==a.id);
   markPortfolioChanged();
   $("closeBackdrop").classList.remove("open");
@@ -1242,11 +1271,11 @@ function submitMove(e){
   if(!(c.q>0)){alert("Enter a valid quantity.");return;}
   if(c.k==="out"){
     if(c.q>a.amount+1e-9){alert("You only hold "+quantity(a.amount)+".");return;}
-    a.buyFee=c.newFee;a.amount=Math.max(0,c.newAmount);
+    scaleLots(a,Math.max(0,a.amount-c.q));
     if(a.amount<1e-12)state.portfolio=state.portfolio.filter(x=>x.id!==a.id);
   } else {
     if(!(c.p>0)||!(c.fee>=0)){alert("Enter a valid price.");return;}
-    a.buyPrice=c.newAvg;a.buyFee=c.newFee;a.amount=c.newAmount;
+    addLot(a,c.q,c.p,c.fee);
   }
   markPortfolioChanged();
   $("mvBackdrop").classList.remove("open");
@@ -1261,6 +1290,19 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")$("mvBackdrop").clas
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-buy]");if(b)openMove(b.dataset.buy,"buy");
   const t=e.target.closest("[data-transfer]");if(t)openMove(t.dataset.transfer,"transfer");
+});
+
+/* ===== Delete a single purchase (lot) ===== */
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-lot-del]");if(!b)return;
+  const [aid,lid]=b.dataset.lotDel.split("|");
+  const a=state.portfolio.find(x=>x.id===aid);
+  if(!a||!confirm("Delete this purchase?"))return;
+  ensureLots(a);
+  a.lots=a.lots.filter(l=>l.id!==lid);
+  recalc(a);
+  if(a.amount<1e-12)state.portfolio=state.portfolio.filter(x=>x.id!==a.id);
+  markPortfolioChanged();render();connectLivePrices();
 });
 
 $("addBtn").addEventListener("click",()=>openModal());
