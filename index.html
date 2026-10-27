@@ -138,7 +138,7 @@ input::placeholder{color:#5a5a5a}
 .dt-pos strong{display:block;color:var(--text);font-size:13px;margin-top:3px;font-weight:600;overflow-wrap:anywhere}
 
 /* summary */
-.stats{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:14px;margin-bottom:14px}
 .stat{padding:18px 20px;min-width:0}
 .stat-label{font-size:13px;color:var(--muted)}
 .stat-value{font-size:clamp(22px,3vw,34px);font-weight:700;letter-spacing:-.03em;margin:10px 0 6px;overflow-wrap:anywhere;line-height:1.1}
@@ -230,6 +230,8 @@ canvas{width:100%;height:100%;display:block}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
 .notice{padding:11px 13px;border-radius:10px;background:var(--raised);border:1px solid var(--border);color:#b5b5b5;font-size:12px;line-height:1.7;margin:12px 0}
 .footer{display:flex;justify-content:space-between;gap:15px;color:var(--muted);font-size:12px;padding:10px 2px 25px}
+.check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text)}
+.check input{width:auto}
 
 @media(max-width:1100px){
   .terminal{grid-template-columns:1fr}
@@ -306,8 +308,9 @@ canvas{width:100%;height:100%;display:block}
   </section>
 
   <section class="stats">
-    <div class="panel stat"><div class="stat-label">Total portfolio value</div><div class="stat-value" id="totalUsd">$0.00</div><div class="stat-foot" id="totalEgp">EGP 0</div></div>
+    <div class="panel stat"><div class="stat-label">Total value (assets + USDC)</div><div class="stat-value" id="totalUsd">$0.00</div><div class="stat-foot" id="totalEgp">EGP 0</div></div>
     <div class="panel stat"><div class="stat-label">Unrealized profit / loss</div><div class="stat-value" id="totalPnl">$0.00</div><div class="stat-foot" id="totalPnlPct">Add your buy prices to track P/L</div></div>
+    <div class="panel stat"><div class="stat-label">USDC balance</div><div class="stat-value" id="cashVal">$0.00</div><div class="stat-foot"><span id="cashEgp">—</span> · <button class="small-action" id="cashBtn" type="button">Edit</button></div></div>
   </section>
 
   <section class="panel perf-strip">
@@ -362,6 +365,7 @@ canvas{width:100%;height:100%;display:block}
         <div class="field"><label for="coinBuy">Average buy price (USD)</label><input id="coinBuy" type="number" min="0" step="any" placeholder="Optional"></div>
         <div class="field full"><label for="coinFee">Buy fee (optional)</label><div class="row2"><input id="coinFee" type="number" min="0" step="any" placeholder="e.g. 0.1"><select id="coinFeeUnit" class="fee-unit"><option value="pct">% of purchase</option><option value="usd">$ USD</option></select></div></div>
         <div class="field full"><div class="notice" id="buyPreview" style="margin:0">—</div></div>
+        <div class="field full" id="coinDeductRow"><label class="check"><input type="checkbox" id="coinDeduct" checked> Deduct the purchase cost from my USDC balance</label></div>
         <div class="field full"><label for="coinLogo">Logo URL (optional)</label><input id="coinLogo" type="url" placeholder="Found automatically if empty"></div>
       </div>
       <div class="modal-actions"><button class="btn" type="button" id="cancelBtn">Cancel</button><button class="btn primary" type="submit">Save asset</button></div>
@@ -381,6 +385,7 @@ canvas{width:100%;height:100%;display:block}
         <div class="field"><label for="closePrice">Sell price (USD) *</label><input id="closePrice" type="number" min="0" step="any" required></div>
         <div class="field full"><label for="closeFee">Sell fee (optional)</label><div class="row2"><input id="closeFee" type="number" min="0" step="any" placeholder="e.g. 0.1"><select id="closeFeeUnit" class="fee-unit"><option value="pct">% of sale</option><option value="usd">$ USD</option></select></div></div>
         <div class="field full"><label for="closeDate">Date</label><input id="closeDate" type="date"></div>
+        <div class="field full"><label class="check"><input type="checkbox" id="closeAdd" checked> Add the sale proceeds to my USDC balance</label></div>
       </div>
       <div class="notice" id="closePreview">—</div>
       <div class="modal-actions"><button class="btn" type="button" id="closeCancel">Cancel</button><button class="btn primary" type="submit">Close &amp; record</button></div>
@@ -403,6 +408,18 @@ canvas{width:100%;height:100%;display:block}
       </div>
       <div class="notice" id="mvPreview">—</div>
       <div class="modal-actions"><button class="btn" type="button" id="mvCancel">Cancel</button><button class="btn primary" type="submit" id="mvSubmit">Save</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- USDC balance -->
+<div class="modal-backdrop" id="cashBackdrop">
+  <div class="modal">
+    <h3>USDC balance</h3>
+    <p>Set the USDC you hold. Buying deducts from it and selling adds to it automatically.</p>
+    <form id="cashForm">
+      <div class="field"><label for="cashInput">Balance (USDC)</label><input id="cashInput" type="number" step="any" placeholder="3000" required></div>
+      <div class="modal-actions"><button class="btn" type="button" id="cashCancel">Cancel</button><button class="btn primary" type="submit">Save balance</button></div>
     </form>
   </div>
 </div>
@@ -475,7 +492,7 @@ function normalizeAsset(raw) {
 }
 
 /* ===== state ===== */
-const defaultState = () => ({portfolio:[],prices:{},usdEgp:0,history:[],watchlist:[],changes:{},stats:{},trades:[],updatedAt:null});
+const defaultState = () => ({portfolio:[],prices:{},cash:0,usdEgp:0,history:[],watchlist:[],changes:{},stats:{},trades:[],updatedAt:null});
 let state = defaultState();
 let currentUser = null, cloudReady = false, socket = null, reconnectTimer = null, rateTimer = null, sparkTimer = null;
 let activeStorageKey = STORAGE_KEY, cloudSaveTimer = null;
@@ -488,7 +505,7 @@ function saveCloudPortfolio() {
   if (!currentUser || !cloudReady) return;
   clearTimeout(cloudSaveTimer);
   const id = currentUser.uid;
-  const snapshot = {portfolio:state.portfolio,usdEgp:state.usdEgp,watchlist:state.watchlist,history:state.history,trades:state.trades||[]};
+  const snapshot = {portfolio:state.portfolio,cash:num(state.cash),usdEgp:state.usdEgp,watchlist:state.watchlist,history:state.history,trades:state.trades||[]};
   cloudSaveTimer = setTimeout(async () => {
     if (!currentUser || currentUser.uid !== id || !cloudReady) return;
     try { await setDoc(doc(db,"users",id),{...snapshot,updatedAt:serverTimestamp()},{merge:true}); }
@@ -500,14 +517,15 @@ function markPortfolioChanged(){ persist(); saveCloudPortfolio(); }
 const allSymbols = () => [...new Set([...state.portfolio.map(a=>a.symbol),...(state.watchlist||[])])];
 const priceOf = a => num(state.prices[a.symbol] ?? a.price);
 function totals() {
-  let value=0,cost=0,hasBuy=false;
+  let assets=0,cost=0,hasBuy=false;
   for (const a of state.portfolio) {
-    value += a.amount * priceOf(a);
+    assets += a.amount * priceOf(a);
     if (a.buyPrice > 0) { cost += a.amount*a.buyPrice + num(a.buyFee); hasBuy = true; }
   }
-  const pnl = value - cost;
-  return {value,cost,pnl,pnlPct:cost?pnl/cost*100:0,hasBuy};
+  const cash = num(state.cash), value = assets + cash, pnl = assets - cost;
+  return {value,assets,cash,cost,pnl,pnlPct:cost?pnl/cost*100:0,hasBuy};
 }
+const adjustCash = d => { state.cash = Math.round((num(state.cash)+d)*1e8)/1e8; };
 const currentEgp = v => state.usdEgp > 0 ? v * state.usdEgp : 0;
 const egpSigned = v => state.usdEgp > 0 ? (v>0?"+":"") + money(v*state.usdEgp,"EGP") : "—";
 function setStatus(ok,text){ $("liveDot").classList.toggle("live",!!ok); $("liveStatus").textContent = text; }
@@ -599,6 +617,8 @@ const heldLogo = sym => (state.portfolio.find(a=>a.symbol===sym)||{}).logo;
 function render() {
   const t = totals();
   $("totalUsd").textContent = money(t.value);
+  $("cashVal").textContent = usd2(state.cash); $("cashVal").className = "stat-value "+(num(state.cash)<0?"red":"");
+  $("cashEgp").textContent = state.usdEgp>0 ? money(currentEgp(num(state.cash)),"EGP") : "—";
   $("totalEgp").textContent = state.usdEgp > 0 ? money(currentEgp(t.value),"EGP") : "EGP rate unavailable";
   $("totalPnl").textContent = t.hasBuy ? (t.pnl>0?"+":"") + moneyRound(t.pnl) : "—";
   $("totalPnl").className = "stat-value " + (t.pnl>0?"green":t.pnl<0?"red":"");
@@ -838,7 +858,7 @@ function drawAllocation(){
   ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,size,size);
   const c = size/2, radius = 72;
   ctx.lineWidth = 24; ctx.lineCap = "butt";
-  const items = state.portfolio.map(a=>({symbol:a.symbol,value:a.amount*priceOf(a)})).filter(i=>i.value>0).sort((a,b)=>b.value-a.value);
+  const items = [...state.portfolio.map(a=>({symbol:a.symbol,value:a.amount*priceOf(a)})),{symbol:"USDC",value:num(state.cash)}].filter(i=>i.value>0).sort((a,b)=>b.value-a.value);
   const total = items.reduce((s,i)=>s+i.value,0);
   if (!total) {
     ctx.strokeStyle = "#1f1f1f"; ctx.beginPath(); ctx.arc(c,c,radius,0,Math.PI*2); ctx.stroke();
@@ -945,6 +965,7 @@ function openModal(asset=null){
   $("coinBuy").value = asset?.buyPrice||"";
   $("coinLogo").value = asset?.logo||"";
   $("coinFee").value = asset?.buyFee||""; $("coinFeeUnit").value = asset ? "usd" : "pct";
+  $("coinDeduct").checked = true; $("coinDeductRow").style.display = asset ? "none" : "";
   previewBuy();
   $("modalBackdrop").classList.add("open");
   setTimeout(()=>$("coinSymbol").focus(),50);
@@ -964,6 +985,9 @@ function saveAsset(event){
   const fee = $("coinFeeUnit").value==="pct" ? amount*buyPrice*feeIn/100 : feeIn;
   if (!/^[A-Z0-9._-]{1,20}$/.test(symbol)) { alert("Enter a valid coin symbol, such as BTC or SOL."); return; }
   if (![amount,buyPrice,fee].every(Number.isFinite) || amount<0 || buyPrice<0 || fee<0) { alert("Enter valid positive values."); return; }
+  const spend = amount*buyPrice + fee;
+  const deduct = !id && $("coinDeduct").checked && buyPrice>0 && amount>0;
+  if (deduct && spend > num(state.cash)+1e-9 && !confirm(`This purchase (${money(spend)}) is more than your USDC balance (${money(state.cash)}). The balance will go negative. Continue?`)) return;
   const existing = state.portfolio.find(a=>a.id===id);
   const duplicate = state.portfolio.find(a=>a.symbol===symbol && a.id!==id);
   const logo = $("coinLogo").value.trim();
@@ -979,6 +1003,7 @@ function saveAsset(event){
     state.portfolio.push({id:uid(),symbol,name:$("coinName").value.trim()||symbol,amount,buyPrice,buyFee:fee,logo,price:0,change24h:0,
       lots: amount>0 ? [{id:uid(),qty:amount,price:buyPrice,fee,time:Date.now()}] : []});
   }
+  if (deduct) adjustCash(-spend);
   markPortfolioChanged(); closeModal(); render(); fetchPrices(); connectLivePrices();
 }
 function deleteAsset(id){
@@ -1032,7 +1057,7 @@ function openClose(id){
   $("closeQty").value = a.amount;
   $("closePrice").value = priceOf(a)||"";
   $("closeDate").value = new Date().toISOString().slice(0,10);
-  $("closeFee").value = ""; $("closeFeeUnit").value = "pct";
+  $("closeFee").value = ""; $("closeFeeUnit").value = "pct"; $("closeAdd").checked = true;
   previewClose();
   $("closeBackdrop").classList.add("open");
 }
@@ -1046,7 +1071,7 @@ function calcClose(a){
 function previewClose(){
   const a = state.portfolio.find(x=>x.id===$("closeId").value); if (!a) return;
   const c = calcClose(a);
-  $("closePreview").innerHTML = `Bought: ${quantity(c.q)} × ${money(a.buyPrice)} = ${money(c.q*a.buyPrice)}${c.buyFeePart>0?` + ${money(c.buyFeePart)} fee`:""} → <strong>${money(c.cost)}</strong><br>Sold: ${quantity(c.q)} × ${money(c.p)} = ${money(c.q*c.p)}${c.sellFee>0?` − ${money(c.sellFee)} fee`:""} → <strong>${money(c.proceeds)}</strong><br>Net result: <strong class="${c.pnl>0?"green":c.pnl<0?"red":""}">${c.pnl>0?"+":""}${money(c.pnl)}</strong>${state.usdEgp>0?" · "+egpSigned(c.pnl):""}`;
+  $("closePreview").innerHTML = `Bought: ${quantity(c.q)} × ${money(a.buyPrice)} = ${money(c.q*a.buyPrice)}${c.buyFeePart>0?` + ${money(c.buyFeePart)} fee`:""} → <strong>${money(c.cost)}</strong><br>Sold: ${quantity(c.q)} × ${money(c.p)} = ${money(c.q*c.p)}${c.sellFee>0?` − ${money(c.sellFee)} fee`:""} → <strong>${money(c.proceeds)}</strong><br>Net result: <strong class="${c.pnl>0?"green":c.pnl<0?"red":""}">${c.pnl>0?"+":""}${money(c.pnl)}</strong>${state.usdEgp>0?" · "+egpSigned(c.pnl):""}<br>USDC after: <strong>${money(num(state.cash)+($("closeAdd").checked?c.proceeds:0))}</strong>`;
 }
 function submitClose(e){
   e.preventDefault();
@@ -1058,6 +1083,7 @@ function submitClose(e){
   state.trades.push({id:uid(),symbol:a.symbol,name:a.name,qty:c.q,buy:a.buyPrice,sell:c.p,buyFee:c.buyFeePart,sellFee:c.sellFee,pnl:c.pnl,time:d});
   scaleLots(a,Math.max(0,a.amount-c.q));
   if (a.amount < 1e-12) state.portfolio = state.portfolio.filter(x=>x.id!==a.id);
+  if ($("closeAdd").checked) adjustCash(c.proceeds);
   markPortfolioChanged();
   $("closeBackdrop").classList.remove("open");
   viewMonth = monthKey(d); render(); connectLivePrices();
@@ -1099,7 +1125,7 @@ function previewMove(){
   const c = calcMove(a);
   if (c.k==="out") { $("mvPreview").innerHTML = c.q>0 ? `After transfer: <strong>${quantity(c.newAmount)}</strong> held · avg buy stays ${a.buyPrice>0?money(a.buyPrice):"—"}.<br>No profit or loss is recorded.` : "Enter the quantity sent out."; return; }
   $("mvPreview").innerHTML = c.q>0&&c.p>0
-    ? `This ${c.k==="buy"?"purchase":"transfer"}: ${quantity(c.q)} × ${money(c.p)} = ${money(c.q*c.p)}${c.fee>0?` + ${money(c.fee)} fee`:""}<br>New quantity: <strong>${quantity(c.newAmount)}</strong> · New average: <strong>${money(c.newAvg)}</strong>${c.k==="in"?"<br>Cost basis defaults to the current price, so your profit/loss doesn't change.":""}`
+    ? `This ${c.k==="buy"?"purchase":"transfer"}: ${quantity(c.q)} × ${money(c.p)} = ${money(c.q*c.p)}${c.fee>0?` + ${money(c.fee)} fee`:""}<br>New quantity: <strong>${quantity(c.newAmount)}</strong> · New average: <strong>${money(c.newAvg)}</strong>${c.k==="in"?"<br>Cost basis defaults to the current price, so your profit/loss doesn't change.":""}${c.k==="buy"?`<br>USDC after: <strong>${money(num(state.cash)-c.q*c.p-c.fee)}</strong>`:""}`
     : "Enter quantity and price.";
 }
 function submitMove(e){
@@ -1113,6 +1139,11 @@ function submitMove(e){
     if (a.amount < 1e-12) state.portfolio = state.portfolio.filter(x=>x.id!==a.id);
   } else {
     if (!(c.p>0) || !(c.fee>=0)) { alert("Enter a valid price."); return; }
+    if (c.k==="buy") {
+      const spend = c.q*c.p + c.fee;
+      if (spend > num(state.cash)+1e-9 && !confirm(`This purchase (${money(spend)}) is more than your USDC balance (${money(state.cash)}). The balance will go negative. Continue?`)) return;
+      adjustCash(-spend);
+    }
     addLot(a,c.q,c.p,c.fee);
   }
   markPortfolioChanged();
@@ -1152,7 +1183,7 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("keydown",e=>{
   if (e.key !== "Escape") return;
-  closeModal(); $("closeBackdrop").classList.remove("open"); $("mvBackdrop").classList.remove("open");
+  closeModal(); $("closeBackdrop").classList.remove("open"); $("mvBackdrop").classList.remove("open"); $("cashBackdrop").classList.remove("open");
 });
 $("addBtn").addEventListener("click",()=>openModal());
 $("cancelBtn").addEventListener("click",closeModal);
@@ -1177,6 +1208,15 @@ $("mvForm").addEventListener("submit",submitMove);
 $("mvFeeUnit").addEventListener("change",previewMove);
 $("mvDir").addEventListener("change",syncMove);
 $("mvCancel").addEventListener("click",()=>$("mvBackdrop").classList.remove("open"));
+$("cashBtn").addEventListener("click",()=>{ $("cashInput").value = num(state.cash)||""; $("cashBackdrop").classList.add("open"); setTimeout(()=>$("cashInput").focus(),50); });
+$("cashForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const v = Number($("cashInput").value);
+  if (!Number.isFinite(v)) { alert("Enter a valid amount."); return; }
+  state.cash = v; markPortfolioChanged(); $("cashBackdrop").classList.remove("open"); render();
+});
+$("cashCancel").addEventListener("click",()=>$("cashBackdrop").classList.remove("open"));
+$("closeAdd").addEventListener("change",previewClose);
 window.addEventListener("resize",drawChart);
 
 $("watchGrid").addEventListener("click",e=>{
@@ -1340,7 +1380,7 @@ onAuthStateChanged(auth,async user=>{
         prices: cloud.prices||{},
         history: Array.isArray(cloud.history) ? cloud.history : [],
         watchlist: Array.isArray(cloud.watchlist) ? cloud.watchlist.filter(x=>/^[A-Z0-9]{1,20}$/.test(x)) : [],
-        changes: {}, stats: {},
+        changes: {}, stats: {}, cash: num(cloud.cash),
         trades: Array.isArray(cloud.trades) ? cloud.trades : []};
       persist();
       if (started) { render(); fetchPrices(); connectLivePrices(); }
