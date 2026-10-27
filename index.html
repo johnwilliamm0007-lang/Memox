@@ -142,8 +142,6 @@ tbody tr:last-child td{border-bottom:0}
 .perf-value{font-size:20px;font-weight:700;letter-spacing:-.02em}
 .perf-change{font-size:12px;margin-top:3px;color:var(--muted)}
 
-/* ===== Watchlist: one coin per row ===== */
-.watch-add{display:flex;gap:8px;flex-wrap:wrap}
 .chart-backdrop{display:none;position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.7);padding:20px;align-items:center;justify-content:center}
 .chart-backdrop.open{display:flex}
 .chart-modal{width:min(100%,1200px);height:min(88vh,780px);display:flex;flex-direction:column;border-radius:16px;background:var(--card);border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.6);overflow:hidden}
@@ -187,7 +185,6 @@ tbody tr:last-child td{border-bottom:0}
  .asset-buttons .btn{padding:8px 5px}
  .form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}
  .footer{flex-direction:column}.toolbar{width:100%}.search{flex:1;min-width:0;width:100%}
- .watch-add{width:100%}.watch-add .search{flex:1;min-width:0}
  .card-value{font-size:20px}
 }
 
@@ -234,32 +231,11 @@ body{background:radial-gradient(900px 500px at 12% -10%,rgba(79,140,255,.14),tra
 .stats .stat:first-child{background:linear-gradient(135deg,rgba(79,140,255,.16),rgba(34,211,238,.06)),var(--card);border-color:rgba(79,140,255,.35)}
 .stats .stat:first-child .stat-value{font-size:clamp(30px,4.4vw,44px)}
 .asset-card{transition:transform .15s,border-color .15s,box-shadow .15s}.asset-card:hover{transform:translateY(-2px)}
-.coin-symbol,.stat-foot,.card-details,.trade-meta,.watch-sub{font-size:12px}
+.coin-symbol,.stat-foot,.card-details,.trade-meta{font-size:12px}
 .user-menu{position:relative}.user-menu summary{list-style:none;cursor:pointer}.user-menu summary::-webkit-details-marker{display:none}
 .user-pop{position:absolute;right:0;top:calc(100% + 8px);z-index:6;min-width:170px;padding:6px;background:#0f151c;border:1px solid #2a3441;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.55)}
 .user-pop button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--text);padding:10px;border-radius:8px;font-size:13px}
 .user-pop button:hover{background:#1b2531}
-
-/* ===== Watchlist (compact list) ===== */
-.watch-grid{display:block;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.015)}
-.watch-row{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
-.watch-row:last-child{border-bottom:0}
-.watch-row:hover{background:rgba(79,140,255,.07)}
-.watch-row .coin-logo{width:36px;height:36px;flex:0 0 36px;font-size:10px}
-.watch-sym{font-weight:600;font-size:15px;line-height:1.1}
-.watch-sub{font-size:12px;color:var(--muted);margin-top:3px}
-.watch-quote{text-align:right}
-.watch-price{font-weight:700;font-size:15px;white-space:nowrap}
-.chg-pill{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;background:#1b2531;color:var(--muted)}
-.chg-pill.green{background:rgba(34,201,147,.14)}.chg-pill.red{background:rgba(255,107,112,.14)}
-.watch-actions{display:flex;gap:4px}
-.watch-actions .icon-btn{border-color:var(--border);width:34px;height:34px;font-size:16px}
-.watch-actions .icon-btn.danger:hover{color:var(--red)}
-.drag-handle{width:20px;height:34px;border:0;background:transparent;color:#4a5563;font-size:15px;letter-spacing:-2px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:0}
-.drag-handle:hover,.drag-handle:focus-visible{color:var(--text)}
-.watch-row.dragging{background:#17202a;box-shadow:0 8px 24px rgba(0,0,0,.55);position:relative;z-index:3;cursor:grabbing}
-.watch-grid.sorting{user-select:none;-webkit-user-select:none}
-@media(max-width:600px){.watch-row{gap:10px;padding:11px 10px}.drag-handle{width:16px}.watch-row .coin-logo{width:32px;height:32px;flex-basis:32px}}
 
 /* ===== Motion + bolder look ===== */
 @keyframes rise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
@@ -269,11 +245,11 @@ body{background:radial-gradient(900px 500px at 12% -10%,rgba(79,140,255,.14),tra
 @keyframes glow{0%,100%{box-shadow:0 0 0 rgba(79,140,255,0)}50%{box-shadow:0 0 44px rgba(79,140,255,.22)}}
 @keyframes flashUp{from{background:rgba(34,201,147,.38)}to{background:transparent}}
 @keyframes flashDown{from{background:rgba(255,107,112,.38)}to{background:transparent}}
-.intro .panel,.intro .watch-row{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+.intro .panel,.intro .wl-row{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
 .intro .stats .stat:nth-child(2){animation-delay:.07s}.intro .stats .stat:nth-child(3){animation-delay:.14s}
 .intro .perf-strip{animation-delay:.2s}
 .intro .asset-card:nth-child(2){animation-delay:.1s}.intro .asset-card:nth-child(3){animation-delay:.15s}.intro .asset-card:nth-child(n+4){animation-delay:.2s}
-.intro .watch-row:nth-child(2){animation-delay:.1s}.intro .watch-row:nth-child(n+3){animation-delay:.16s}
+.intro .wl-row:nth-child(2){animation-delay:.1s}.intro .wl-row:nth-child(n+3){animation-delay:.16s}
 .modal-backdrop.open,.chart-backdrop.open{animation:fade .18s ease-out}
 .modal-backdrop.open .modal{animation:pop .24s cubic-bezier(.2,.9,.3,1.15)}
 .dot.live{animation:pulse 2s infinite}
@@ -347,38 +323,6 @@ button.hz-card:hover{border-color:#3a4658}
 .an-details summary{cursor:pointer;font-weight:600;font-size:13px}
 .an-details[open] summary{margin-bottom:10px}
 @media(max-width:800px){.tri-grid,.scn-grid{grid-template-columns:1fr}}
-
-/* ===== Watchlist v2 ===== */
-.watch-sum{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 14px}
-.wchip{padding:5px 11px;border-radius:999px;background:#131b24;border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
-.wchip.green{color:var(--green);background:rgba(34,201,147,.10);border-color:rgba(34,201,147,.25)}
-.wchip.red{color:var(--red);background:rgba(255,107,112,.10);border-color:rgba(255,107,112,.25)}
-.watch-grid{display:grid;gap:10px;border:0;border-radius:0;overflow:visible;background:none}
-.watch-row{grid-template-columns:auto auto minmax(0,1.4fr) minmax(80px,130px) auto auto;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)),#0d1218;position:relative;overflow:hidden;transition:transform .15s,border-color .15s,box-shadow .15s,background .15s}
-.watch-row:last-child{border-bottom:1px solid var(--border)}
-.watch-row::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 4px 4px 0;background:var(--border)}
-.watch-row.up::before{background:var(--green);box-shadow:0 0 14px rgba(34,201,147,.6)}
-.watch-row.down::before{background:var(--red);box-shadow:0 0 14px rgba(255,107,112,.6)}
-.watch-row:hover{transform:translateY(-1px);border-color:rgba(79,140,255,.45);box-shadow:0 10px 28px rgba(0,0,0,.45);background:linear-gradient(180deg,rgba(79,140,255,.08),rgba(255,255,255,0)),#0d1218}
-.watch-row .coin-logo{width:44px;height:44px;flex:0 0 44px;font-size:11px;box-shadow:0 0 0 2px var(--border)}
-.watch-row.up .coin-logo{box-shadow:0 0 0 2px rgba(34,201,147,.55)}
-.watch-row.down .coin-logo{box-shadow:0 0 0 2px rgba(255,107,112,.55)}
-.watch-sym{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.w-name{font-weight:500;font-size:12px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.w-held{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(79,140,255,.15);color:#8fb4ff}
-.w-range{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:10px;color:var(--muted);max-width:260px}
-.w-rbar{flex:1;height:5px;border-radius:4px;position:relative;background:linear-gradient(90deg,rgba(255,107,112,.55),rgba(139,151,167,.25),rgba(34,201,147,.55))}
-.w-rbar i{position:absolute;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px #0d1218,0 0 8px rgba(255,255,255,.5)}
-.w-spark{min-width:0;display:flex;flex-direction:column;align-items:center}
-.spark{width:100%;height:38px;display:block}
-.spark-empty{height:38px}
-.w-spark small{font-size:9px;color:var(--muted);margin-top:2px}
-.watch-price{font-size:17px}
-.chg-pill{padding:3px 10px;font-size:12px}
-.watch-actions .icon-btn{width:36px;height:36px;border-radius:10px;background:#131b24}
-.watch-actions .icon-btn:hover{background:#1b2531}
-@media(max-width:700px){.w-range{display:none}.watch-row{grid-template-columns:auto auto minmax(0,1fr) minmax(60px,84px) auto auto;gap:10px}}
-@media(max-width:520px){.w-spark{display:none}.watch-row{grid-template-columns:auto auto minmax(0,1fr) auto auto;padding:12px}.watch-row .coin-logo{width:38px;height:38px;flex-basis:38px}.w-name{display:none}}
 .an-chart{direction:ltr;height:480px;margin:16px 0;border-radius:14px;overflow:hidden;border:1px solid #2a2e39;background:#131722}
 @media(max-width:600px){.an-chart{height:380px}}
 
@@ -405,6 +349,74 @@ button.hz-card:hover{border-color:#3a4658}
   .app{padding-bottom:96px}
   .rate-pill small{display:none}
 }
+
+/* ===== Two-column layout: main on the left, Watchlist on the right ===== */
+.app{max-width:1520px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:20px;align-items:start}
+.main-col{min-width:0}
+.side-col{min-width:0}
+@media(min-width:1101px){
+  .tab[data-tab="watch"]{display:none}
+  .side-col{position:sticky;top:78px;max-height:calc(100vh - 96px);overflow-y:auto;scrollbar-width:thin;border-radius:20px}
+  .side-col .tab-panel[data-panel="watch"]{display:block}
+}
+@media(max-width:1100px){
+  .layout{grid-template-columns:1fr}
+}
+
+/* ===== Smart watchlist ===== */
+.wl-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.wl-head h3{margin:0;font-size:17px}
+.wl-head p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.wl-add{display:flex;gap:8px;margin-bottom:14px}
+.wl-add .search{flex:1;min-width:0}
+.wl-mood{padding:12px 14px;border-radius:14px;background:#0b1017;border:1px solid var(--border);margin-bottom:12px}
+.wl-mood:empty{display:none}
+.mood-top{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}
+.mood-top strong{font-size:14px}
+.mood-bar{display:flex;height:6px;border-radius:6px;background:#1b2531;margin:10px 0 8px;overflow:hidden}
+.mood-bar i{display:block;height:100%}
+.mood-bar .g{background:var(--green)}
+.mood-bar .r{background:var(--red);margin-left:auto}
+.mood-foot{display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--muted)}
+.wl-tools{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.wl-chips{display:flex;gap:6px;flex-wrap:wrap}
+.wl-chip{padding:5px 11px;border-radius:999px;border:1px solid var(--border);background:#0b1017;color:var(--muted);font-size:12px;font-weight:600}
+.wl-chip:hover{color:var(--text)}
+.wl-chip.active{background:rgba(79,140,255,.16);border-color:rgba(79,140,255,.5);color:#bcd2ff}
+.wl-tools select{background:#0b1017;color:var(--text);border:1px solid var(--border);padding:6px 8px;border-radius:10px;font-size:12px}
+.watch-grid{display:grid;gap:8px;border:0;background:none;overflow:visible}
+.watch-grid.sorting{user-select:none;-webkit-user-select:none}
+.wl-row{position:relative;padding:12px 12px 12px 14px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)),#0d1218;cursor:pointer;overflow:hidden;transition:transform .15s,border-color .15s,box-shadow .15s}
+.wl-row::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 4px 4px 0;background:var(--border)}
+.wl-row.up::before{background:var(--green);box-shadow:0 0 12px rgba(34,201,147,.6)}
+.wl-row.down::before{background:var(--red);box-shadow:0 0 12px rgba(255,107,112,.6)}
+.wl-row:hover{transform:translateY(-1px);border-color:rgba(79,140,255,.45);box-shadow:0 10px 26px rgba(0,0,0,.45)}
+.wl-row.dragging{background:#17202a;box-shadow:0 8px 24px rgba(0,0,0,.55);z-index:3;cursor:grabbing}
+.wl-main{display:flex;align-items:center;gap:10px}
+.wl-row .coin-logo{width:38px;height:38px;flex:0 0 38px;font-size:10px}
+.wl-row.up .coin-logo{box-shadow:0 0 0 2px rgba(34,201,147,.55)}
+.wl-row.down .coin-logo{box-shadow:0 0 0 2px rgba(255,107,112,.55)}
+.wl-id{flex:1;min-width:0}
+.wl-sym{font-weight:700;font-size:15px;display:flex;align-items:center;gap:6px}
+.wl-name{font-size:11px;color:var(--muted);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.w-held{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(79,140,255,.15);color:#8fb4ff}
+.w-spark{width:62px;flex:0 0 62px;min-width:0}
+.spark{width:100%;height:30px;display:block}
+.spark-empty{height:30px}
+.wl-quote{text-align:right;flex:0 0 auto}
+.watch-price{font-size:15px;font-weight:700;white-space:nowrap}
+.chg-pill{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600;background:#1b2531;color:var(--muted)}
+.chg-pill.green{background:rgba(34,201,147,.14)}.chg-pill.red{background:rgba(255,107,112,.14)}
+.w-range{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:10px;color:var(--muted)}
+.w-rbar{flex:1;height:5px;border-radius:4px;position:relative;background:linear-gradient(90deg,rgba(255,107,112,.55),rgba(139,151,167,.25),rgba(34,201,147,.55))}
+.w-rbar i{position:absolute;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px #0d1218,0 0 8px rgba(255,255,255,.5)}
+.drag-handle{width:16px;height:34px;border:0;background:transparent;color:#4a5563;font-size:15px;letter-spacing:-2px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;padding:0;flex:0 0 16px}
+.drag-handle:hover,.drag-handle:focus-visible{color:var(--text)}
+.wl-actions{display:flex;gap:6px;max-height:0;opacity:0;overflow:hidden;transition:max-height .2s,opacity .2s,margin .2s}
+.wl-row:hover .wl-actions,.wl-row:focus-within .wl-actions{max-height:40px;opacity:1;margin-top:10px}
+@media(hover:none){.wl-actions{max-height:40px;opacity:1;margin-top:10px}}
+.wl-actions .btn{flex:1;padding:6px 8px;font-size:12px}
 </style>
 </head>
 <body>
@@ -439,6 +451,9 @@ button.hz-card:hover{border-color:#3a4658}
       <details class="user-menu"><summary class="user-pill" id="userPill"></summary><div class="user-pop"><button id="exportBtn" type="button">↓ Export CSV</button><button id="signOutBtn" type="button">Sign out</button></div></details>
     </div>
   </header>
+
+<div class="layout">
+<div class="main-col">
 
   <section class="stats">
     <div class="panel stat">
@@ -475,17 +490,6 @@ button.hz-card:hover{border-color:#3a4658}
     </section>
   </div>
 
-  <div class="tab-panel" data-panel="watch">
-  <section class="panel section" style="margin-bottom:18px">
-    <div class="section-head">
-      <div><h3>Watchlist</h3><p>Coins you follow without holding them</p></div>
-      <form class="watch-add" id="watchForm"><input class="search" id="watchInput" placeholder="Add symbol, e.g. SOL" maxlength="20" autocomplete="off" aria-label="Add a coin to your watchlist"><button class="btn primary" type="submit">＋ Watch</button></form>
-    </div>
-    <div class="watch-sum" id="watchSummary"></div>
-    <div class="watch-grid" id="watchGrid"></div>
-  </section>
-  </div>
-
   <div class="tab-panel" data-panel="analysis">
     <section class="panel section" style="margin-bottom:18px">
     <div class="section-head">
@@ -511,6 +515,41 @@ button.hz-card:hover{border-color:#3a4658}
       <div class="trade-list" id="tradeList"></div>
     </section>
   </div>
+
+</div><!-- /main-col -->
+
+<aside class="side-col">
+  <div class="tab-panel" data-panel="watch">
+    <section class="panel section">
+      <div class="wl-head">
+        <div><h3>Watchlist</h3><p>Coins you follow without holding</p></div>
+        <span class="badge" id="wlCount">0 coins</span>
+      </div>
+      <form class="wl-add" id="watchForm">
+        <input class="search" id="watchInput" placeholder="Add symbol, e.g. SOL" maxlength="20" autocomplete="off" aria-label="Add a coin to your watchlist">
+        <button class="btn primary" type="submit">＋ Watch</button>
+      </form>
+      <div class="wl-mood" id="wlMood"></div>
+      <div class="wl-tools">
+        <div class="wl-chips" id="wlChips">
+          <button type="button" class="wl-chip active" data-wl="all">All</button>
+          <button type="button" class="wl-chip" data-wl="up">▲ Gainers</button>
+          <button type="button" class="wl-chip" data-wl="down">▼ Losers</button>
+          <button type="button" class="wl-chip" data-wl="held">Held</button>
+        </div>
+        <select id="wlSort" aria-label="Sort watchlist">
+          <option value="manual">Manual order</option>
+          <option value="gain">Best 24h</option>
+          <option value="loss">Worst 24h</option>
+          <option value="name">A → Z</option>
+        </select>
+      </div>
+      <div class="watch-grid" id="watchGrid"></div>
+    </section>
+  </div>
+</aside>
+
+</div><!-- /layout -->
 
 <footer class="footer"><span>Coinfolio · Personal portfolio tracker</span><span>Market prices are indicative. The USD/EGP rate comes from CoinGecko and may differ from actual P2P prices.</span></footer>
 </div>
@@ -879,7 +918,9 @@ document.addEventListener("click", e => {
   if (openMenuId) { openMenuId = null; renderCards(); }
 });
 
+/* ===== Smart watchlist (right column) ===== */
 let watchDragging=false;
+let wlFilter="all",wlSort="manual";
 let sparkTimer=null;
 const spark={};
 function sparkSvg(sym,pts){
@@ -893,25 +934,52 @@ function sparkSvg(sym,pts){
 }
 function renderWatchlist() {
   if(watchDragging) return;
-  const grid=$("watchGrid"),sumEl=$("watchSummary");
+  const grid=$("watchGrid"),moodEl=$("wlMood");
   if(!grid) return;
   const list=Array.isArray(state.watchlist)?state.watchlist:[];
-  if(!list.length) {
-    grid.innerHTML='<div class="empty" style="padding:24px 10px">No coins on your watchlist yet. Add a symbol like SOL or ETH above.</div>';
-    if(sumEl) sumEl.innerHTML="";
-    return;
-  }
+  const cnt=$("wlCount");if(cnt)cnt.textContent=list.length+" coin"+(list.length===1?"":"s");
   const changes=state.changes||{},stats=state.stats||{};
   state.watchLogos=state.watchLogos||{};
   const sgn=v=>(v>0?"+":"")+v.toFixed(2)+"%";
-  if(sumEl){
-    const items=list.map(s=>({s,c:num(changes[s]),ok:num(state.prices[s])>0})).filter(x=>x.ok);
-    if(items.length>=2){
-      const best=items.reduce((a,b)=>b.c>a.c?b:a),worst=items.reduce((a,b)=>b.c<a.c?b:a),avg=items.reduce((t,x)=>t+x.c,0)/items.length;
-      sumEl.innerHTML=`<span class="wchip green">▲ ${escapeHtml(best.s)} ${sgn(best.c)}</span><span class="wchip red">▼ ${escapeHtml(worst.s)} ${sgn(worst.c)}</span><span class="wchip">Avg ${sgn(avg)}</span><span class="wchip">${list.length} coins</span>`;
-    } else sumEl.innerHTML=`<span class="wchip">${list.length} coin${list.length===1?"":"s"}</span>`;
+  const isHeld=s=>(state.portfolio||[]).some(a=>a.symbol===s);
+
+  /* Market mood */
+  if(moodEl){
+    const live=list.filter(s=>num(state.prices[s])>0);
+    if(live.length){
+      const up=live.filter(s=>num(changes[s])>0).length,down=live.filter(s=>num(changes[s])<0).length;
+      const avg=live.reduce((t,s)=>t+num(changes[s]),0)/live.length;
+      const ratio=up/live.length;
+      const label=ratio>=.65?"Bullish":ratio<=.35?"Bearish":"Mixed";
+      const lc=ratio>=.65?"green":ratio<=.35?"red":"";
+      const gW=up/live.length*100,rW=down/live.length*100;
+      moodEl.innerHTML=`<div class="mood-top"><span>Watchlist mood</span><strong class="${lc}">${label}</strong></div>
+        <div class="mood-bar"><i class="g" style="width:${gW}%"></i><i class="r" style="width:${rW}%"></i></div>
+        <div class="mood-foot"><span class="green">▲ ${up} up</span><span>Avg ${sgn(avg)}</span><span class="red">${down} down ▼</span></div>`;
+    } else moodEl.innerHTML="";
   }
-  grid.innerHTML=list.map(sym=>{
+
+  if(!list.length) {
+    grid.innerHTML='<div class="empty" style="padding:24px 10px">No coins on your watchlist yet. Add a symbol like SOL or ETH above.</div>';
+    return;
+  }
+
+  /* Filter + sort */
+  let view=list.filter(s=>{
+    const c=num(changes[s]);
+    return wlFilter==="up"?c>0:wlFilter==="down"?c<0:wlFilter==="held"?isHeld(s):true;
+  });
+  if(wlSort==="gain") view=[...view].sort((a,b)=>num(changes[b])-num(changes[a]));
+  else if(wlSort==="loss") view=[...view].sort((a,b)=>num(changes[a])-num(changes[b]));
+  else if(wlSort==="name") view=[...view].sort((a,b)=>a.localeCompare(b));
+  const canDrag=wlFilter==="all"&&wlSort==="manual";
+
+  if(!view.length){
+    grid.innerHTML='<div class="empty" style="padding:24px 10px">No coins match this filter.</div>';
+    return;
+  }
+
+  grid.innerHTML=view.map(sym=>{
     const price=num(state.prices[sym]),ch=num(changes[sym]),st=stats[sym]||{};
     const held=(state.portfolio||[]).find(a=>a.symbol===sym);
     const url=(held&&held.logo)||state.watchLogos[sym]||("https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/"+sym.toLowerCase()+".png");
@@ -926,17 +994,21 @@ function renderWatchlist() {
       const pos=Math.max(0,Math.min(100,(price-st.low)/(st.high-st.low)*100));
       range=`<div class="w-range" title="24h low / high"><span>${priceFmt(st.low)}</span><div class="w-rbar"><i style="left:${pos.toFixed(1)}%"></i></div><span>${priceFmt(st.high)}</span></div>`;
     }
-    return `<article class="watch-row ${cls}" data-sym="${escapeHtml(sym)}">
-      <button type="button" class="drag-handle" aria-label="Drag to reorder ${escapeHtml(sym)}" title="Drag to reorder">⋮⋮</button>
-      <span class="coin-logo"><img src="${escapeHtml(url)}" alt="${escapeHtml(sym)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${fb}'"></span>
-      <div class="watch-info" style="min-width:0">
-        <div class="watch-sym">${escapeHtml(sym)}${nm?` <span class="w-name">${escapeHtml(nm)}</span>`:""}${held?' <span class="w-held">Held</span>':""}</div>
-        <div class="watch-sub">${escapeHtml(sym)}/USDT${st.vol>0?" · Vol "+usdShort(st.vol):""}</div>
-        ${range}
+    const sub=(nm?nm:sym+"/USDT")+(st.vol>0?" · Vol "+usdShort(st.vol):"");
+    return `<article class="wl-row ${cls}" data-sym="${escapeHtml(sym)}">
+      <div class="wl-main">
+        ${canDrag?`<button type="button" class="drag-handle" aria-label="Drag to reorder ${escapeHtml(sym)}" title="Drag to reorder">⋮⋮</button>`:""}
+        <span class="coin-logo"><img src="${escapeHtml(url)}" alt="${escapeHtml(sym)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${fb}'"></span>
+        <div class="wl-id"><div class="wl-sym">${escapeHtml(sym)}${held?'<span class="w-held">Held</span>':""}</div><div class="wl-name">${escapeHtml(sub)}</div></div>
+        <div class="w-spark">${sparkSvg(sym,pts)}</div>
+        <div class="wl-quote"><div class="watch-price ${flash("w:"+sym,price)}">${price>0?priceFmt(price):"—"}</div><span class="chg-pill ${ch>0?"green":ch<0?"red":""}">${ch>0?"▲ ":ch<0?"▼ ":""}${Math.abs(ch).toFixed(2)}%</span></div>
       </div>
-      <div class="w-spark">${sparkSvg(sym,pts)}<small>48h</small></div>
-      <div class="watch-quote"><div class="watch-price ${flash("w:"+sym,price)}">${price>0?priceFmt(price):"—"}</div><span class="chg-pill ${ch>0?"green":ch<0?"red":""}">${ch>0?"▲ ":ch<0?"▼ ":""}${Math.abs(ch).toFixed(2)}%</span></div>
-      <div class="watch-actions"><button class="icon-btn" data-watch-add="${escapeHtml(sym)}" title="Add to portfolio" aria-label="Add ${escapeHtml(sym)} to portfolio">＋</button><button class="icon-btn danger" data-watch-remove="${escapeHtml(sym)}" title="Remove" aria-label="Remove ${escapeHtml(sym)}">✕</button></div>
+      ${range}
+      <div class="wl-actions">
+        <button class="btn primary" data-watch-add="${escapeHtml(sym)}" type="button">＋ Portfolio</button>
+        <button class="btn" type="button">📈 Chart</button>
+        <button class="btn danger" data-watch-remove="${escapeHtml(sym)}" type="button">Remove</button>
+      </div>
     </article>`;
   }).join("");
 }
@@ -1503,11 +1575,19 @@ $("chartClose").addEventListener("click",closeChart);
 $("chartBackdrop").addEventListener("click",e=>{if(e.target===$("chartBackdrop"))closeChart();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("chartBackdrop").classList.contains("open"))closeChart();});
 $("watchGrid").addEventListener("click",e=>{
-  const row=e.target.closest(".watch-row");
+  const row=e.target.closest(".wl-row");
   if(!row) return;
   if(e.target.closest("[data-watch-add],[data-watch-remove],.drag-handle")) return;
   openChart(row.dataset.sym);
 });
+/* Watchlist filter chips + sort */
+$("wlChips").addEventListener("click",e=>{
+  const b=e.target.closest("[data-wl]");if(!b)return;
+  wlFilter=b.dataset.wl;
+  document.querySelectorAll("#wlChips .wl-chip").forEach(c=>c.classList.toggle("active",c===b));
+  renderWatchlist();
+});
+$("wlSort").addEventListener("change",e=>{wlSort=e.target.value;renderWatchlist();});
 document.addEventListener("click",event=>{
   const edit=event.target.closest("[data-edit]");
   const del=event.target.closest("[data-delete]");
@@ -1551,7 +1631,7 @@ $("watchForm").addEventListener("submit",async event=>{
 $("watchGrid").addEventListener("pointerdown",e=>{
   const handle=e.target.closest(".drag-handle");
   if(!handle) return;
-  const row=handle.closest(".watch-row"), grid=$("watchGrid");
+  const row=handle.closest(".wl-row"), grid=$("watchGrid");
   if(!row) return;
   e.preventDefault();
   watchDragging=true;
@@ -1561,7 +1641,7 @@ $("watchGrid").addEventListener("pointerdown",e=>{
   const move=ev=>{
     if(ev.clientY<70) window.scrollBy(0,-12);
     else if(ev.clientY>window.innerHeight-70) window.scrollBy(0,12);
-    const others=[...grid.querySelectorAll(".watch-row:not(.dragging)")];
+    const others=[...grid.querySelectorAll(".wl-row:not(.dragging)")];
     const next=others.find(r=>{const b=r.getBoundingClientRect();return ev.clientY<b.top+b.height/2;});
     if(next) { if(row.nextElementSibling!==next) grid.insertBefore(row,next); }
     else if(grid.lastElementChild!==row) grid.appendChild(row);
@@ -1572,7 +1652,7 @@ $("watchGrid").addEventListener("pointerdown",e=>{
     handle.removeEventListener("pointercancel",end);
     row.classList.remove("dragging");
     grid.classList.remove("sorting");
-    const order=[...grid.querySelectorAll(".watch-row")].map(r=>r.dataset.sym);
+    const order=[...grid.querySelectorAll(".wl-row")].map(r=>r.dataset.sym);
     watchDragging=false;
     if(order.length===(state.watchlist||[]).length && order.join()!==state.watchlist.join()) {
       state.watchlist=order;
@@ -1588,13 +1668,13 @@ $("watchGrid").addEventListener("keydown",e=>{
   const handle=e.target.closest(".drag-handle");
   if(!handle||(e.key!=="ArrowUp"&&e.key!=="ArrowDown")) return;
   e.preventDefault();
-  const sym=handle.closest(".watch-row").dataset.sym;
+  const sym=handle.closest(".wl-row").dataset.sym;
   const list=state.watchlist, i=list.indexOf(sym), j=i+(e.key==="ArrowUp"?-1:1);
   if(i<0||j<0||j>=list.length) return;
   [list[i],list[j]]=[list[j],list[i]];
   markPortfolioChanged();
   renderWatchlist();
-  const again=$("watchGrid").querySelector(`.watch-row[data-sym="${sym}"] .drag-handle`);
+  const again=$("watchGrid").querySelector(`.wl-row[data-sym="${sym}"] .drag-handle`);
   if(again) again.focus();
 });
 document.addEventListener("keydown",event=>{if(event.key==="Escape")closeModal();});
@@ -2107,8 +2187,11 @@ $("anOut").addEventListener("click",e=>{const b=e.target.closest("[data-hz]");if
 
 /* ===== Tabs ===== */
 const TAB_KEY="coinfolio_tab";
+const isWide=()=>window.matchMedia("(min-width:1101px)").matches;
 function setTab(name,save=true){
   if(!["portfolio","watch","analysis","trades"].includes(name)) name="portfolio";
+  /* On wide screens the Watchlist is always visible on the right, so it is never a tab */
+  if(name==="watch" && isWide()) name="portfolio";
   document.querySelectorAll(".tab").forEach(b=>{const on=b.dataset.tab===name;b.classList.toggle("active",on);b.setAttribute("aria-selected",on?"true":"false");});
   document.querySelectorAll(".tab-panel").forEach(p=>p.classList.toggle("active",p.dataset.panel===name));
   if(save){try{localStorage.setItem(TAB_KEY,name);}catch{}}
@@ -2118,6 +2201,10 @@ function setTab(name,save=true){
   else if(name==="trades") renderTrades();
 }
 $("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)setTab(b.dataset.tab);});
+window.addEventListener("resize",()=>{
+  const cur=document.querySelector(".tab.active");
+  if(cur&&cur.dataset.tab==="watch"&&isWide()) setTab("portfolio",false);
+});
 
 function startApp() {
   {let t="portfolio";try{t=localStorage.getItem(TAB_KEY)||"portfolio";}catch{}setTab(t,false);}
