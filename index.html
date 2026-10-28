@@ -106,7 +106,9 @@ input::placeholder{color:#5a5a5a}
 .tv-row.dragging{background:#1a1a1a;z-index:3;cursor:grabbing}
 .tv-sym{display:flex;align-items:center;gap:8px;min-width:0}
 .tv-sym .coin-logo{width:18px;height:18px;flex:0 0 18px;font-size:7px;border:0}
+.tv-txt{display:flex;flex-direction:column;min-width:0}
 .tv-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.tv-sub{display:none}
 .tv-row .num{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tv-act{position:absolute;right:4px;top:50%;transform:translateY(-50%);display:none;gap:4px;background:#1a1a1a;border:1px solid var(--border2);padding:2px;border-radius:8px;z-index:2}
 .tv-row:hover .tv-act{display:flex}
@@ -233,6 +235,9 @@ canvas{width:100%;height:100%;display:block}
 .check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text)}
 .check input{width:auto}
 
+/* mobile bottom nav (hidden on desktop) */
+.mnav{display:none}
+
 @media(max-width:1100px){
   .terminal{grid-template-columns:1fr}
   .term-chart{height:460px}
@@ -243,8 +248,6 @@ canvas{width:100%;height:100%;display:block}
 }
 @media(max-width:700px){
   .stats{grid-template-columns:1fr}
-  .tabs{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:9;width:auto;margin:0;display:grid;grid-template-columns:1fr 1fr;background:#000;border-color:var(--border2)}
-  .app{padding-bottom:90px}
 }
 @media(max-width:600px){
   .app{padding:0 14px 14px}
@@ -258,10 +261,74 @@ canvas{width:100%;height:100%;display:block}
   .month-nav{width:100%;justify-content:space-between}
   .alloc{justify-content:center}.alloc-legend{min-width:100%}
 }
+
+/* ===== mobile app layout (TradingView style) ===== */
+@media(max-width:700px){
+  .tabs{display:none}
+  .app{padding:0 12px calc(86px + env(safe-area-inset-bottom,0px))}
+  .topbar{margin:0 -12px;padding:10px 12px;align-items:center;flex-wrap:nowrap;gap:8px;border-bottom:1px solid var(--border)}
+  .brand h1{display:none}
+  .brand-mark{width:32px;height:32px;font-size:16px;border-radius:9px}
+  .top-actions{flex-wrap:nowrap;gap:6px;justify-content:flex-end}
+  .status{width:auto;flex:none}
+  #liveStatus,#refreshBtn{display:none}
+  #addBtn{padding:8px 12px}
+  #addBtn .lbl{display:none}
+  .rate-pill{padding:5px 9px;font-size:11px;gap:5px}
+  .user-pill{max-width:84px;padding:7px 9px}
+
+  .mnav{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:9;background:#000;border-top:1px solid var(--border);padding:6px 0 calc(6px + env(safe-area-inset-bottom,0px))}
+  .mnav button{background:none;border:0;color:#8a8a8a;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:500;padding:4px 0}
+  .mnav button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .mnav button.active{color:#fff}
+
+  body[data-mview="watch"] .term-chart,
+  body[data-mview="watch"] .detail-panel,
+  body[data-mview="watch"] .stats,
+  body[data-mview="watch"] .perf-strip,
+  body[data-mview="watch"] .tab-panel,
+  body[data-mview="watch"] .footer{display:none!important}
+  body[data-mview="chart"] .wl-panel,
+  body[data-mview="chart"] .stats,
+  body[data-mview="chart"] .perf-strip,
+  body[data-mview="chart"] .tab-panel,
+  body[data-mview="chart"] .footer{display:none!important}
+  body[data-mview="portfolio"] .terminal,
+  body[data-mview="trades"] .terminal,
+  body[data-mview="trades"] .stats,
+  body[data-mview="trades"] .perf-strip{display:none!important}
+  body[data-mview="portfolio"] .app,body[data-mview="trades"] .app{padding-top:14px}
+  body[data-mview="portfolio"] .stats,body[data-mview="portfolio"] .perf-strip{margin-top:0}
+
+  .terminal{display:block;margin:0 -12px;gap:0}
+  .term-chart{height:calc(100vh - 150px);height:calc(100dvh - 150px);min-height:380px;border:0;border-radius:0}
+  .term-side{height:auto;gap:0}
+  .wl-panel{border:0;border-radius:0;max-height:none;flex:none;overflow:visible}
+  .tv-list{overflow:visible}
+  .detail-panel{border:0;border-top:1px solid var(--border);border-radius:0;overflow:visible}
+  .wl-top{padding:14px 14px 10px;border-bottom:0}
+  .wl-top h3{font-size:22px}
+  .tv-head{display:none}
+  .tv-row{height:auto;min-height:68px;padding:8px 14px 8px 2px;grid-template-columns:18px minmax(0,1fr) auto auto;grid-template-rows:auto auto;column-gap:10px;row-gap:3px;border-bottom:1px solid var(--border);border-radius:0;font-size:15px;align-items:center}
+  .tv-row:hover{background:transparent}
+  .tv-row:active{background:var(--hover)}
+  .tv-row.active{background:transparent;box-shadow:none}
+  .tv-row>.drag-handle{grid-row:1/3;grid-column:1;height:100%;width:18px}
+  .tv-row>.tv-sym{grid-row:1/3;grid-column:2}
+  .tv-row>:nth-child(3){grid-row:1;grid-column:3/5;font-size:19px;font-weight:600}
+  .tv-row>:nth-child(4){grid-row:2;grid-column:3;font-size:15px}
+  .tv-row>:nth-child(5){grid-row:2;grid-column:4;font-size:15px}
+  .tv-act{display:none!important}
+  .tv-sym{gap:12px}
+  .tv-sym .coin-logo{width:44px;height:44px;flex:0 0 44px;font-size:12px;border:1px solid var(--border)}
+  .tv-txt{gap:3px}
+  .tv-name{font-size:18px;font-weight:700}
+  .tv-sub{display:block;color:var(--muted);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:400}
+}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
-<body>
+<body data-mview="watch">
 <div class="splash" id="splash"><div class="brand-mark">C</div></div>
 
 <div class="auth-screen" id="authScreen">
@@ -287,7 +354,7 @@ canvas{width:100%;height:100%;display:block}
       <div class="rate-pill" title="USD / EGP"><span>USD/EGP</span><strong id="usdEgp">—</strong></div>
       <div class="status"><span class="dot" id="liveDot"></span><span id="liveStatus">Connecting…</span></div>
       <button class="btn" id="refreshBtn" type="button">↻ Refresh</button>
-      <button class="btn primary" id="addBtn" type="button">＋ Add asset</button>
+      <button class="btn primary" id="addBtn" type="button" aria-label="Add asset">＋<span class="lbl"> Add asset</span></button>
       <details class="user-menu"><summary class="user-pill" id="userPill"></summary><div class="user-pop"><button id="exportBtn" type="button">↓ Export CSV</button><button id="signOutBtn" type="button">Sign out</button></div></details>
     </div>
   </header>
@@ -349,6 +416,13 @@ canvas{width:100%;height:100%;display:block}
   </div>
 
   <footer class="footer"><span>Coinfolio · Personal portfolio tracker</span><span>Prices are indicative. The USD/EGP rate comes from CoinGecko and may differ from P2P prices.</span></footer>
+
+  <nav class="mnav" id="mnav" aria-label="Main navigation">
+    <button type="button" data-mv="watch" class="active"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Watchlist</button>
+    <button type="button" data-mv="chart"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 15l3-4 3 2 4-5"/></svg>Chart</button>
+    <button type="button" data-mv="portfolio"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.5 6.5"/></svg>Portfolio</button>
+    <button type="button" data-mv="trades"><svg viewBox="0 0 24 24"><path d="M7 8h13l-3-3M17 16H4l3 3"/></svg>Trades</button>
+  </nav>
 </div>
 
 <!-- Add / edit asset -->
@@ -566,8 +640,9 @@ function coinImg(sym,primary){
   const list = [...new Set([
     primary,
     logoStore[s],
-    `https://assets.coincap.io/assets/icons/${s}@2x.png`,
-    `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${s}.png`
+    `https://bin.bnbstatic.com/static/assets/logos/${sym.toUpperCase()}.png`,
+    `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${s}.png`,
+    `https://assets.coincap.io/assets/icons/${s}@2x.png`
   ].filter(Boolean))];
   return `<img src="${escapeHtml(list[0])}" data-sym="${escapeHtml(sym)}" data-next="${escapeHtml(JSON.stringify(list.slice(1)))}" alt="" loading="lazy" referrerpolicy="no-referrer">`;
 }
@@ -683,6 +758,10 @@ function renderCards() {
 }
 
 /* ===== terminal: TradingView chart + watchlist + symbol detail ===== */
+const mq = window.matchMedia("(max-width:700px)");
+const MV_KEY = "coinfolio_mview";
+let mview = "watch";
+try { mview = localStorage.getItem(MV_KEY) || "watch"; } catch {}
 let watchDragging = false, termSym = "", termChartSym = "";
 const TERM_KEY = "coinfolio_term_sym";
 const dcache = {};
@@ -711,6 +790,7 @@ function loadTV(){
 async function loadTermChart(force){
   const sym = ensureTermSym(), box = $("termChart");
   if (!box) return;
+  if (mq.matches && mview !== "chart") return;
   if (!force && termChartSym === sym && box.childElementCount) return;
   termChartSym = sym;
   box.innerHTML = '<div style="padding:24px;color:var(--muted)">Loading chart…</div>';
@@ -722,10 +802,17 @@ async function loadTermChart(force){
       container_id:"termChart", autosize:true,
       symbol:"BINANCE:"+sym+"USDT", interval:"D", timezone:"Africa/Cairo",
       theme:"dark", style:"1", locale:"en", toolbar_bg:"#000000",
-      enable_publishing:false, allow_symbol_change:false, hide_side_toolbar:false,
+      enable_publishing:false, allow_symbol_change:false, hide_side_toolbar:mq.matches,
       withdateranges:true, save_image:true,
+      studies:["BB@tv-basicstudies"],
       loading_screen:{backgroundColor:"#000000",foregroundColor:"#ffffff"},
-      overrides:{"paneProperties.background":"#000000","paneProperties.backgroundType":"solid","paneProperties.vertGridProperties.color":"#111111","paneProperties.horzGridProperties.color":"#111111"}
+      overrides:{
+        "paneProperties.background":"#000000","paneProperties.backgroundType":"solid",
+        "paneProperties.vertGridProperties.color":"#111111","paneProperties.horzGridProperties.color":"#111111",
+        "mainSeriesProperties.candleStyle.upColor":"#089981","mainSeriesProperties.candleStyle.downColor":"#f23645",
+        "mainSeriesProperties.candleStyle.borderUpColor":"#089981","mainSeriesProperties.candleStyle.borderDownColor":"#f23645",
+        "mainSeriesProperties.candleStyle.wickUpColor":"#089981","mainSeriesProperties.candleStyle.wickDownColor":"#f23645"
+      }
     });
   } catch {
     termChartSym = "";
@@ -742,9 +829,11 @@ function renderWatchlist(){
   grid.innerHTML = list.map(sym => {
     const price = num(state.prices[sym]), pct = num(changes[sym]);
     const abs = price>0 ? price-price/(1+pct/100) : 0, cls = pct>0?"green":pct<0?"red":"", e = escapeHtml(sym);
+    const held = state.portfolio.find(a=>a.symbol===sym);
+    const nm = (held && held.name && held.name!==sym) ? held.name : sym;
     return `<div class="tv-row ${sym===active?"active":""}" data-sym="${e}">
       <button type="button" class="drag-handle" aria-label="Drag to reorder ${e}" title="Drag to reorder">⋮⋮</button>
-      <span class="tv-sym"><span class="coin-logo">${coinImg(sym,heldLogo(sym))}</span><span class="tv-name">${e}USDT</span></span>
+      <span class="tv-sym"><span class="coin-logo">${coinImg(sym,heldLogo(sym))}</span><span class="tv-txt"><span class="tv-name">${e}USDT</span><span class="tv-sub">${escapeHtml(nm)} / TetherUS</span></span></span>
       <span class="num ${flash("w:"+sym,price)}">${price>0?numFmt(price):"—"}</span>
       <span class="num ${cls}">${abs>0?"+":abs<0?"−":""}${abs?numFmt(abs):"0.00"}</span>
       <span class="num ${cls}">${pct>0?"+":pct<0?"−":""}${Math.abs(pct).toFixed(2)}%</span>
@@ -794,6 +883,8 @@ function renderDetail(){
   } else {
     pos = `<button class="btn primary" data-watch-add="${e}" type="button" style="width:100%;margin-top:16px">＋ Add to portfolio</button>`;
   }
+  const inWl = (state.watchlist||[]).includes(sym);
+  const rem = inWl ? `<button class="btn" data-watch-remove="${e}" type="button" style="width:100%;margin-top:10px">Remove from watchlist</button>` : "";
   box.innerHTML = `<div class="dt">
     <div class="dt-head"><span class="coin-logo">${coinImg(sym,heldLogo(sym))}</span><div class="dt-title">${e}USDT</div></div>
     <div class="dt-sub">${escapeHtml(nm)} / TetherUS · BINANCE</div>
@@ -801,7 +892,7 @@ function renderDetail(){
     ${rangeBar(dLo,dHi,price,"Day's range")}
     ${rangeBar(wLo,wHi,price,"52wk range")}
     <h4>Performance</h4><div class="perf-grid">${tiles}</div>
-    ${pos}
+    ${pos}${rem}
   </div>`;
 }
 async function loadDetail(sym){
@@ -1223,6 +1314,7 @@ $("watchGrid").addEventListener("click",e=>{
   const row = e.target.closest(".tv-row");
   if (!row || e.target.closest("[data-watch-add],[data-watch-remove],.drag-handle")) return;
   selectSym(row.dataset.sym);
+  if (mq.matches) setMView("chart");
 });
 $("watchForm").addEventListener("submit",async e=>{
   e.preventDefault();
@@ -1287,8 +1379,28 @@ function setTab(name,save=true){
 }
 $("tabs").addEventListener("click",e=>{ const b = e.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); });
 
+/* ===== mobile views (bottom navigation) ===== */
+function setMView(name,save=true){
+  if (!["watch","chart","portfolio","trades"].includes(name)) name = "watch";
+  mview = name;
+  document.body.dataset.mview = name;
+  document.querySelectorAll("#mnav [data-mv]").forEach(b=>b.classList.toggle("active",b.dataset.mv===name));
+  if (save) { try { localStorage.setItem(MV_KEY,name); } catch {} }
+  if (!mq.matches) return;
+  if (name==="portfolio" || name==="trades") setTab(name,false);
+  window.scrollTo(0,0);
+  if (name==="chart") loadTermChart(true);
+  else if (name==="portfolio") setTimeout(()=>{ drawChart(); drawAllocation(); },0);
+}
+$("mnav").addEventListener("click",e=>{ const b = e.target.closest("[data-mv]"); if (b) setMView(b.dataset.mv); });
+mq.addEventListener("change",()=>{
+  if (mq.matches) setMView(mview,false);
+  else { termChartSym = ""; loadTermChart(true); }
+});
+
 function startApp(){
   { let t = "portfolio"; try { t = localStorage.getItem(TAB_KEY)||"portfolio"; } catch {} setTab(t,false); }
+  setMView(mview,false);
   render();
   loadTermChart(); loadDetail();
   if (!Array.isArray(state.watchlist)) state.watchlist = [];
