@@ -49,7 +49,7 @@ input::placeholder{color:#5a5a5a}
 .fee-unit{width:auto}
 
 /* top bar */
-.topbar{position:sticky;top:0;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 -24px 20px;padding:14px 24px;background:rgba(5,7,13,.85);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.topbar{position:sticky;top:12px;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:16px;margin:14px 0 18px;padding:10px 16px;background:linear-gradient(90deg,rgba(47,123,255,.10),rgba(34,201,147,.06)),rgba(10,14,23,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .brand{display:flex;align-items:center;gap:12px}
 .brand-mark{width:36px;height:36px;border-radius:10px;object-fit:cover;display:block}
 .brand h1{font-size:19px;background:linear-gradient(90deg,#4ea1ff,#22c993);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -92,38 +92,38 @@ input::placeholder{color:#5a5a5a}
 .auth-card input:focus-visible{outline:none;border-color:#22c993;box-shadow:0 0 0 3px rgba(34,201,147,.2)}
 
 /* terminal: chart + watchlist + detail */
-.terminal{--th:clamp(520px,calc(100vh - 140px),780px);display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;margin-bottom:16px;align-items:stretch}
+.terminal{--th:clamp(520px,calc(100vh - 140px),780px);display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:14px;margin-bottom:16px;align-items:stretch}
 .term-chart{padding:0;overflow:hidden;height:var(--th);background:#000}
 #termChart{width:100%;height:100%}
 .term-side{display:flex;flex-direction:column;gap:14px;min-width:0;height:var(--th)}
-.wl-panel{padding:0;display:flex;flex-direction:column;min-height:0;flex:0 1 46%;overflow:hidden}
+.wl-panel{padding:0;display:flex;flex-direction:column;min-height:0;flex:0 1 50%;overflow:hidden}
 .detail-panel{padding:0;flex:1 1 54%;min-height:0;overflow-y:auto;scrollbar-width:thin}
-.wl-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border)}
-.wl-top h3{font-size:15px;display:flex;align-items:center;gap:8px}
+.wl-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.wl-top h3{font-size:17px;display:flex;align-items:center;gap:8px}
 .wl-add{display:flex;gap:6px}
-.wl-add input{width:120px;padding:6px 10px;font-size:12px}
-.wl-add .btn{padding:6px 12px}
-.tv-head,.tv-row{display:grid;grid-template-columns:16px minmax(0,1.6fr) minmax(0,1.2fr) minmax(0,1fr) minmax(0,.9fr);gap:6px;align-items:center;padding:0 12px}
-.tv-head{font-size:12px;color:var(--muted);padding-top:8px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.wl-add input{width:130px;padding:8px 12px;font-size:13px}
+.wl-add .btn{padding:8px 14px}
+.tv-head,.tv-row{display:grid;grid-template-columns:18px minmax(0,1.6fr) minmax(0,1.2fr) minmax(0,1fr) minmax(0,.9fr);gap:8px;align-items:center;padding:0 14px}
+.tv-head{font-size:13px;color:var(--muted);padding-top:10px;padding-bottom:10px;border-bottom:1px solid var(--border)}
 .tv-head span:nth-child(n+3),.tv-row .num{text-align:right}
 .tv-list{overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin}
 .tv-list.sorting{user-select:none;-webkit-user-select:none}
-.tv-row{height:34px;font-size:13px;cursor:pointer;position:relative;border-radius:4px}
+.tv-row{height:48px;font-size:15px;cursor:pointer;position:relative;border-radius:8px}
 .tv-row:hover{background:var(--hover)}
 .tv-row.active{background:rgba(47,123,255,.10);box-shadow:inset 0 0 0 1px rgba(78,161,255,.7)}
 .tv-row.dragging{background:#1a1a1a;z-index:3;cursor:grabbing}
-.tv-sym{display:flex;align-items:center;gap:8px;min-width:0}
-.tv-sym .coin-logo{width:18px;height:18px;flex:0 0 18px;font-size:7px;border:0}
+.tv-sym{display:flex;align-items:center;gap:10px;min-width:0}
+.tv-sym .coin-logo{width:30px;height:30px;flex:0 0 30px;font-size:10px;border:0}
 .tv-txt{display:flex;flex-direction:column;min-width:0}
-.tv-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.tv-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 .tv-sub{display:none}
 .tv-row .num{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tv-act{position:absolute;right:4px;top:50%;transform:translateY(-50%);display:none;gap:4px;background:#1a1a1a;border:1px solid var(--border2);padding:2px;border-radius:8px;z-index:2}
 .tv-row:hover .tv-act{display:flex}
-.tv-act button{width:24px;height:24px;border-radius:6px;border:0;background:transparent;color:var(--text)}
+.tv-act button{width:30px;height:30px;border-radius:6px;border:0;background:transparent;color:var(--text)}
 .tv-act button:hover{background:#2a2a2a}
 @media(hover:none){.tv-row.active .tv-act{display:flex}}
-.drag-handle{width:14px;height:34px;border:0;background:transparent;color:#555;font-size:13px;letter-spacing:-2px;cursor:grab;touch-action:none;padding:0}
+.drag-handle{width:16px;height:48px;border:0;background:transparent;color:#555;font-size:13px;letter-spacing:-2px;cursor:grab;touch-action:none;padding:0}
 .drag-handle:hover{color:var(--text)}
 .dt{padding:14px 16px 16px}
 .dt-head{display:flex;align-items:center;gap:10px}
@@ -276,7 +276,7 @@ canvas{width:100%;height:100%;display:block}
 @media(max-width:700px){
   .tabs{display:none}
   .app{padding:0 12px calc(86px + env(safe-area-inset-bottom,0px))}
-  .topbar{margin:0 -12px;padding:10px 12px;align-items:center;flex-wrap:nowrap;gap:8px;border-bottom:1px solid var(--border)}
+  .topbar{margin:0 -12px;padding:10px 12px;align-items:center;flex-wrap:nowrap;gap:8px;top:0;border-radius:0;border-width:0 0 1px;box-shadow:none}
   .brand h1{display:none}
   .brand-mark{width:32px;height:32px;font-size:16px;border-radius:9px}
   .top-actions{flex-wrap:nowrap;gap:6px;justify-content:flex-end}
@@ -319,21 +319,21 @@ canvas{width:100%;height:100%;display:block}
   .wl-top{padding:14px 14px 10px;border-bottom:0}
   .wl-top h3{font-size:22px}
   .tv-head{display:none}
-  .tv-row{height:auto;min-height:68px;padding:8px 14px 8px 2px;grid-template-columns:18px minmax(0,1fr) auto auto;grid-template-rows:auto auto;column-gap:10px;row-gap:3px;border-bottom:1px solid var(--border);border-radius:0;font-size:15px;align-items:center}
+  .tv-row{height:auto;min-height:clamp(78px,21vw,92px);padding:10px 16px 10px 2px;grid-template-columns:18px minmax(0,1fr) auto auto;grid-template-rows:auto auto;column-gap:12px;row-gap:5px;border-bottom:1px solid var(--border);border-radius:0;font-size:clamp(15px,4.4vw,18px);align-items:center}
   .tv-row:hover{background:transparent}
   .tv-row:active{background:var(--hover)}
   .tv-row.active{background:transparent;box-shadow:none}
   .tv-row>.drag-handle{grid-row:1/3;grid-column:1;height:100%;width:18px}
   .tv-row>.tv-sym{grid-row:1/3;grid-column:2}
-  .tv-row>:nth-child(3){grid-row:1;grid-column:3/5;font-size:19px;font-weight:600}
-  .tv-row>:nth-child(4){grid-row:2;grid-column:3;font-size:15px}
-  .tv-row>:nth-child(5){grid-row:2;grid-column:4;font-size:15px}
+  .tv-row>:nth-child(3){grid-row:1;grid-column:3/5;font-size:clamp(19px,5.5vw,23px);font-weight:500}
+  .tv-row>:nth-child(4){grid-row:2;grid-column:3;font-size:clamp(14px,4.3vw,18px)}
+  .tv-row>:nth-child(5){grid-row:2;grid-column:4;font-size:clamp(14px,4.3vw,18px)}
   .tv-act{display:none!important}
   .tv-sym{gap:12px}
-  .tv-sym .coin-logo{width:44px;height:44px;flex:0 0 44px;font-size:12px;border:1px solid var(--border)}
+  .tv-sym .coin-logo{width:clamp(42px,11.5vw,50px);height:clamp(42px,11.5vw,50px);flex:0 0 clamp(42px,11.5vw,50px);font-size:13px;border:1px solid var(--border)}
   .tv-txt{gap:3px}
-  .tv-name{font-size:18px;font-weight:700}
-  .tv-sub{display:block;color:var(--muted);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:400}
+  .tv-name{font-size:clamp(17px,5.2vw,22px);font-weight:600}
+  .tv-sub{display:block;color:var(--muted);font-size:clamp(14px,4.3vw,18px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:400}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -375,7 +375,7 @@ canvas{width:100%;height:100%;display:block}
       <section class="panel wl-panel">
         <div class="wl-top">
           <h3>Watchlist <span class="badge" id="wlCount">0</span></h3>
-          <form class="wl-add" id="watchForm"><input id="watchInput" placeholder="Add, e.g. SOL" maxlength="20" autocomplete="off" aria-label="Add a coin to your watchlist"><button class="btn primary" type="submit" aria-label="Add to watchlist">＋</button></form>
+          <form class="wl-add" id="watchForm"><input id="watchInput" placeholder="Add any coin" maxlength="40" autocomplete="off" aria-label="Add a coin to your watchlist"><button class="btn primary" type="submit" aria-label="Add to watchlist">＋</button></form>
         </div>
         <div class="tv-head"><span></span><span>Symbol</span><span>Last</span><span>Chg</span><span>Chg%</span></div>
         <div class="tv-list" id="watchGrid"></div>
@@ -576,7 +576,7 @@ function normalizeAsset(raw) {
 }
 
 /* ===== state ===== */
-const defaultState = () => ({portfolio:[],prices:{},cash:0,usdEgp:0,history:[],watchlist:[],changes:{},stats:{},trades:[],updatedAt:null});
+const defaultState = () => ({portfolio:[],prices:{},cash:0,usdEgp:0,history:[],watchlist:[],changes:{},stats:{},trades:[],sources:{},updatedAt:null});
 let state = defaultState();
 let currentUser = null, cloudReady = false, socket = null, reconnectTimer = null, rateTimer = null, sparkTimer = null;
 let activeStorageKey = STORAGE_KEY, cloudSaveTimer = null;
@@ -589,7 +589,7 @@ function saveCloudPortfolio() {
   if (!currentUser || !cloudReady) return;
   clearTimeout(cloudSaveTimer);
   const id = currentUser.uid;
-  const snapshot = {portfolio:state.portfolio,cash:num(state.cash),usdEgp:state.usdEgp,watchlist:state.watchlist,history:state.history,trades:state.trades||[]};
+  const snapshot = {portfolio:state.portfolio,cash:num(state.cash),usdEgp:state.usdEgp,watchlist:state.watchlist,history:state.history,trades:state.trades||[],sources:state.sources||{}};
   cloudSaveTimer = setTimeout(async () => {
     if (!currentUser || currentUser.uid !== id || !cloudReady) return;
     try { await setDoc(doc(db,"users",id),{...snapshot,updatedAt:serverTimestamp()},{merge:true}); }
@@ -695,8 +695,10 @@ async function pumpGecko(){
   }
   geckoBusy = false;
 }
-const logoMarkup = (a,large=true) => `<span class="coin-logo ${large?"":"small"}">${coinImg(a.symbol,a.logo)}</span>`;
-const heldLogo = sym => (state.portfolio.find(a=>a.symbol===sym)||{}).logo;
+const logoMarkup = (a,large=true) => `<span class="coin-logo ${large?"":"small"}">${coinImg(a.symbol,a.logo||(srcOf(a.symbol)||{}).logo)}</span>`;
+const srcOf = sym => (state.sources||{})[sym] || null;
+const pairOf = sym => sym + (srcOf(sym) ? "USD" : "USDT");
+const heldLogo = sym => (state.portfolio.find(a=>a.symbol===sym)||{}).logo || (srcOf(sym)||{}).logo;
 
 /* ===== render ===== */
 function render() {
@@ -803,6 +805,9 @@ async function loadTermChart(force){
   if (mq.matches && mview !== "chart") return;
   if (!force && termChartSym === sym && box.childElementCount) return;
   termChartSym = sym;
+  if (lwChart) { try { lwChart.remove(); } catch {} lwChart = null; }
+  if (lwRO) { lwRO.disconnect(); lwRO = null; }
+  if (srcOf(sym)) { loadGeckoChart(sym); return; }
   box.innerHTML = '<div style="padding:24px;color:var(--muted)">Loading chart…</div>';
   try {
     await loadTV();
@@ -829,6 +834,46 @@ async function loadTermChart(force){
     box.innerHTML = '<div style="padding:24px;color:var(--red)">Could not load the chart. Check your connection and try again.</div>';
   }
 }
+/* ===== non-Binance coins: candlestick chart from CoinGecko ===== */
+let lwChart = null, lwRO = null, lwPromise = null, gDays = 30;
+function loadLW(){
+  if (window.LightweightCharts) return Promise.resolve();
+  if (!lwPromise) lwPromise = new Promise((res,rej)=>{
+    const sc = document.createElement("script");
+    sc.src = "https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js";
+    sc.onload = res; sc.onerror = () => { lwPromise = null; rej(); };
+    document.head.appendChild(sc);
+  });
+  return lwPromise;
+}
+async function loadGeckoChart(sym){
+  const box = $("termChart"), gs = srcOf(sym);
+  const btn = (d,l) => `<button type="button" class="small-action" data-gd="${d}" style="${gDays===d?"background:linear-gradient(90deg,#2f7bff,#22c993);color:#041016;border-color:transparent":""}">${l}</button>`;
+  box.innerHTML = `<div style="display:flex;flex-direction:column;height:100%"><div id="gcBar" style="display:flex;gap:6px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)"><strong style="margin-right:8px">${escapeHtml(pairOf(sym))}</strong>${btn(1,"1D")}${btn(7,"7D")}${btn(30,"1M")}${btn(90,"3M")}<span class="muted" style="margin-left:auto;font-size:12px">CoinGecko</span></div><div id="gcBox" style="flex:1;min-height:0;position:relative"><div style="padding:24px;color:var(--muted)">Loading chart…</div></div></div>`;
+  $("gcBar").onclick = e => { const b = e.target.closest("[data-gd]"); if (b) { gDays = Number(b.dataset.gd); termChartSym = ""; loadTermChart(true); } };
+  const host = $("gcBox");
+  try {
+    await loadLW();
+    const r = await fetch(`https://api.coingecko.com/api/v3/coins/${encodeURIComponent(gs.id)}/ohlc?vs_currency=usd&days=${gDays}`);
+    if (!r.ok) throw new Error("HTTP "+r.status);
+    const raw = await r.json();
+    if (termChartSym !== sym) return;
+    const seen = new Set(), data = [];
+    for (const k of raw) { const t = Math.floor(k[0]/1000); if (seen.has(t)) continue; seen.add(t); data.push({time:t,open:k[1],high:k[2],low:k[3],close:k[4]}); }
+    data.sort((a,b)=>a.time-b.time);
+    if (!data.length) throw new Error("empty");
+    host.innerHTML = "";
+    const lp = data[data.length-1].close, prec = lp>=100?2:lp>=1?4:lp>=0.01?6:8;
+    lwChart = LightweightCharts.createChart(host,{width:host.clientWidth||600,height:host.clientHeight||400,layout:{background:{color:"#05070d"},textColor:"#8d97ab"},grid:{vertLines:{color:"#0f1522"},horzLines:{color:"#0f1522"}},rightPriceScale:{borderColor:"#1a2335"},timeScale:{borderColor:"#1a2335",timeVisible:gDays<=30}});
+    const ser = lwChart.addCandlestickSeries({upColor:"#089981",downColor:"#f23645",borderVisible:false,wickUpColor:"#089981",wickDownColor:"#f23645",priceFormat:{type:"price",precision:prec,minMove:Math.pow(10,-prec)}});
+    ser.setData(data);
+    lwChart.timeScale().fitContent();
+    lwRO = new ResizeObserver(()=>{ if (lwChart) lwChart.applyOptions({width:host.clientWidth,height:host.clientHeight}); });
+    lwRO.observe(host);
+  } catch {
+    if (termChartSym === sym) host.innerHTML = '<div style="padding:24px;color:var(--red)">Could not load the chart for this coin. CoinGecko may be busy, try again in a minute.</div>';
+  }
+}
 function renderWatchlist(){
   if (watchDragging) return;
   const grid = $("watchGrid");
@@ -840,10 +885,10 @@ function renderWatchlist(){
     const price = num(state.prices[sym]), pct = num(changes[sym]);
     const abs = price>0 ? price-price/(1+pct/100) : 0, cls = pct>0?"green":pct<0?"red":"", e = escapeHtml(sym);
     const held = state.portfolio.find(a=>a.symbol===sym);
-    const nm = (held && held.name && held.name!==sym) ? held.name : sym;
+    const nm = (held && held.name && held.name!==sym) ? held.name : ((srcOf(sym)||{}).name || sym);
     return `<div class="tv-row ${sym===active?"active":""}" data-sym="${e}">
       <button type="button" class="drag-handle" aria-label="Drag to reorder ${e}" title="Drag to reorder">⋮⋮</button>
-      <span class="tv-sym"><span class="coin-logo">${coinImg(sym,heldLogo(sym))}</span><span class="tv-txt"><span class="tv-name">${e}USDT</span><span class="tv-sub">${escapeHtml(nm)} / TetherUS</span></span></span>
+      <span class="tv-sym"><span class="coin-logo">${coinImg(sym,heldLogo(sym))}</span><span class="tv-txt"><span class="tv-name">${escapeHtml(pairOf(sym))}</span><span class="tv-sub">${escapeHtml(nm)} / ${srcOf(sym)?"USD":"TetherUS"}</span></span></span>
       <span class="num ${flash("w:"+sym,price)}">${price>0?numFmt(price):"—"}</span>
       <span class="num ${cls}">${abs>0?"+":abs<0?"−":""}${abs?numFmt(abs):"0.00"}</span>
       <span class="num ${cls}">${pct>0?"+":pct<0?"−":""}${Math.abs(pct).toFixed(2)}%</span>
@@ -879,7 +924,7 @@ function renderDetail(){
   let wLo = 0, wHi = 0;
   if (k && k.length) { const w = k.slice(-365); wLo = Math.min(...w.map(x=>x.l),price>0?price:Infinity); wHi = Math.max(...w.map(x=>x.h),price); }
   const held = state.portfolio.find(a=>a.symbol===sym), cls = pct>0?"green":pct<0?"red":"", e = escapeHtml(sym);
-  const nm = (held && held.name && held.name!==sym) ? held.name : sym;
+  const nm = (held && held.name && held.name!==sym) ? held.name : ((srcOf(sym)||{}).name || sym);
   const tiles = [["1W",perfOf(k,7,price)],["1M",perfOf(k,30,price)],["3M",perfOf(k,90,price)],["6M",perfOf(k,180,price)],["YTD",ytdOf(k,price)],["1Y",perfOf(k,365,price)]]
     .map(([l,v])=>`<div class="pf ${v==null?"":v>0?"up":"down"}"><b>${v==null?"—":(v>0?"+":"")+v.toFixed(2)+"%"}</b><small>${l}</small></div>`).join("");
   let pos = "";
@@ -896,9 +941,9 @@ function renderDetail(){
   const inWl = (state.watchlist||[]).includes(sym);
   const rem = inWl ? `<button class="btn" data-watch-remove="${e}" type="button" style="width:100%;margin-top:10px">Remove from watchlist</button>` : "";
   box.innerHTML = `<div class="dt">
-    <div class="dt-head"><span class="coin-logo">${coinImg(sym,heldLogo(sym))}</span><div class="dt-title">${e}USDT</div></div>
-    <div class="dt-sub">${escapeHtml(nm)} / TetherUS · BINANCE</div>
-    <div class="dt-price ${cls}"><span>${price>0?numFmt(price):"—"}</span><small>USDT</small><span class="dt-chg">${abs>0?"+":abs<0?"−":""}${abs?numFmt(abs):"0.00"} ${pct>0?"+":pct<0?"−":""}${Math.abs(pct).toFixed(2)}%</span></div>
+    <div class="dt-head"><span class="coin-logo">${coinImg(sym,heldLogo(sym))}</span><div class="dt-title">${escapeHtml(pairOf(sym))}</div></div>
+    <div class="dt-sub">${escapeHtml(nm)} / ${srcOf(sym)?"USD · CoinGecko":"TetherUS · BINANCE"}</div>
+    <div class="dt-price ${cls}"><span>${price>0?numFmt(price):"—"}</span><small>${srcOf(sym)?"USD":"USDT"}</small><span class="dt-chg">${abs>0?"+":abs<0?"−":""}${abs?numFmt(abs):"0.00"} ${pct>0?"+":pct<0?"−":""}${Math.abs(pct).toFixed(2)}%</span></div>
     ${rangeBar(dLo,dHi,price,"Day's range")}
     ${rangeBar(wLo,wHi,price,"52wk range")}
     <h4>Performance</h4><div class="perf-grid">${tiles}</div>
@@ -909,6 +954,17 @@ async function loadDetail(sym){
   sym = sym || ensureTermSym();
   const c = dcache[sym];
   if (c && Date.now()-c.t < 300000) return;
+  const gs = srcOf(sym);
+  if (gs) {
+    try {
+      const r = await fetch(`https://api.coingecko.com/api/v3/coins/${encodeURIComponent(gs.id)}/market_chart?vs_currency=usd&days=365&interval=daily`);
+      if (!r.ok) return;
+      const d = await r.json();
+      dcache[sym] = {t:Date.now(),k:(d.prices||[]).map(x=>({t:x[0],o:x[1],h:x[1],l:x[1],c:x[1]}))};
+    } catch { return; }
+    if (sym === termSym) renderDetail();
+    return;
+  }
   try {
     const r = await fetch(`https://api.binance.com/api/v3/klines?symbol=${sym}USDT&interval=1d&limit=400`);
     if (!r.ok) return;
@@ -979,6 +1035,48 @@ function drawAllocation(){
   legend.innerHTML = shown.map((item,i)=>`<div class="alloc-row"><span class="alloc-dot" style="background:${ALLOC_COLORS[i%ALLOC_COLORS.length]}"></span><strong>${escapeHtml(item.symbol)}</strong><span class="val">${usd2(item.value)}</span><span class="pct">${(item.value/total*100).toFixed(1)}%</span></div>`).join("");
 }
 
+/* ===== find any coin: Binance first, then CoinGecko ===== */
+async function resolveCoin(raw){
+  const q = String(raw||"").trim(); if (!q) return null;
+  if (/^[A-Za-z0-9]{1,20}$/.test(q)) {
+    try {
+      const r = await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol="+encodeURIComponent(q.toUpperCase()+"USDT"),{cache:"no-store"});
+      if (r.ok) { const t = await r.json(); if (num(t.lastPrice) > 0) return {src:"binance",sym:q.toUpperCase(),t}; }
+    } catch {}
+  }
+  try {
+    const r = await fetch("https://api.coingecko.com/api/v3/search?query="+encodeURIComponent(q));
+    if (!r.ok) throw new Error("HTTP "+r.status);
+    const low = q.toLowerCase();
+    const m = ((await r.json()).coins||[]).filter(c=>String(c.symbol).toLowerCase()===low || c.id===low)
+      .sort((a,b)=>(a.market_cap_rank||1e9)-(b.market_cap_rank||1e9))[0];
+    if (m) {
+      const sym = String(m.symbol).toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,20);
+      if (sym) return {src:"gecko",sym,id:m.id,name:m.name,logo:m.large||m.thumb||""};
+    }
+  } catch {}
+  return null;
+}
+async function fetchGeckoPrices(){
+  const src = state.sources||{}, syms = allSymbols().filter(s=>src[s]);
+  if (!syms.length) return 0;
+  const ids = [...new Set(syms.map(s=>src[s].id))];
+  let n = 0;
+  try {
+    const r = await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=250&ids="+encodeURIComponent(ids.join(",")),{cache:"no-store"});
+    if (!r.ok) throw new Error("HTTP "+r.status);
+    for (const c of await r.json()) {
+      for (const s of syms) {
+        if (src[s].id !== c.id) continue;
+        if (applyTicker(s,num(c.current_price),num(c.price_change_percentage_24h),num(c.high_24h),num(c.low_24h),num(c.total_volume))) {
+          n++; if (c.image && !src[s].logo) src[s].logo = c.image;
+        }
+      }
+    }
+  } catch (e) { console.warn("CoinGecko prices failed:",e); }
+  return n;
+}
+
 /* ===== prices: Binance REST snapshot + WebSocket ===== */
 function applyTicker(sym,price,pct,hi,lo,vol){
   if (!(price>0)) return false;
@@ -990,8 +1088,9 @@ function applyTicker(sym,price,pct,hi,lo,vol){
   return true;
 }
 async function fetchPrices(){
-  const symbols = allSymbols();
-  if (!symbols.length) { setStatus(true,"Add assets to begin"); return; }
+  const all = allSymbols();
+  if (!all.length) { setStatus(true,"Add assets to begin"); return; }
+  const symbols = all.filter(s=>!(state.sources||{})[s]);
   let ok = 0;
   const fromRest = t => { if (applyTicker(t.symbol.replace(/USDT$/i,"").toUpperCase(),num(t.lastPrice),num(t.priceChangePercent),num(t.highPrice),num(t.lowPrice),num(t.quoteVolume))) ok++; };
   for (let i=0;i<symbols.length;i+=80) {
@@ -1009,6 +1108,7 @@ async function fetchPrices(){
       }
     }
   }
+  ok += await fetchGeckoPrices();
   if (ok) {
     state.updatedAt = Date.now(); persist(); recordHistory(); render();
     setStatus(true, socket && socket.readyState===WebSocket.OPEN ? "Live prices connected" : "Prices refreshed");
@@ -1022,8 +1122,8 @@ function scheduleLiveRender(){
 function connectLivePrices(){
   clearTimeout(reconnectTimer);
   if (socket) { socket.onclose = null; try { socket.close(); } catch {} }
-  const symbols = allSymbols().map(x=>x.toLowerCase()+"usdt");
-  if (!symbols.length) { socket = null; setStatus(true,"Add assets to begin"); return; }
+  const symbols = allSymbols().filter(x=>!(state.sources||{})[x]).map(x=>x.toLowerCase()+"usdt");
+  if (!symbols.length) { socket = null; setStatus(true,allSymbols().length?"Prices refresh every 30s":"Add assets to begin"); return; }
   try {
     socket = new WebSocket("wss://stream.binance.com:9443/stream?streams="+symbols.map(s=>s+"@ticker").join("/"));
     socket.onopen = () => setStatus(true,"Live prices connected");
@@ -1077,7 +1177,7 @@ function previewBuy(){
   const fee = $("coinFeeUnit").value==="pct" ? q*pr*fi/100 : fi;
   $("buyPreview").innerHTML = pr>0&&q>0 ? `Total purchase: ${quantity(q)} × ${money(pr)} = ${money(q*pr)}${fee>0?` + ${money(fee)} fee`:""} → <strong>${money(q*pr+fee)}</strong>` : "Enter quantity and buy price to see the total cost.";
 }
-function saveAsset(event){
+async function saveAsset(event){
   event.preventDefault();
   const id = $("editId").value, symbol = $("coinSymbol").value.trim().toUpperCase();
   const amount = Number($("coinAmount").value);
@@ -1086,6 +1186,12 @@ function saveAsset(event){
   const fee = $("coinFeeUnit").value==="pct" ? amount*buyPrice*feeIn/100 : feeIn;
   if (!/^[A-Z0-9._-]{1,20}$/.test(symbol)) { alert("Enter a valid coin symbol, such as BTC or SOL."); return; }
   if (![amount,buyPrice,fee].every(Number.isFinite) || amount<0 || buyPrice<0 || fee<0) { alert("Enter valid positive values."); return; }
+  let resolvedName = "";
+  if (!srcOf(symbol) && !(num(state.prices[symbol])>0)) {
+    const rc = await resolveCoin(symbol);
+    if (rc && rc.src==="gecko" && rc.sym===symbol) { state.sources = state.sources||{}; state.sources[symbol] = {id:rc.id,name:rc.name,logo:rc.logo}; resolvedName = rc.name; }
+    else if (!rc && !confirm(symbol+" was not found on Binance or CoinGecko, so it will have no live price. Save it anyway?")) return;
+  }
   const spend = amount*buyPrice + fee;
   const deduct = !id && $("coinDeduct").checked && buyPrice>0 && amount>0;
   if (deduct && spend > num(state.cash)+1e-9 && !confirm(`This purchase (${money(spend)}) is more than your USDC balance (${money(state.cash)}). The balance will go negative. Continue?`)) return;
@@ -1098,10 +1204,10 @@ function saveAsset(event){
     addLot(duplicate,amount,buyPrice>0?buyPrice:cur,fee);
     if (logo) duplicate.logo = logo;
   } else if (existing) {
-    Object.assign(existing,{symbol,name:$("coinName").value.trim()||symbol,amount,buyPrice,buyFee:fee,logo});
+    Object.assign(existing,{symbol,name:$("coinName").value.trim()||resolvedName||symbol,amount,buyPrice,buyFee:fee,logo});
     existing.lots = amount>0 ? [{id:uid(),qty:amount,price:buyPrice,fee,time:Date.now()}] : [];
   } else {
-    state.portfolio.push({id:uid(),symbol,name:$("coinName").value.trim()||symbol,amount,buyPrice,buyFee:fee,logo,price:0,change24h:0,
+    state.portfolio.push({id:uid(),symbol,name:$("coinName").value.trim()||resolvedName||symbol,amount,buyPrice,buyFee:fee,logo,price:0,change24h:0,
       lots: amount>0 ? [{id:uid(),qty:amount,price:buyPrice,fee,time:Date.now()}] : []});
   }
   if (deduct) adjustCash(-spend);
@@ -1328,17 +1434,17 @@ $("watchGrid").addEventListener("click",e=>{
 });
 $("watchForm").addEventListener("submit",async e=>{
   e.preventDefault();
-  const input = $("watchInput"), symbol = input.value.trim().toUpperCase();
-  if (!/^[A-Z0-9]{1,20}$/.test(symbol)) { alert("Enter a valid coin symbol, such as SOL."); return; }
+  const input = $("watchInput"), raw = input.value.trim();
+  if (!/^[A-Za-z0-9._-]{1,40}$/.test(raw)) { alert("Enter a coin symbol, such as SOL."); return; }
+  const rc = await resolveCoin(raw);
+  if (!rc) { alert("\u201c"+raw+"\u201d was not found on Binance or CoinGecko. Try the coin's symbol or its CoinGecko ID (for example render-token). If it should exist, CoinGecko may be busy, so try again in a minute."); return; }
+  const symbol = rc.sym;
   if (!Array.isArray(state.watchlist)) state.watchlist = [];
   if (state.watchlist.includes(symbol)) { alert(symbol+" is already on your watchlist."); return; }
-  try {
-    const r = await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol="+encodeURIComponent(symbol+"USDT"),{cache:"no-store"});
-    if (!r.ok) throw new Error("not found");
-    const t = await r.json();
-    if (!applyTicker(symbol,num(t.lastPrice),num(t.priceChangePercent),num(t.highPrice),num(t.lowPrice),num(t.quoteVolume))) throw new Error("no price");
-  } catch { alert(symbol+"/USDT was not found on Binance."); return; }
+  if (rc.src === "gecko") { state.sources = state.sources || {}; state.sources[symbol] = {id:rc.id,name:rc.name,logo:rc.logo}; }
+  else { const t = rc.t; applyTicker(symbol,num(t.lastPrice),num(t.priceChangePercent),num(t.highPrice),num(t.lowPrice),num(t.quoteVolume)); }
   state.watchlist.push(symbol);
+  if (rc.src === "gecko") await fetchGeckoPrices();
   input.value = "";
   markPortfolioChanged(); render(); connectLivePrices(); selectSym(symbol);
 });
@@ -1415,6 +1521,7 @@ function startApp(){
   loadTermChart(); loadDetail();
   if (!Array.isArray(state.watchlist)) state.watchlist = [];
   if (!state.changes || typeof state.changes !== "object") state.changes = {};
+  if (!state.sources || typeof state.sources !== "object") state.sources = {};
   if (allSymbols().length) { setStatus(false,"Loading prices…"); fetchPrices().finally(()=>connectLivePrices()); }
   else setStatus(true,"Add assets to begin");
   clearInterval(sparkTimer); sparkTimer = setInterval(()=>loadDetail(),300000);
