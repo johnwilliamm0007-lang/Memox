@@ -9,7 +9,8 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Coinfolio — Crypto Portfolio</title>
+<title>Memox — Crypto Portfolio</title>
+<meta name="apple-mobile-web-app-title" content="Memox">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -50,7 +51,7 @@ input::placeholder{color:#5a5a5a}
 /* top bar */
 .topbar{position:sticky;top:0;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 -24px 20px;padding:14px 24px;background:#000;border-bottom:1px solid var(--border)}
 .brand{display:flex;align-items:center;gap:12px}
-.brand-mark{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:18px;font-weight:800;color:#000;background:#fff}
+.brand-mark{width:36px;height:36px;border-radius:10px;object-fit:cover;display:block}
 .brand h1{font-size:18px}
 .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .rate-pill{display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;border:1px solid var(--border2);font-size:12px;color:var(--muted)}
@@ -329,11 +330,11 @@ canvas{width:100%;height:100%;display:block}
 </style>
 </head>
 <body data-mview="watch">
-<div class="splash" id="splash"><div class="brand-mark">C</div></div>
+<div class="splash" id="splash"><img class="brand-mark" src="icons/icon-192.png" alt="Memox"></div>
 
 <div class="auth-screen" id="authScreen">
   <section class="auth-card">
-    <div class="auth-brand"><div class="brand-mark">C</div><div><h1 style="font-size:21px">Coinfolio</h1><p class="muted" style="font-size:11px;margin:4px 0 0">Your crypto, one view</p></div></div>
+    <div class="auth-brand"><img class="brand-mark" src="icons/icon-192.png" alt="Memox"><div><h1 style="font-size:21px">Memox</h1><p class="muted" style="font-size:11px;margin:4px 0 0">Your crypto, one view</p></div></div>
     <h2 id="authHeading">Welcome back</h2>
     <p class="auth-sub" id="authSub">Sign in to open your portfolio from any device.</p>
     <div class="auth-tabs"><button class="auth-tab active" id="signInTab" type="button">Sign in</button><button class="auth-tab" id="signUpTab" type="button">Create account</button></div>
@@ -349,7 +350,7 @@ canvas{width:100%;height:100%;display:block}
 
 <div class="app" id="mainApp">
   <header class="topbar">
-    <div class="brand"><div class="brand-mark">C</div><h1>Coinfolio</h1></div>
+    <div class="brand"><img class="brand-mark" src="icons/icon-192.png" alt="Memox"><h1>Memox</h1></div>
     <div class="top-actions">
       <div class="rate-pill" title="USD / EGP"><span>USD/EGP</span><strong id="usdEgp">—</strong></div>
       <div class="status"><span class="dot" id="liveDot"></span><span id="liveStatus">Connecting…</span></div>
@@ -415,7 +416,7 @@ canvas{width:100%;height:100%;display:block}
     </section>
   </div>
 
-  <footer class="footer"><span>Coinfolio · Personal portfolio tracker</span><span>Prices are indicative. The USD/EGP rate comes from CoinGecko and may differ from P2P prices.</span></footer>
+  <footer class="footer"><span>Memox · Personal portfolio tracker</span><span>Prices are indicative. The USD/EGP rate comes from CoinGecko and may differ from P2P prices.</span></footer>
 
   <nav class="mnav" id="mnav" aria-label="Main navigation">
     <button type="button" data-mv="watch" class="active"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Watchlist</button>
@@ -1111,7 +1112,7 @@ function exportCsv(){
   });
   const csv = [header,...rows].map(r=>r.map(v=>'"'+safe(v).replace(/"/g,'""')+'"').join(",")).join("\r\n");
   const url = URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}));
-  const a = document.createElement("a"); a.href = url; a.download = "coinfolio-portfolio.csv"; a.click();
+  const a = document.createElement("a"); a.href = url; a.download = "memox-portfolio.csv"; a.click();
   URL.revokeObjectURL(url);
 }
 
@@ -1503,7 +1504,7 @@ onAuthStateChanged(auth,async user=>{
     cloudReady = true;
     if (!started) showApp();
   } catch (error) {
-    console.error("Could not load Coinfolio profile",error);
+    console.error("Could not load Memox profile",error);
     appStartedForUid = "";
     $("splash").style.display = "none";
     setAuthMessage("Could not load your account data. Check that Firestore is enabled and its rules allow signed-in users.","error");
