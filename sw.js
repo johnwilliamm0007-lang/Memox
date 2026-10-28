@@ -1,6 +1,6 @@
 /* Minimal service worker: caches the app shell so it opens instantly.
    Live prices, Firebase and TradingView always go to the network. */
-const CACHE = "coinfolio-shell-v1";
+const CACHE = "memox-shell-v2";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icons/icon-192.png", "./icons/icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
