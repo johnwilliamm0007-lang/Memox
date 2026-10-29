@@ -1632,5 +1632,29 @@ onAuthStateChanged(auth,async user=>{
 setInterval(()=>{ if (currentUser && cloudReady) fetchPrices(); },30000);
 })();
 </script>
+  <script>
+(function () {
+  var mq = matchMedia("(max-width:700px)");
+  var body = document.body;
+  var wlY = 0;
+  history.replaceState({ mv: "watch" }, "");
+  addEventListener("scroll", function () {
+    if (body.dataset.mview === "watch") wlY = scrollY;
+  }, { passive: true });
+  new MutationObserver(function () {
+    if (!mq.matches) return;
+    var v = body.dataset.mview || "watch";
+    if ((history.state && history.state.mv) === v) return;
+    history.pushState({ mv: v }, "");
+  }).observe(body, { attributes: true, attributeFilter: ["data-mview"] });
+  addEventListener("popstate", function (e) {
+    if (!mq.matches) return;
+    var v = (e.state && e.state.mv) || "watch";
+    var btn = document.querySelector('#mnav [data-mv="' + v + '"]');
+    if (btn) btn.click();
+    if (v === "watch") setTimeout(function () { scrollTo(0, wlY); }, 50);
+  });
+})();
+</script>
 </body>
 </html>
