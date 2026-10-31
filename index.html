@@ -788,10 +788,13 @@ async function pumpGecko(){
   }
   geckoBusy = false;
 }
-const logoMarkup = (a,large=true) => `<span class="coin-logo ${large?"":"small"}">${coinImg(a.symbol,a.logo||(srcOf(a.symbol)||{}).logo)}</span>`;
-const srcOf = sym => (state.sources||{})[sym] || null;
+const logoMarkup = (a,large=true) => `<span class="coin-logo ${large?"":"small"}">${coinImg(a.symbol,a.logo||(rawSrc(a.symbol)||{}).logo)}</span>`;
+const rawSrc = sym => (state.sources||{})[sym] || null;
+const srcOf = sym => { const s = rawSrc(sym); return s && s.id ? s : null; };
+const exOf = sym => { const s = rawSrc(sym); return s && s.ex ? s.ex : ""; };
+const venue = sym => ({okx:"OKX",bybit:"BYBIT"})[exOf(sym)] || "BINANCE";
 const pairOf = sym => sym + (srcOf(sym) ? "USD" : "USDT");
-const heldLogo = sym => (state.portfolio.find(a=>a.symbol===sym)||{}).logo || (srcOf(sym)||{}).logo;
+const heldLogo = sym => (state.portfolio.find(a=>a.symbol===sym)||{}).logo || (rawSrc(sym)||{}).logo;
 
 /* ===== render ===== */
 function render() {
@@ -912,7 +915,7 @@ async function loadTermChart(force){
     box.innerHTML = "";
     new TradingView.widget({
       container_id:"termChart", autosize:true,
-      symbol:"BINANCE:"+sym+"USDT", interval:"D", timezone:"Africa/Cairo",
+      symbol:venue(sym)+":"+sym+"USDT", interval:"D", timezone:"Africa/Cairo",
       theme:"dark", style:"1", locale:"en", toolbar_bg:"#000000",
       enable_publishing:false, allow_symbol_change:false, hide_side_toolbar:mq.matches,
       withdateranges:true, save_image:true,
@@ -1039,7 +1042,7 @@ function renderDetail(){
   const rem = inWl ? `<button class="btn" data-watch-remove="${e}" type="button" style="width:100%;margin-top:10px">Remove from watchlist</button>` : "";
   box.innerHTML = `<div class="dt">
     <div class="dt-head"><span class="coin-logo">${coinImg(sym,heldLogo(sym))}</span><div class="dt-title">${escapeHtml(pairOf(sym))}</div></div>
-    <div class="dt-sub">${escapeHtml(nm)} / ${srcOf(sym)?"USD · CoinGecko":"TetherUS · BINANCE"}</div>
+    <div class="dt-sub">${escapeHtml(nm)} / ${srcOf(sym)?"USD · CoinGecko":"TetherUS · "+venue(sym)}</div>
     <div class="dt-price ${cls}"><span>${price>0?numFmt(price):"—"}</span><small>${srcOf(sym)?"USD":"USDT"}</small><span class="dt-chg">${abs>0?"+":abs<0?"−":""}${abs?numFmt(abs):"0.00"} ${pct>0?"+":pct<0?"−":""}${Math.abs(pct).toFixed(2)}%</span></div>
     ${rangeBar(dLo,dHi,price,"Day's range")}
     ${rangeBar(wLo,wHi,price,"52wk range")}
@@ -1058,6 +1061,25 @@ async function loadDetail(sym){
       if (!r.ok) return;
       const d = await r.json();
       dcache[sym] = {t:Date.now(),k:(d.prices||[]).map(x=>({t:x[0],o:x[1],h:x[1],l:x[1],c:x[1]}))};
+    } catch { return; }
+    if (sym === termSym) renderDetail();
+    return;
+  }
+  const ex = exOf(sym);
+  if (ex) {
+    try {
+      let k = [];
+      if (ex === "okx") {
+        const r = await fetch(`https://www.okx.com/api/v5/market/candles?instId=${sym}-USDT&bar=1D&limit=300`);
+        if (!r.ok) return;
+        k = ((await r.json()).data||[]).map(x=>({t:+x[0],o:+x[1],h:+x[2],l:+x[3],c:+x[4]}));
+      } else {
+        const r = await fetch(`https://api.bybit.com/v5/market/kline?category=spot&symbol=${sym}USDT&interval=D&limit=400`);
+        if (!r.ok) return;
+        k = (((await r.json()).result||{}).list||[]).map(x=>({t:+x[0],o:+x[1],h:+x[2],l:+x[3],c:+x[4]}));
+      }
+      k.sort((a,b)=>a.t-b.t);
+      dcache[sym] = {t:Date.now(),k};
     } catch { return; }
     if (sym === termSym) renderDetail();
     return;
@@ -1133,12 +1155,25 @@ function drawAllocation(){
 }
 
 /* ===== find any coin: Binance first, then CoinGecko ===== */
+const okxT = t => { const p = num(t.last), o = num(t.open24h); return {price:p,pct:o>0?(p/o-1)*100:0,hi:num(t.high24h),lo:num(t.low24h),vol:num(t.volCcy24h)*p}; };
+const bybT = t => ({price:num(t.lastPrice),pct:num(t.price24hPcnt)*100,hi:num(t.highPrice24h),lo:num(t.lowPrice24h),vol:num(t.turnover24h)});
 async function resolveCoin(raw){
   const q = String(raw||"").trim(); if (!q) return null;
   if (/^[A-Za-z0-9]{1,20}$/.test(q)) {
     try {
       const r = await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol="+encodeURIComponent(q.toUpperCase()+"USDT"),{cache:"no-store"});
       if (r.ok) { const t = await r.json(); if (num(t.lastPrice) > 0) return {src:"binance",sym:q.toUpperCase(),t}; }
+    } catch {}
+  }
+  if (/^[A-Za-z0-9]{1,20}$/.test(q)) {
+    const u = q.toUpperCase();
+    try {
+      const r = await fetch("https://www.okx.com/api/v5/market/ticker?instId="+u+"-USDT",{cache:"no-store"});
+      if (r.ok) { const t = ((await r.json()).data||[])[0]; if (t && num(t.last) > 0) return {src:"okx",sym:u,t:okxT(t)}; }
+    } catch {}
+    try {
+      const r = await fetch("https://api.bybit.com/v5/market/tickers?category=spot&symbol="+u+"USDT",{cache:"no-store"});
+      if (r.ok) { const t = (((await r.json()).result||{}).list||[])[0]; if (t && num(t.lastPrice) > 0) return {src:"bybit",sym:u,t:bybT(t)}; }
     } catch {}
   }
   try {
@@ -1155,7 +1190,7 @@ async function resolveCoin(raw){
   return null;
 }
 async function fetchGeckoPrices(){
-  const src = state.sources||{}, syms = allSymbols().filter(s=>src[s]);
+  const src = state.sources||{}, syms = allSymbols().filter(s=>src[s]&&src[s].id);
   if (!syms.length) return 0;
   const ids = [...new Set(syms.map(s=>src[s].id))];
   let n = 0;
@@ -1174,12 +1209,41 @@ async function fetchGeckoPrices(){
   return n;
 }
 
+/* ===== OKX / Bybit prices (polled); also rescues CoinGecko coins that have no price ===== */
+async function fetchExchangePrices(){
+  const src = state.sources||{}, all = allSymbols();
+  const cand = all.filter(s=>src[s] && (src[s].ex || (src[s].id && !(num(state.prices[s])>0))));
+  if (!cand.length) return 0;
+  let okx = null, byb = null, n = 0, moved = false;
+  if (cand.some(s=>src[s].ex!=="bybit")) try {
+    const r = await fetch("https://www.okx.com/api/v5/market/tickers?instType=SPOT",{cache:"no-store"});
+    if (r.ok) { okx = {}; for (const t of (await r.json()).data||[]) if (/-USDT$/.test(t.instId)) okx[t.instId.slice(0,-5)] = okxT(t); }
+  } catch {}
+  if (cand.some(s=>src[s].ex!=="okx")) try {
+    const r = await fetch("https://api.bybit.com/v5/market/tickers?category=spot",{cache:"no-store"});
+    if (r.ok) { byb = {}; for (const t of ((await r.json()).result||{}).list||[]) if (/USDT$/.test(t.symbol)) byb[t.symbol.slice(0,-4)] = bybT(t); }
+  } catch {}
+  for (const s of cand) {
+    const e = src[s].ex;
+    let t = null, from = e;
+    if (e === "okx") t = okx && okx[s];
+    else if (e === "bybit") t = byb && byb[s];
+    else if (okx && okx[s]) { t = okx[s]; from = "okx"; }
+    else if (byb && byb[s]) { t = byb[s]; from = "bybit"; }
+    if (!t || !applyTicker(s,t.price,t.pct,t.hi,t.lo,t.vol)) continue;
+    n++;
+    if (!e) { src[s] = {ex:from,name:src[s].name,logo:src[s].logo}; moved = true; }
+  }
+  if (moved) { state.sources = src; saveCloudPortfolio(); }
+  return n;
+}
+
 /* ===== prices: Binance REST snapshot + WebSocket ===== */
 function applyTicker(sym,price,pct,hi,lo,vol){
   if (!(price>0)) return false;
   state.prices[sym] = price;
   const a = state.portfolio.find(x=>x.symbol===sym);
-  if (a) a.change24h = pct;
+  if (a) { a.change24h = pct; a.price = price; }
   state.changes = state.changes||{}; state.changes[sym] = pct;
   state.stats = state.stats||{}; state.stats[sym] = {high:hi,low:lo,vol};
   return true;
@@ -1206,6 +1270,7 @@ async function fetchPrices(){
     }
   }
   ok += await fetchGeckoPrices();
+  ok += await fetchExchangePrices();
   if (ok) {
     state.updatedAt = Date.now(); persist(); recordHistory(); render();
     setStatus(true, socket && socket.readyState===WebSocket.OPEN ? "Live prices connected" : "Prices refreshed");
@@ -1284,10 +1349,11 @@ async function saveAsset(event){
   if (!/^[A-Z0-9._-]{1,20}$/.test(symbol)) { alert("Enter a valid coin symbol, such as BTC or SOL."); return; }
   if (![amount,buyPrice,fee].every(Number.isFinite) || amount<0 || buyPrice<0 || fee<0) { alert("Enter valid positive values."); return; }
   let resolvedName = "";
-  if (!srcOf(symbol) && !(num(state.prices[symbol])>0)) {
+  if (!srcOf(symbol) && !exOf(symbol) && !(num(state.prices[symbol])>0)) {
     const rc = await resolveCoin(symbol);
     if (rc && rc.src==="gecko" && rc.sym===symbol) { state.sources = state.sources||{}; state.sources[symbol] = {id:rc.id,name:rc.name,logo:rc.logo}; resolvedName = rc.name; }
-    else if (!rc && !confirm(symbol+" was not found on Binance or CoinGecko, so it will have no live price. Save it anyway?")) return;
+    else if (rc && (rc.src==="okx"||rc.src==="bybit") && rc.sym===symbol) { state.sources = state.sources||{}; state.sources[symbol] = {ex:rc.src}; applyTicker(symbol,rc.t.price,rc.t.pct,rc.t.hi,rc.t.lo,rc.t.vol); }
+    else if (!rc && !confirm(symbol+" was not found on Binance, OKX, Bybit or CoinGecko, so it will have no live price. Save it anyway?")) return;
   }
   const spend = amount*buyPrice + fee;
   const deduct = !id && $("coinDeduct").checked && buyPrice>0 && amount>0;
@@ -1534,12 +1600,13 @@ $("watchForm").addEventListener("submit",async e=>{
   const input = $("watchInput"), raw = input.value.trim();
   if (!/^[A-Za-z0-9._-]{1,40}$/.test(raw)) { alert("Enter a coin symbol, such as SOL."); return; }
   const rc = await resolveCoin(raw);
-  if (!rc) { alert("\u201c"+raw+"\u201d was not found on Binance or CoinGecko. Try the coin's symbol or its CoinGecko ID (for example render-token). If it should exist, CoinGecko may be busy, so try again in a minute."); return; }
+  if (!rc) { alert("\u201c"+raw+"\u201d was not found on Binance, OKX, Bybit or CoinGecko. Try the coin's symbol or its CoinGecko ID (for example render-token). If it should exist, CoinGecko may be busy, so try again in a minute."); return; }
   const symbol = rc.sym;
   if (!Array.isArray(state.watchlist)) state.watchlist = [];
   if (state.watchlist.includes(symbol)) { alert(symbol+" is already on your watchlist."); return; }
   if (rc.src === "gecko") { state.sources = state.sources || {}; state.sources[symbol] = {id:rc.id,name:rc.name,logo:rc.logo}; }
-  else { const t = rc.t; applyTicker(symbol,num(t.lastPrice),num(t.priceChangePercent),num(t.highPrice),num(t.lowPrice),num(t.quoteVolume)); }
+  else if (rc.src === "binance") { const t = rc.t; applyTicker(symbol,num(t.lastPrice),num(t.priceChangePercent),num(t.highPrice),num(t.lowPrice),num(t.quoteVolume)); }
+  else { state.sources = state.sources || {}; state.sources[symbol] = {ex:rc.src}; const t = rc.t; applyTicker(symbol,t.price,t.pct,t.hi,t.lo,t.vol); }
   state.watchlist.push(symbol);
   if (rc.src === "gecko") await fetchGeckoPrices();
   input.value = "";
@@ -1703,7 +1770,7 @@ onAuthStateChanged(auth,async user=>{
       const cloud = snap.data();
       state = {...defaultState(),...cloud,
         portfolio: Array.isArray(cloud.portfolio) ? cloud.portfolio.map(normalizeAsset).filter(Boolean) : [],
-        prices: cloud.prices||{},
+        prices: (local&&local.prices)||{},
         history: Array.isArray(cloud.history) ? cloud.history : [],
         watchlist: Array.isArray(cloud.watchlist) ? cloud.watchlist.filter(x=>/^[A-Z0-9]{1,20}$/.test(x)) : [],
         changes: {}, stats: {}, cash: num(cloud.cash),
