@@ -336,6 +336,66 @@ canvas{width:100%;height:100%;display:block}
   .tv-sub{display:block;color:var(--muted);font-size:clamp(14px,4.3vw,18px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:400}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== Blacker theme ===== */
+:root{
+  --bg:#000;--panel:#050505;--raised:#0b0b0b;--hover:#121212;
+  --border:#161616;--border2:#242424;--muted:#8a8a8a;
+}
+html,.splash{background:#000}
+body{
+  background:
+    radial-gradient(900px 520px at 6% -6%,rgba(47,123,255,.06),transparent 62%),
+    radial-gradient(820px 520px at 100% 104%,rgba(34,201,147,.05),transparent 62%),
+    #000;
+  background-attachment:fixed;
+}
+.topbar{
+  background:linear-gradient(90deg,rgba(47,123,255,.04),rgba(34,201,147,.03)),rgba(0,0,0,.88);
+}
+.stat{background:linear-gradient(145deg,rgba(47,123,255,.03),transparent 65%),var(--panel)}
+.stats .stat:nth-child(1){
+  background:linear-gradient(135deg,rgba(47,123,255,.14),rgba(34,201,147,.07)),var(--panel);
+  border-color:rgba(78,161,255,.25);
+}
+.stats .stat:nth-child(2){background:linear-gradient(145deg,rgba(34,201,147,.06),transparent 65%),var(--panel)}
+.perf-strip{background:linear-gradient(90deg,rgba(47,123,255,.04),rgba(34,201,147,.03)),var(--panel)}
+.modal{background:#050505}
+.user-pop,.menu{background:#080808}
+.tv-row.active{background:rgba(47,123,255,.06)}
+.tv-row.dragging,.tv-act{background:#111}
+.auth-screen{
+  background:
+    radial-gradient(ellipse 60% 45% at 15% 8%,rgba(47,123,255,.14),transparent 70%),
+    radial-gradient(ellipse 55% 45% at 88% 92%,rgba(34,201,147,.10),transparent 70%),
+    #000;
+}
+.auth-card{background:rgba(0,0,0,.88)}
+.mnav{background:rgba(0,0,0,.95)}
+
+/* ===== Clean buttons (no gradient) ===== */
+.btn.primary,
+.btn.primary.auth-submit,
+.tab.active,
+.auth-tab.active{
+  background:#fff;
+  color:#000;
+  border-color:#fff;
+  box-shadow:none;
+}
+.btn.primary:hover,
+.btn.primary.auth-submit:hover{
+  background:#e6e6e6;
+  border-color:#e6e6e6;
+}
+.brand h1,
+.auth-brand h1{
+  background:none;
+  -webkit-background-clip:initial;
+  background-clip:initial;
+  color:#fff;
+}
+.auth-brand .brand-mark{box-shadow:none}
 </style>
 </head>
 <body data-mview="watch">
@@ -848,7 +908,7 @@ function loadLW(){
 }
 async function loadGeckoChart(sym){
   const box = $("termChart"), gs = srcOf(sym);
-  const btn = (d,l) => `<button type="button" class="small-action" data-gd="${d}" style="${gDays===d?"background:linear-gradient(90deg,#2f7bff,#22c993);color:#041016;border-color:transparent":""}">${l}</button>`;
+  const btn = (d,l) => `<button type="button" class="small-action" data-gd="${d}" style="${gDays===d?"background:#fff;color:#000;border-color:#fff":""}">${l}</button>`;
   box.innerHTML = `<div style="display:flex;flex-direction:column;height:100%"><div id="gcBar" style="display:flex;gap:6px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)"><strong style="margin-right:8px">${escapeHtml(pairOf(sym))}</strong>${btn(1,"1D")}${btn(7,"7D")}${btn(30,"1M")}${btn(90,"3M")}<span class="muted" style="margin-left:auto;font-size:12px">CoinGecko</span></div><div id="gcBox" style="flex:1;min-height:0;position:relative"><div style="padding:24px;color:var(--muted)">Loading chart…</div></div></div>`;
   $("gcBar").onclick = e => { const b = e.target.closest("[data-gd]"); if (b) { gDays = Number(b.dataset.gd); termChartSym = ""; loadTermChart(true); } };
   const host = $("gcBox");
@@ -864,7 +924,7 @@ async function loadGeckoChart(sym){
     if (!data.length) throw new Error("empty");
     host.innerHTML = "";
     const lp = data[data.length-1].close, prec = lp>=100?2:lp>=1?4:lp>=0.01?6:8;
-    lwChart = LightweightCharts.createChart(host,{width:host.clientWidth||600,height:host.clientHeight||400,layout:{background:{color:"#05070d"},textColor:"#8d97ab"},grid:{vertLines:{color:"#0f1522"},horzLines:{color:"#0f1522"}},rightPriceScale:{borderColor:"#1a2335"},timeScale:{borderColor:"#1a2335",timeVisible:gDays<=30}});
+    lwChart = LightweightCharts.createChart(host,{width:host.clientWidth||600,height:host.clientHeight||400,layout:{background:{color:"#000000"},textColor:"#8a8a8a"},grid:{vertLines:{color:"#0e0e0e"},horzLines:{color:"#0e0e0e"}},rightPriceScale:{borderColor:"#161616"},timeScale:{borderColor:"#161616",timeVisible:gDays<=30}});
     const ser = lwChart.addCandlestickSeries({upColor:"#089981",downColor:"#f23645",borderVisible:false,wickUpColor:"#089981",wickDownColor:"#f23645",priceFormat:{type:"price",precision:prec,minMove:Math.pow(10,-prec)}});
     ser.setData(data);
     lwChart.timeScale().fitContent();
