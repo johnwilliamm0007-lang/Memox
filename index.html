@@ -826,7 +826,7 @@ function render() {
     $("perfChange").className = "perf-change " + (pc>0?"green":pc<0?"red":"");
   } else { $("perfChange").textContent = "Tracking started"; $("perfChange").className = "perf-change"; }
 
-  renderCards(); renderWatchlist(); renderDetail(); renderTrades(); drawChart(); drawAllocation();
+  renderCards(); renderWatchlist(); renderDetail(); renderTrades(); drawChart(); drawAllocation(); updateTabTitle();
 }
 
 const openDetails = new Set();
@@ -893,7 +893,7 @@ function ensureTermSym(){
 function selectSym(sym){
   termSym = sym;
   try { localStorage.setItem(TERM_KEY,sym); } catch {}
-  renderWatchlist(); renderDetail(); loadTermChart(); loadDetail(sym);
+  renderWatchlist(); renderDetail(); updateTabTitle(); loadTermChart(); loadDetail(sym);
 }
 let tvPromise = null;
 function loadTV(){
@@ -1018,6 +1018,12 @@ function rangeBar(lo,hi,price,label){
   if (!(hi>lo) || !(price>0)) return "";
   const pos = Math.max(0,Math.min(100,(price-lo)/(hi-lo)*100));
   return `<div class="dt-range"><div class="rrow"><span>${priceFmt(lo)}</span><span class="rlabel">${label}</span><span>${priceFmt(hi)}</span></div><div class="rbar"><i style="left:${pos.toFixed(1)}%"></i></div></div>`;
+}
+function updateTabTitle(){
+  const sym = ensureTermSym(), price = num(state.prices[sym]);
+  if (!(price > 0)) { document.title = "Memox — Crypto Portfolio"; return; }
+  const pct = num((state.changes || {})[sym]);
+  document.title = `${sym} ${priceFmt(price)} ${pct>0?"▲":pct<0?"▼":""}${Math.abs(pct).toFixed(2)}% · Memox`;
 }
 function renderDetail(){
   const box = $("detailPanel");
@@ -1253,6 +1259,7 @@ function applyTicker(sym,price,pct,hi,lo,vol){
   if (a) { a.change24h = pct; a.price = price; }
   state.changes = state.changes||{}; state.changes[sym] = pct;
   state.stats = state.stats||{}; state.stats[sym] = {high:hi,low:lo,vol};
+  if (sym === termSym) updateTabTitle();
   return true;
 }
 async function fetchPrices(){
@@ -1755,7 +1762,7 @@ onAuthStateChanged(auth,async user=>{
     currentUser = null; cloudReady = false; appStartedForUid = "";
     clearTimeout(cloudSaveTimer); clearInterval(rateTimer); clearTimeout(reconnectTimer); clearInterval(sparkTimer);
     if (socket) { socket.onclose = null; try { socket.close(); } catch {} socket = null; }
-    state = defaultState(); activeStorageKey = STORAGE_KEY;
+    state = defaultState(); activeStorageKey = STORAGE_KEY; document.title = "Memox — Crypto Portfolio";
     $("mainApp").style.display = "none"; $("splash").style.display = "none"; $("authScreen").style.display = "flex";
     return;
   }
