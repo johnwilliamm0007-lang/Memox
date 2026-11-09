@@ -436,6 +436,144 @@ body{
   .asset-card:hover{border-color:rgba(255,59,74,.55);box-shadow:inset 0 2px 0 #ff3b4a,0 0 32px rgba(255,59,74,.18)}
   .share-bar i{background:linear-gradient(90deg,#ff3b4a,#ff8a93);opacity:1}
 }
+
+/* ===== X-style glow (applied to everything) ===== */
+:root{
+  --glow:linear-gradient(180deg,rgba(255,255,255,.065) 0%,rgba(255,255,255,.022) 38%,rgba(255,255,255,0) 100%);
+  --glow-border:rgba(255,255,255,.11);
+  --glow-border-hover:rgba(255,255,255,.22);
+  --glow-edge:inset 0 1px 0 rgba(255,255,255,.09);
+}
+
+/* cards & panels (all screen sizes) */
+.stat,
+.perf-strip,
+.section.panel,
+.asset-card,
+.empty.panel{
+  background:var(--glow),#050505;
+  border:1px solid var(--glow-border);
+  border-radius:16px;
+  box-shadow:var(--glow-edge),0 12px 32px rgba(0,0,0,.5);
+}
+/* keep the blue/green tint on the main "Total value" card, with the glow on top */
+.stats .stat:nth-child(1){
+  background:var(--glow),linear-gradient(135deg,rgba(47,123,255,.16),rgba(34,201,147,.08)),#050505;
+  border-color:rgba(255,255,255,.15);
+}
+.stats .stat:nth-child(2){
+  background:var(--glow),linear-gradient(145deg,rgba(34,201,147,.06),transparent 65%),#050505;
+}
+.mstats .stat{border-radius:14px}
+.asset-card:hover,
+.stat:hover{
+  border-color:var(--glow-border-hover);
+  box-shadow:var(--glow-edge),0 0 28px rgba(255,255,255,.05),0 12px 32px rgba(0,0,0,.5);
+}
+.asset-card:hover{transform:translateY(-2px)}
+.mini-stats{background:rgba(255,255,255,.02);border-color:var(--glow-border)}
+.share-bar i{background:#fff;opacity:.85}
+
+/* desktop-only panels (mobile keeps its flat edge-to-edge layout) */
+@media(min-width:701px){
+  .wl-panel,
+  .detail-panel{
+    background:var(--glow),#050505;
+    border:1px solid var(--glow-border);
+    border-radius:16px;
+    box-shadow:var(--glow-edge),0 12px 32px rgba(0,0,0,.5);
+  }
+  .term-chart{
+    border:1px solid var(--glow-border);
+    border-radius:16px;
+    box-shadow:var(--glow-edge),0 12px 32px rgba(0,0,0,.5);
+  }
+  .topbar{
+    background:var(--glow),rgba(0,0,0,.88);
+    border-color:var(--glow-border);
+    box-shadow:var(--glow-edge),0 12px 32px rgba(0,0,0,.5);
+  }
+  .asset-card{
+    background:var(--glow),#050505;
+    border-color:var(--glow-border);
+    box-shadow:var(--glow-edge),0 12px 32px rgba(0,0,0,.5);
+  }
+  .asset-card:hover{
+    border-color:var(--glow-border-hover);
+    box-shadow:var(--glow-edge),0 0 28px rgba(255,255,255,.05),0 12px 32px rgba(0,0,0,.5);
+  }
+}
+
+/* mobile: glow on the flat bars, no radius/border changes */
+@media(max-width:700px){
+  .topbar{background:var(--glow),rgba(0,0,0,.9);box-shadow:none}
+  .wl-panel,.detail-panel{background:var(--glow),#050505}
+}
+
+/* tabs, pills, chips */
+.tabs{
+  background:var(--glow),#050505;
+  border-color:var(--glow-border);
+  box-shadow:var(--glow-edge);
+}
+.badge,.rate-pill,.user-pill{
+  background:rgba(255,255,255,.03);
+  border-color:var(--glow-border);
+  box-shadow:var(--glow-edge);
+}
+.pf{background:var(--glow),#0b0b0b;box-shadow:var(--glow-edge)}
+.notice{background:var(--glow),#0b0b0b;border-color:var(--glow-border);box-shadow:var(--glow-edge)}
+
+/* inputs */
+input,select{
+  background:var(--glow),#0b0b0b;
+  border-color:var(--glow-border);
+  box-shadow:var(--glow-edge);
+}
+input:focus-visible,select:focus-visible{border-color:rgba(255,255,255,.4)}
+.btn:not(.primary){
+  background:var(--glow),rgba(255,255,255,.02);
+  border-color:var(--glow-border);
+  box-shadow:var(--glow-edge);
+}
+.btn:not(.primary):hover{border-color:var(--glow-border-hover)}
+.small-action{border-color:var(--glow-border);box-shadow:var(--glow-edge)}
+
+/* modals */
+.modal{
+  background:var(--glow),#050505;
+  border:1px solid rgba(255,255,255,.13);
+  box-shadow:var(--glow-edge),0 0 70px rgba(255,255,255,.04),0 24px 60px rgba(0,0,0,.7);
+}
+
+/* login card */
+.auth-card{
+  background:var(--glow),rgba(0,0,0,.88);
+  border:1px solid rgba(255,255,255,.13);
+  box-shadow:var(--glow-edge),0 0 90px rgba(255,255,255,.04),0 24px 60px rgba(0,0,0,.65);
+}
+
+/* dropdown menus & row actions */
+.user-pop,.menu,.tv-act{
+  background:var(--glow),#080808;
+  border:1px solid rgba(255,255,255,.13);
+  box-shadow:var(--glow-edge),0 16px 40px rgba(0,0,0,.6);
+}
+
+/* watchlist rows */
+.tv-row.active{
+  background:var(--glow),rgba(47,123,255,.06);
+}
+@media(min-width:701px){
+  .tv-row:hover{background:rgba(255,255,255,.04)}
+}
+
+/* mobile bottom nav */
+.mnav{
+  background:var(--glow),rgba(0,0,0,.95);
+  border-top-color:rgba(255,255,255,.11);
+  box-shadow:var(--glow-edge);
+}
 </style>
 </head>
 <body data-mview="watch">
