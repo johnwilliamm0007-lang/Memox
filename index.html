@@ -12,6 +12,11 @@
 <title>Memox — Crypto Portfolio</title>
 <meta name="apple-mobile-web-app-title" content="Memox">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js">
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js">
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -596,6 +601,19 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 }
 </script>
+<script>
+/* fast first paint: show the login form right away unless the user was signed in before */
+(function(){
+  var hint=null;try{hint=localStorage.getItem("memox_hint")}catch(e){}
+  var sp=document.getElementById("splash"),au=document.getElementById("authScreen"),app=document.getElementById("mainApp");
+  function showAuth(){sp.style.display="none";au.style.display="flex"}
+  if(!hint)showAuth();
+  document.getElementById("authForm").addEventListener("submit",function(e){
+    if(!window.__memoxReady){e.preventDefault();document.getElementById("authMessage").textContent="Connecting… try again in a moment."}
+  });
+  setTimeout(function(){if(!window.__memoxReady&&app.style.display==="none")showAuth()},8000);
+})();
+</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -613,6 +631,7 @@ const db = getFirestore(firebaseApp);
 
 (() => {
 "use strict";
+window.__memoxReady = true;
 
 /* ===== helpers ===== */
 const STORAGE_KEY = "coinfolio_glass_v2";
@@ -1755,6 +1774,7 @@ $("signOutBtn").addEventListener("click",async()=>{ await signOut(auth); });
 let appStartedForUid = "";
 onAuthStateChanged(auth,async user=>{
   if (!user) {
+    try { localStorage.removeItem("memox_hint"); } catch {}
     currentUser = null; cloudReady = false; appStartedForUid = "";
     clearTimeout(cloudSaveTimer); clearInterval(rateTimer); clearTimeout(reconnectTimer); clearInterval(sparkTimer);
     if (socket) { socket.onclose = null; try { socket.close(); } catch {} socket = null; }
@@ -1763,6 +1783,7 @@ onAuthStateChanged(auth,async user=>{
     return;
   }
   if (appStartedForUid === user.uid) return;
+  try { localStorage.setItem("memox_hint","1"); } catch {}
   currentUser = user; cloudReady = false; appStartedForUid = user.uid;
   activeStorageKey = STORAGE_KEY+"_"+user.uid;
   state = defaultState();
