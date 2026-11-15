@@ -153,7 +153,8 @@ input::placeholder{color:#5a5a5a}
 .dt-pos strong{display:block;color:var(--text);font-size:13px;margin-top:3px;font-weight:600;overflow-wrap:anywhere}
 
 /* summary */
-.stats{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:1100px){.stats{grid-template-columns:1fr 1fr}}
 .stat{padding:18px 20px;min-width:0;background:linear-gradient(145deg,rgba(47,123,255,.07),transparent 65%),var(--panel)}
 .stats .stat:nth-child(1){background:linear-gradient(135deg,rgba(47,123,255,.26),rgba(34,201,147,.14)),var(--panel);border-color:rgba(78,161,255,.35)}
 .stats .stat:nth-child(2){background:linear-gradient(145deg,rgba(34,201,147,.11),transparent 65%),var(--panel)}
@@ -446,22 +447,10 @@ button:focus-visible{outline:2px solid var(--accent)}
 [dir=rtl] .menu,[dir=rtl] .user-pop{right:auto;left:0}
 [dir=rtl] .stat-value,[dir=rtl] .card-value,[dir=rtl] .dt-price,[dir=rtl] .tv-row .num{direction:ltr}
 @media(max-width:700px){.tstats{grid-template-columns:1fr 1fr}.top-actions #privBtn{padding:8px 10px}}
-/* v4: per-purchase P/L + futures */
+/* v4: per-purchase P/L */
 .lot{grid-template-columns:52px 1fr auto auto}
 .lot-pl{font-weight:700;font-size:12px;text-align:right;white-space:nowrap}
 .lot-pl small{font-weight:600;opacity:.8;margin-inline-start:4px}
-.fut-side{font-size:11px;font-weight:700;padding:4px 8px;border-radius:999px;white-space:nowrap}
-.fut-side.long{color:var(--green);background:rgba(61,220,151,.12)}
-.fut-side.short{color:var(--red);background:rgba(255,107,107,.12)}
-.fut-pnl{font-size:30px;font-weight:800;letter-spacing:-.03em;margin-top:16px;line-height:1}
-.fut-actions{display:flex;gap:7px;margin-top:14px}
-.fut-actions .btn{padding:8px 10px;font-size:12px;flex:1}
-.priv .fut-pnl{filter:blur(9px);user-select:none}
-@media(max-width:700px){
-  .mnav{grid-template-columns:repeat(5,1fr)}
-  body[data-mview="futures"] .terminal,body[data-mview="futures"] .stats,body[data-mview="futures"] .perf-strip{display:none!important}
-  body[data-mview="futures"] .app{padding-top:14px}
-}
 </style>
 </head>
 <body data-mview="watch">
@@ -516,6 +505,7 @@ button:focus-visible{outline:2px solid var(--accent)}
     <div class="panel stat"><div class="stat-label">Total value (assets + USDC)</div><div class="stat-value" id="totalUsd">$0.00</div><div class="stat-foot" id="totalEgp">EGP 0</div></div>
     <div class="panel stat"><div class="stat-label">Unrealized profit / loss</div><div class="stat-value" id="totalPnl">$0.00</div><div class="stat-foot" id="totalPnlPct">Add your buy prices to track P/L</div><div class="stat-foot" id="realizedLine" style="margin-top:4px"></div></div>
     <div class="panel stat"><div class="stat-label">USDC balance</div><div class="stat-value" id="cashVal">$0.00</div><div class="stat-foot"><span id="cashEgp">—</span> · <button class="small-action" id="cashBtn" type="button">Edit</button></div></div>
+    <div class="panel stat"><div class="stat-label">Daily profit / loss</div><div class="stat-value" id="dayPnl">$0.00</div><div class="stat-foot" id="dayPnlFoot">—</div></div>
   </section>
 
   <section class="panel perf-strip">
@@ -526,7 +516,6 @@ button:focus-visible{outline:2px solid var(--accent)}
   <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
     <button class="tab active" data-tab="portfolio" type="button" role="tab">Portfolio</button>
     <button class="tab" data-tab="trades" type="button" role="tab">Trades</button>
-    <button class="tab" data-tab="futures" type="button" role="tab">Futures</button>
   </nav>
 
   <div class="tab-panel active" data-panel="portfolio">
@@ -551,23 +540,11 @@ button:focus-visible{outline:2px solid var(--accent)}
       </div>
       <div class="stat-foot" id="mNetEgp" style="margin:-4px 0 12px">—</div>
       <div class="tstats" id="tStats"></div>
+      <div class="section-head" style="margin:14px 0 8px"><div><h3>Daily results</h3></div></div>
+      <div class="trade-list" id="dayList" style="max-height:220px;margin-bottom:14px"></div>
       <div class="trade-list" id="tradeList"></div>
     </section>
   </div>
-
-  <div class="tab-panel" data-panel="futures">
-  <div class="section-head">
-    <div><h3>Futures positions</h3><p>Long / Short with leverage · P/L follows live price</p></div>
-    <div style="display:flex;gap:8px;align-items:center"><span class="badge" id="futBadge">0 positions</span><button class="btn primary" id="futAddBtn" type="button">＋ New position</button></div>
-  </div>
-  <div class="mstats">
-    <div class="panel stat"><div class="stat-label">Margin in use</div><div class="stat-value" id="fMargin">$0.00</div></div>
-    <div class="panel stat"><div class="stat-label">Unrealized P/L</div><div class="stat-value" id="fPnl">$0.00</div></div>
-    <div class="panel stat"><div class="stat-label">Equity</div><div class="stat-value" id="fEquity">$0.00</div></div>
-  </div>
-  <div class="stat-foot" id="fPnlEgp" style="margin:-4px 0 14px">—</div>
-  <section class="asset-grid" id="futGrid"></section>
-</div>
 
 <footer class="footer"><span>Memox · Personal portfolio tracker</span><span>Prices are indicative. The USD/EGP rate comes from CoinGecko and may differ from P2P prices.</span></footer>
 
@@ -576,7 +553,6 @@ button:focus-visible{outline:2px solid var(--accent)}
     <button type="button" data-mv="chart"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 15l3-4 3 2 4-5"/></svg>Chart</button>
     <button type="button" data-mv="portfolio"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.5 6.5"/></svg>Portfolio</button>
     <button type="button" data-mv="trades"><svg viewBox="0 0 24 24"><path d="M7 8h13l-3-3M17 16H4l3 3"/></svg>Trades</button>
-    <button type="button" data-mv="futures"><svg viewBox="0 0 24 24"><path d="M4 17l5-6 4 3 7-9"/><path d="M15 5h5v5"/></svg>Futures</button>
   </nav>
 </div>
 
@@ -672,46 +648,6 @@ button:focus-visible{outline:2px solid var(--accent)}
   </div>
 </div>
 
-<div class="modal-backdrop" id="futBackdrop">
-  <div class="modal">
-    <h3 id="futTitle">New futures position</h3>
-    <p>Track a long or short position with leverage.</p>
-    <form id="futForm">
-      <input type="hidden" id="futId">
-      <div class="form-grid">
-        <div class="field"><label for="futSymbol">Coin symbol *</label><input id="futSymbol" placeholder="BTC" required maxlength="20" autocomplete="off"></div>
-        <div class="field"><label for="futSide">Direction</label><select id="futSide"><option value="long">Long</option><option value="short">Short</option></select></div>
-        <div class="field"><label for="futLev">Leverage (x) *</label><input id="futLev" type="number" min="1" max="125" step="any" value="10" required></div>
-        <div class="field"><label for="futMargin">Margin (USD) *</label><input id="futMargin" type="number" min="0" step="any" required></div>
-        <div class="field full"><label for="futEntry">Entry price (USD) *</label><input id="futEntry" type="number" min="0" step="any" required></div>
-        <div class="field"><label for="futTp">Take profit (USD)</label><input id="futTp" type="number" min="0" step="any" placeholder="Optional"></div>
-        <div class="field"><label for="futSl">Stop loss (USD)</label><input id="futSl" type="number" min="0" step="any" placeholder="Optional"></div>
-        <div class="field full" id="futDeductRow"><label class="check"><input type="checkbox" id="futDeduct" checked> Deduct the margin from my USDC balance</label></div>
-        <div class="field full"><div class="notice" id="futPreview" style="margin:0">—</div></div>
-      </div>
-      <div class="modal-actions"><button class="btn" type="button" id="futCancel">Cancel</button><button class="btn primary" type="submit">Save position</button></div>
-    </form>
-  </div>
-</div>
-
-<div class="modal-backdrop" id="fcBackdrop">
-  <div class="modal">
-    <h3 id="fcTitle">Close position</h3>
-    <p id="fcInfo"></p>
-    <form id="fcForm">
-      <input type="hidden" id="fcId">
-      <div class="form-grid">
-        <div class="field"><label for="fcPrice">Exit price (USD) *</label><input id="fcPrice" type="number" min="0" step="any" required></div>
-        <div class="field"><label for="fcFee">Total fees (USD)</label><input id="fcFee" type="number" min="0" step="any" placeholder="Optional"></div>
-        <div class="field full"><label for="fcDate">Date</label><input id="fcDate" type="date"></div>
-        <div class="field full"><label class="check"><input type="checkbox" id="fcAdd" checked> Return margin + P/L to my USDC balance</label></div>
-      </div>
-      <div class="notice" id="fcPreview">—</div>
-      <div class="modal-actions"><button class="btn" type="button" id="fcCancel">Cancel</button><button class="btn primary" type="submit">Close &amp; record</button></div>
-    </form>
-  </div>
-</div>
-
 <div class="toast" id="toast" style="display:none" role="status"></div>
 <div class="ptr" id="ptr">↓ Pull to refresh</div>
 
@@ -798,7 +734,7 @@ function normalizeAsset(raw) {
 }
 
 /* ===== state ===== */
-const defaultState = () => ({portfolio:[],prices:{},cash:0,usdEgp:0,history:[],watchlist:[],changes:{},stats:{},trades:[],alerts:[],futures:[],sources:{},updatedAt:null});
+const defaultState = () => ({portfolio:[],prices:{},cash:0,usdEgp:0,history:[],watchlist:[],changes:{},stats:{},trades:[],alerts:[],sources:{},updatedAt:null});
 let state = defaultState();
 let currentUser = null, cloudReady = false, socket = null, reconnectTimer = null, rateTimer = null, sparkTimer = null, mkTimer = null;
 let activeStorageKey = STORAGE_KEY, cloudSaveTimer = null;
@@ -813,7 +749,7 @@ function saveCloudPortfolio() {
   if (!currentUser || !cloudReady) return;
   clearTimeout(cloudSaveTimer);
   const id = currentUser.uid;
-  const snapshot = {portfolio:state.portfolio,cash:num(state.cash),usdEgp:state.usdEgp,watchlist:state.watchlist,history:state.history,trades:state.trades||[],alerts:state.alerts||[],futures:state.futures||[],sources:state.sources||{}};
+  const snapshot = {portfolio:state.portfolio,cash:num(state.cash),usdEgp:state.usdEgp,watchlist:state.watchlist,history:state.history,trades:state.trades||[],alerts:state.alerts||[],sources:state.sources||{}};
   cloudSaveTimer = setTimeout(async () => {
     if (!currentUser || currentUser.uid !== id || !cloudReady) return;
     try { await setDoc(doc(db,"users",id),{...snapshot,updatedAt:serverTimestamp()},{merge:true}); }
@@ -822,7 +758,7 @@ function saveCloudPortfolio() {
 }
 function markPortfolioChanged(){ persist(); saveCloudPortfolio(); }
 
-const allSymbols = () => [...new Set([...state.portfolio.map(a=>a.symbol),...(state.watchlist||[]),...(state.futures||[]).map(f=>f.symbol)])];
+const allSymbols = () => [...new Set([...state.portfolio.map(a=>a.symbol),...(state.watchlist||[])])];
 const priceOf = a => num(state.prices[a.symbol] ?? a.price);
 function totals() {
   let assets=0,cost=0,hasBuy=false;
@@ -830,8 +766,7 @@ function totals() {
     assets += a.amount * priceOf(a);
     if (a.buyPrice > 0) { cost += a.amount*a.buyPrice + num(a.buyFee); hasBuy = true; }
   }
-  const fut = (state.futures||[]).reduce((s,f)=>s+Math.max(0,f.margin+futPnl(f)),0);
-  const cash = num(state.cash), value = assets + cash + fut, pnl = assets - cost;
+  const cash = num(state.cash), value = assets + cash, pnl = assets - cost;
   return {value,assets,cash,cost,pnl,pnlPct:cost?pnl/cost*100:0,hasBuy};
 }
 const adjustCash = d => { state.cash = Math.round((num(state.cash)+d)*1e8)/1e8; };
@@ -928,8 +863,22 @@ const venue = sym => ({okx:"OKX",bybit:"BYBIT"})[exOf(sym)] || "BINANCE";
 const pairOf = sym => sym + (srcOf(sym) ? "USD" : "USDT");
 const heldLogo = sym => (state.portfolio.find(a=>a.symbol===sym)||{}).logo || (rawSrc(sym)||{}).logo;
 
+/* coins forced to use Bybit (price + chart) instead of CoinGecko */
+const FORCE_BYBIT = ["AZTEC"];
+function fixSources(){
+  state.sources = state.sources || {};
+  const all = allSymbols();
+  FORCE_BYBIT.forEach(s=>{
+    if (!all.includes(s)) return;
+    const c = state.sources[s];
+    if (c && c.ex === "bybit" && !c.id) return;
+    state.sources[s] = {ex:"bybit",name:(c&&c.name)||"",logo:(c&&c.logo)||""};
+  });
+}
+
 /* ===== render ===== */
 function render() {
+  fixSources();
   const t = totals();
   $("totalUsd").textContent = money(t.value);
   $("cashVal").textContent = usd2(state.cash); $("cashVal").className = "stat-value "+(num(state.cash)<0?"red":"");
@@ -944,6 +893,14 @@ function render() {
   $("realizedLine").innerHTML = (state.trades||[]).length
     ? `Realized: <b class="${rl>0?"green":rl<0?"red":""}">${rl>0?"+":""}${usd2(rl)}</b> · Total P/L: <b class="${tot>0?"green":tot<0?"red":""}">${tot>0?"+":""}${usd2(tot)}</b>` : "";
   $("usdEgp").textContent = state.usdEgp > 0 ? new Intl.NumberFormat("en-US",{maximumFractionDigits:3}).format(state.usdEgp) : "—";
+  /* daily profit / loss: 24h change of holdings + trades closed today */
+  { let d24=0,base=0;
+    for (const a of state.portfolio){ const p=priceOf(a), ch=num((state.changes||{})[a.symbol] ?? a.change24h); if(!(p>0)) continue; const prev=p/(1+ch/100); d24+=a.amount*(p-prev); base+=a.amount*prev; }
+    const k=new Date().toLocaleDateString("en-GB");
+    const rt=(state.trades||[]).filter(x=>new Date(x.time).toLocaleDateString("en-GB")===k).reduce((s,x)=>s+num(x.pnl),0), dt=d24+rt;
+    $("dayPnl").textContent=(dt>0?"+":"")+usd2(dt);
+    $("dayPnl").className="stat-value "+(dt>0?"green":dt<0?"red":"");
+    $("dayPnlFoot").textContent=`${base>0?(d24>=0?"+":"")+(d24/base*100).toFixed(2)+"% (24h)":"—"} · Realized today: ${rt>0?"+":""}${usd2(rt)}${state.usdEgp>0?" · "+egpSigned(dt):""}`; }
   $("assetBadge").textContent = `${state.portfolio.length} asset${state.portfolio.length===1?"":"s"}`;
 
   const rh = perfRange>0 ? state.history.filter(p=>p.time>=Date.now()-perfRange*864e5) : state.history;
@@ -955,7 +912,7 @@ function render() {
     $("perfChange").className = "perf-change " + (pc>0?"green":pc<0?"red":"");
   } else { $("perfChange").textContent = "Tracking started"; $("perfChange").className = "perf-change"; }
 
-  renderCards(); renderWatchlist(); renderDetail(); renderTrades(); renderFutures(); drawChart(); drawAllocation(); updateTabTitle();
+  renderCards(); renderWatchlist(); renderDetail(); renderTrades(); drawChart(); drawAllocation(); updateTabTitle();
   if (lang==="ar") schedLang();
 }
 
@@ -1054,6 +1011,7 @@ function loadTV(){
   return tvPromise;
 }
 async function loadTermChart(force){
+  fixSources();
   const sym = ensureTermSym(), box = $("termChart");
   if (!box) return;
   if (mq.matches && mview !== "chart") return;
@@ -1428,6 +1386,7 @@ function applyTicker(sym,price,pct,hi,lo,vol){
   return true;
 }
 async function fetchPrices(){
+  fixSources();
   const all = allSymbols();
   if (!all.length) { setStatus(true,"Add assets to begin"); return; }
   const symbols = all.filter(s=>!(state.sources||{})[s]);
@@ -1463,6 +1422,7 @@ function scheduleLiveRender(){
 function connectLivePrices(){
   clearTimeout(reconnectTimer);
   if (socket) { socket.onclose = null; try { socket.close(); } catch {} }
+  fixSources();
   const symbols = allSymbols().filter(x=>!(state.sources||{})[x]).map(x=>x.toLowerCase()+"usdt");
   if (!symbols.length) { socket = null; setStatus(true,allSymbols().length?"Prices refresh every 30s":"Add assets to begin"); return; }
   try {
@@ -1529,7 +1489,10 @@ async function saveAsset(event){
   if (!/^[A-Z0-9._-]{1,20}$/.test(symbol)) { alert("Enter a valid coin symbol, such as BTC or SOL."); return; }
   if (![amount,buyPrice,fee].every(Number.isFinite) || amount<0 || buyPrice<0 || fee<0) { alert("Enter valid positive values."); return; }
   let resolvedName = "";
-  if (!srcOf(symbol) && !exOf(symbol) && !(num(state.prices[symbol])>0)) {
+  if (FORCE_BYBIT.includes(symbol)) {
+    state.sources = state.sources||{};
+    if (!(state.sources[symbol] && state.sources[symbol].ex==="bybit")) state.sources[symbol] = {ex:"bybit",name:"",logo:""};
+  } else if (!srcOf(symbol) && !exOf(symbol) && !(num(state.prices[symbol])>0)) {
     const rc = await resolveCoin(symbol);
     if (rc && rc.src==="gecko" && rc.sym===symbol) { state.sources = state.sources||{}; state.sources[symbol] = {id:rc.id,name:rc.name,logo:rc.logo}; resolvedName = rc.name; }
     else if (rc && (rc.src==="okx"||rc.src==="bybit") && rc.sym===symbol) { state.sources = state.sources||{}; state.sources[symbol] = {ex:rc.src}; applyTicker(symbol,rc.t.price,rc.t.pct,rc.t.hi,rc.t.lo,rc.t.vol); }
@@ -1606,6 +1569,11 @@ function renderTrades(){
     <div class="trade-pnl ${t.pnl>0?"green":t.pnl<0?"red":""}">${t.pnl>0?"+":""}${usd2(t.pnl)}</div>
     <button class="small-action" data-trade-del="${escapeHtml(t.id)}" aria-label="Delete trade">✕</button></div>`).join("")
     : `<div class="empty" style="padding:22px 10px">No closed positions this month.</div>`;
+  const days = {};
+  for (const t of list) { const k = new Date(t.time).toLocaleDateString("en-GB"); (days[k] = days[k] || {n:0,p:0}); days[k].n++; days[k].p += t.pnl; }
+  $("dayList").innerHTML = Object.keys(days).length
+    ? Object.entries(days).map(([d,v])=>`<div class="trade-row" style="grid-template-columns:minmax(0,1fr) auto"><div><strong>${d}</strong><span class="trade-date">${v.n} trade${v.n===1?"":"s"}</span></div><div class="trade-pnl ${v.p>0?"green":v.p<0?"red":""}">${v.p>0?"+":""}${usd2(v.p)}</div></div>`).join("")
+    : `<div class="empty" style="padding:14px 10px">No results this month.</div>`;
 }
 function openClose(id){
   const a = state.portfolio.find(x=>x.id===id); if (!a) return;
@@ -1736,14 +1704,6 @@ function checkAlerts(sym,price){
       if (v>0 && hit && !fired.has(key)) { fired.add(key); notify(msg+" · "+sym,`${priceFmt(price)} (target ${priceFmt(v)})`); }
     });
   }
-  for (const f of state.futures||[]) {
-    if (f.symbol!==sym) continue;
-    const lg = f.side==="long", lq = futLiq(f);
-    [["tp",f.tp,lg?price>=f.tp:price<=f.tp,"🎯 Take profit hit"],["sl",f.sl,lg?price<=f.sl:price>=f.sl,"🛑 Stop loss hit"],["lq",lq,lg?price<=lq:price>=lq,"⚠️ Liquidation level reached"]].forEach(([k,v,hit,msg])=>{
-      const key = f.id+k+v;
-      if (v>0 && hit && !fired.has(key)) { fired.add(key); notify(msg+" · "+sym+" "+f.side.toUpperCase()+" "+f.lev+"x",`${priceFmt(price)} (level ${priceFmt(v)})`); }
-    });
-  }
   if (changed) { markPortfolioChanged(); renderDetail(); }
 }
 function openAlert(sym){
@@ -1763,158 +1723,6 @@ $("alForm").addEventListener("submit",e=>{
   markPortfolioChanged(); $("alBackdrop").classList.remove("open"); renderDetail();
 });
 $("alCancel").addEventListener("click",()=>$("alBackdrop").classList.remove("open"));
-
-/* ===== futures ===== */
-function futPnl(f){
-  const p = num(state.prices[f.symbol]); if (!(p>0)) return 0;
-  return Math.max(-f.margin, f.qty*(p-f.entry)*(f.side==="long"?1:-1));
-}
-function futLiq(f){ return f.side==="long" ? f.entry*(1-1/f.lev+0.005) : f.entry*(1+1/f.lev-0.005); }
-
-async function ensureSource(symbol){
-  if (srcOf(symbol) || exOf(symbol) || num(state.prices[symbol])>0) return true;
-  const rc = await resolveCoin(symbol);
-  state.sources = state.sources||{};
-  if (rc && rc.src==="gecko" && rc.sym===symbol) state.sources[symbol] = {id:rc.id,name:rc.name,logo:rc.logo};
-  else if (rc && (rc.src==="okx"||rc.src==="bybit") && rc.sym===symbol) { state.sources[symbol] = {ex:rc.src}; applyTicker(symbol,rc.t.price,rc.t.pct,rc.t.hi,rc.t.lo,rc.t.vol); }
-  else if (!rc) return confirm(symbol+" was not found on Binance, OKX, Bybit or CoinGecko, so it will have no live price. Save it anyway?");
-  return true;
-}
-
-function renderFutures(){
-  const grid = $("futGrid"); if (!grid) return;
-  const L = Array.isArray(state.futures) ? state.futures : [];
-  $("futBadge").textContent = `${L.length} position${L.length===1?"":"s"}`;
-  const margin = L.reduce((s,f)=>s+f.margin,0), pnl = L.reduce((s,f)=>s+futPnl(f),0);
-  $("fMargin").textContent = usd2(margin);
-  $("fPnl").textContent = (pnl>0?"+":"")+usd2(pnl); $("fPnl").className = "stat-value "+(pnl>0?"green":pnl<0?"red":"");
-  $("fEquity").textContent = usd2(margin+pnl);
-  $("fPnlEgp").textContent = state.usdEgp>0 ? "P/L in EGP: "+egpSigned(pnl) : "—";
-  if (!L.length) { grid.innerHTML = `<div class="panel empty" style="grid-column:1/-1"><strong>No futures positions</strong><br>Use “New position” to track a long or short.</div>`; return; }
-  grid.innerHTML = [...L].sort((a,b)=>b.time-a.time).map(f=>{
-    const price = num(state.prices[f.symbol]), p = futPnl(f), roe = p/f.margin*100, cls = p>0?"green":p<0?"red":"", id = escapeHtml(f.id);
-    return `<article class="panel asset-card">
-      <div class="asset-top">${logoMarkup({symbol:f.symbol,logo:""})}
-        <div style="min-width:0;flex:1"><div class="coin-name">${escapeHtml(f.symbol)}USDT <span class="muted" style="font-weight:500">Perp</span></div><div class="coin-symbol">${quantity(f.qty)} ${escapeHtml(f.symbol)}</div></div>
-        <span class="fut-side ${f.side}">${f.side.toUpperCase()} ${f.lev}x</span>
-      </div>
-      <div class="fut-pnl ${cls}">${p>0?"+":""}${usd2(p)}</div>
-      <div class="card-sub"><span class="${cls}">${roe>=0?"+":""}${roe.toFixed(2)}% ROE</span>${state.usdEgp>0?" · "+egpSigned(p):""}</div>
-      <div class="mini-stats">
-        <div><small>Entry</small><b>${priceFmt(f.entry)}</b></div>
-        <div><small>Price</small><b>${price>0?priceFmt(price):"—"}</b></div>
-        <div><small>Margin</small><b>${usd2(f.margin)}</b></div>
-      </div>
-      <div class="mini-stats">
-        <div><small>Size</small><b>${moneyRound(f.margin*f.lev)}</b></div>
-        <div><small>Est. liq</small><b class="red">${priceFmt(Math.max(0,futLiq(f)))}</b></div>
-        <div><small>TP / SL</small><b>${f.tp>0?priceFmt(f.tp):"—"} / ${f.sl>0?priceFmt(f.sl):"—"}</b></div>
-      </div>
-      <div class="fut-actions"><button class="btn primary" data-fut-close="${id}" style="flex:2">Close position</button><button class="btn" data-fut-edit="${id}">Edit</button><button class="btn" data-fut-del="${id}" aria-label="Delete">✕</button></div>
-    </article>`;
-  }).join("");
-}
-
-function futCalc(){
-  const lev = num($("futLev").value), m = num($("futMargin").value), e = num($("futEntry").value), side = $("futSide").value;
-  const notional = m*lev, qty = e>0 ? notional/e : 0;
-  const liq = e>0 && lev>=1 ? (side==="long" ? e*(1-1/lev+0.005) : e*(1+1/lev-0.005)) : 0;
-  return {lev,m,e,side,notional,qty,liq};
-}
-function previewFut(){
-  const c = futCalc();
-  $("futPreview").innerHTML = c.m>0&&c.e>0&&c.lev>=1
-    ? `Position size: <strong>${money(c.notional)}</strong> · ${quantity(c.qty)} coins<br>Est. liquidation: <strong>${priceFmt(Math.max(0,c.liq))}</strong> (approximate, isolated margin)`
-    : "Enter margin, leverage and entry price.";
-}
-function openFut(f=null){
-  $("futForm").reset();
-  $("futId").value = f ? f.id : "";
-  $("futTitle").textContent = f ? "Edit position" : "New futures position";
-  $("futSymbol").value = f ? f.symbol : ""; $("futSide").value = f ? f.side : "long";
-  $("futLev").value = f ? f.lev : 10; $("futMargin").value = f ? f.margin : ""; $("futEntry").value = f ? f.entry : "";
-  $("futTp").value = (f&&f.tp)||""; $("futSl").value = (f&&f.sl)||"";
-  $("futDeduct").checked = true; $("futDeductRow").style.display = f ? "none" : "";
-  previewFut(); $("futBackdrop").classList.add("open");
-  setTimeout(()=>$("futSymbol").focus(),50);
-}
-async function saveFut(ev){
-  ev.preventDefault();
-  const id = $("futId").value, symbol = $("futSymbol").value.trim().toUpperCase(), c = futCalc();
-  const tp = Math.max(0,num($("futTp").value)), sl = Math.max(0,num($("futSl").value));
-  if (!/^[A-Z0-9._-]{1,20}$/.test(symbol)) { alert("Enter a valid coin symbol, such as BTC."); return; }
-  if (!(c.m>0 && c.e>0 && c.lev>=1)) { alert("Enter valid margin, leverage (1 or more) and entry price."); return; }
-  if (!(await ensureSource(symbol))) return;
-  if (!Array.isArray(state.futures)) state.futures = [];
-  const data = {symbol,side:c.side,lev:c.lev,margin:c.m,entry:c.e,qty:c.qty,tp,sl};
-  if (id) { const f = state.futures.find(x=>x.id===id); if (f) Object.assign(f,data); }
-  else {
-    const deduct = $("futDeduct").checked;
-    if (deduct && c.m > num(state.cash)+1e-9 && !confirm(`The margin (${money(c.m)}) is more than your USDC balance (${money(state.cash)}). The balance will go negative. Continue?`)) return;
-    state.futures.push({id:uid(),...data,time:Date.now()});
-    if (deduct) adjustCash(-c.m);
-  }
-  markPortfolioChanged(); $("futBackdrop").classList.remove("open"); render(); fetchPrices(); connectLivePrices();
-}
-const futById = id => (state.futures||[]).find(x=>x.id===id);
-function fcCalc(f){
-  const p = num($("fcPrice").value), fee = num($("fcFee").value);
-  const raw = f.qty*(p-f.entry)*(f.side==="long"?1:-1);
-  const pnl = Math.max(-f.margin,raw)-fee;
-  return {p,fee,pnl,roe:pnl/f.margin*100,back:Math.max(0,f.margin+pnl)};
-}
-function previewFutClose(){
-  const f = futById($("fcId").value); if (!f) return;
-  const c = fcCalc(f);
-  $("fcPreview").innerHTML = `${f.side.toUpperCase()} ${f.lev}x · entry ${priceFmt(f.entry)} → exit ${priceFmt(c.p)}<br>Net result: <strong class="${c.pnl>0?"green":c.pnl<0?"red":""}">${c.pnl>0?"+":""}${money(c.pnl)}</strong> (${c.roe>=0?"+":""}${c.roe.toFixed(2)}% ROE)${state.usdEgp>0?" · "+egpSigned(c.pnl):""}<br>Returned to USDC: <strong>${money($("fcAdd").checked?c.back:0)}</strong>`;
-}
-function openFutClose(id){
-  const f = futById(id); if (!f) return;
-  $("fcId").value = id;
-  $("fcTitle").textContent = "Close "+f.symbol+" "+f.side.toUpperCase();
-  $("fcInfo").textContent = `Margin ${money(f.margin)} · ${f.lev}x · size ${money(f.margin*f.lev)}`;
-  $("fcPrice").value = num(state.prices[f.symbol])||""; $("fcFee").value = "";
-  $("fcDate").value = new Date().toISOString().slice(0,10); $("fcAdd").checked = true;
-  previewFutClose(); $("fcBackdrop").classList.add("open");
-}
-function submitFutClose(e){
-  e.preventDefault();
-  const f = futById($("fcId").value); if (!f) return;
-  const c = fcCalc(f);
-  if (!(c.p>0) || !(c.fee>=0)) { alert("Enter a valid exit price."); return; }
-  const d = $("fcDate").value ? new Date($("fcDate").value+"T12:00:00").getTime() : Date.now();
-  if (!Array.isArray(state.trades)) state.trades = [];
-  state.trades.push({id:uid(),symbol:f.symbol,name:f.symbol,qty:f.qty,buy:f.entry,sell:c.p,buyFee:0,sellFee:c.fee,pnl:c.pnl,time:d,futures:true,side:f.side,lev:f.lev});
-  state.futures = state.futures.filter(x=>x.id!==f.id);
-  if ($("fcAdd").checked) adjustCash(c.back);
-  markPortfolioChanged(); $("fcBackdrop").classList.remove("open");
-  viewMonth = monthKey(d); render(); connectLivePrices();
-}
-document.addEventListener("click",e=>{
-  let el;
-  if ((el = e.target.closest("[data-fut-close]"))) openFutClose(el.dataset.futClose);
-  else if ((el = e.target.closest("[data-fut-edit]"))) { const f = futById(el.dataset.futEdit); if (f) openFut(f); }
-  else if ((el = e.target.closest("[data-fut-del]"))) {
-    const f = futById(el.dataset.futDel);
-    if (f && confirm("Delete this "+f.symbol+" position without recording it? The margin will NOT be returned to USDC (use Close position for that).")) {
-      state.futures = state.futures.filter(x=>x.id!==f.id); markPortfolioChanged(); render(); connectLivePrices();
-    }
-  }
-});
-$("futAddBtn").addEventListener("click",()=>openFut());
-$("futForm").addEventListener("submit",saveFut);
-["futLev","futMargin","futEntry"].forEach(id=>$(id).addEventListener("input",previewFut));
-$("futSide").addEventListener("change",previewFut);
-$("futSymbol").addEventListener("change",()=>{
-  const p = num(state.prices[$("futSymbol").value.trim().toUpperCase()]);
-  if (p>0 && !$("futEntry").value) { $("futEntry").value = p; previewFut(); }
-});
-$("futCancel").addEventListener("click",()=>$("futBackdrop").classList.remove("open"));
-$("fcForm").addEventListener("submit",submitFutClose);
-["fcPrice","fcFee"].forEach(id=>$(id).addEventListener("input",previewFutClose));
-$("fcAdd").addEventListener("change",previewFutClose);
-$("fcCancel").addEventListener("click",()=>$("fcBackdrop").classList.remove("open"));
-document.addEventListener("keydown",e=>{ if (e.key==="Escape") { $("futBackdrop").classList.remove("open"); $("fcBackdrop").classList.remove("open"); } });
 
 /* ===== performance range buttons ===== */
 $("rng").addEventListener("click",e=>{
@@ -1952,7 +1760,7 @@ function download(name,text,type){
   const a = document.createElement("a"); a.href = url; a.download = name; a.click(); URL.revokeObjectURL(url);
 }
 $("backupBtn").addEventListener("click",()=>{
-  const d = {app:"memox",version:3,exportedAt:new Date().toISOString(),portfolio:state.portfolio,cash:num(state.cash),watchlist:state.watchlist,trades:state.trades||[],alerts:state.alerts||[],futures:state.futures||[],sources:state.sources||{},history:state.history};
+  const d = {app:"memox",version:3,exportedAt:new Date().toISOString(),portfolio:state.portfolio,cash:num(state.cash),watchlist:state.watchlist,trades:state.trades||[],alerts:state.alerts||[],sources:state.sources||{},history:state.history};
   download("memox-backup-"+new Date().toISOString().slice(0,10)+".json",JSON.stringify(d,null,1),"application/json");
 });
 const parseCsv = t => t.replace(/^\uFEFF/,"").split(/\r?\n/).filter(l=>l.trim()).map(l=>{
@@ -1976,7 +1784,7 @@ $("importFile").addEventListener("change",async e=>{
       state = {...state,
         portfolio:d.portfolio.map(normalizeAsset).filter(Boolean), cash:num(d.cash),
         watchlist:Array.isArray(d.watchlist)?d.watchlist.filter(x=>/^[A-Z0-9]{1,20}$/.test(x)):[],
-        trades:Array.isArray(d.trades)?d.trades:[], alerts:Array.isArray(d.alerts)?d.alerts:[], futures:Array.isArray(d.futures)?d.futures:[],
+        trades:Array.isArray(d.trades)?d.trades:[], alerts:Array.isArray(d.alerts)?d.alerts:[],
         sources:d.sources&&typeof d.sources==="object"?d.sources:{}, history:Array.isArray(d.history)?d.history:state.history};
       markPortfolioChanged(); render(); fetchPrices(); connectLivePrices();
       toast("Backup restored."); return;
@@ -2000,6 +1808,7 @@ $("importFile").addEventListener("change",async e=>{
     await fetchPrices();
     for (const s of fresh) {
       if (num(state.prices[s])>0) continue;
+      if (FORCE_BYBIT.includes(s)) continue;
       const rc = await resolveCoin(s); state.sources = state.sources||{};
       if (rc && rc.src==="gecko" && rc.sym===s) state.sources[s] = {id:rc.id,name:rc.name,logo:rc.logo};
       else if (rc && (rc.src==="okx"||rc.src==="bybit") && rc.sym===s) state.sources[s] = {ex:rc.src};
@@ -2026,7 +1835,8 @@ const AR = {
   "Username":"اسم المستخدم","Password":"كلمة المرور","Welcome back":"أهلاً بعودتك","No assets yet":"لا توجد أصول بعد","Save balance":"حفظ الرصيد","Close & record":"إغلاق وتسجيل",
   "Quantity sold *":"الكمية المباعة *","Sell price (USD) *":"سعر البيع (USD) *","Date":"التاريخ","Add asset ":"إضافة أصل","Memox · Personal portfolio tracker":"Memox · متتبع محفظتك الشخصية"
 };
-AR["Futures"] = "العقود الآجلة";
+AR["Daily profit / loss"] = "الربح / الخسارة اليومية";
+AR["Daily results"] = "النتائج اليومية";
 const EN = Object.fromEntries(Object.entries(AR).map(([k,v])=>[v,k]));
 let langQueued = false;
 function schedLang(){ if (langQueued) return; langQueued = true; requestAnimationFrame(()=>{ langQueued = false; applyLang(); }); }
@@ -2146,9 +1956,10 @@ $("watchForm").addEventListener("submit",async e=>{
   else if (rc.src === "binance") { const t = rc.t; applyTicker(symbol,num(t.lastPrice),num(t.priceChangePercent),num(t.highPrice),num(t.lowPrice),num(t.quoteVolume)); }
   else { state.sources = state.sources || {}; state.sources[symbol] = {ex:rc.src}; const t = rc.t; applyTicker(symbol,t.price,t.pct,t.hi,t.lo,t.vol); }
   state.watchlist.push(symbol);
+  fixSources();
   if (rc.src === "gecko") await fetchGeckoPrices();
   input.value = "";
-  markPortfolioChanged(); render(); connectLivePrices(); selectSym(symbol);
+  markPortfolioChanged(); render(); connectLivePrices(); fetchPrices(); selectSym(symbol);
 });
 /* watchlist reordering: drag the ⋮⋮ handle (mouse + touch), or ↑/↓ on the focused handle */
 $("watchGrid").addEventListener("pointerdown",e=>{
@@ -2189,23 +2000,23 @@ $("watchGrid").addEventListener("keydown",e=>{
 /* ===== tabs ===== */
 const TAB_KEY = "coinfolio_tab";
 function setTab(name,save=true){
-  if (!["portfolio","trades","futures"].includes(name)) name = "portfolio";
+  if (!["portfolio","trades"].includes(name)) name = "portfolio";
   document.querySelectorAll(".tab").forEach(b=>{ const on = b.dataset.tab===name; b.classList.toggle("active",on); b.setAttribute("aria-selected",on?"true":"false"); });
   document.querySelectorAll(".tab-panel").forEach(p=>p.classList.toggle("active",p.dataset.panel===name));
   if (save) { try { localStorage.setItem(TAB_KEY,name); } catch {} }
-  if (name==="portfolio") drawAllocation(); else if (name==="futures") renderFutures(); else renderTrades();
+  if (name==="portfolio") drawAllocation(); else renderTrades();
 }
 $("tabs").addEventListener("click",e=>{ const b = e.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); });
 
 /* ===== mobile views (bottom navigation) ===== */
 function setMView(name,save=true){
-  if (!["watch","chart","portfolio","trades","futures"].includes(name)) name = "watch";
+  if (!["watch","chart","portfolio","trades"].includes(name)) name = "watch";
   mview = name;
   document.body.dataset.mview = name;
   document.querySelectorAll("#mnav [data-mv]").forEach(b=>b.classList.toggle("active",b.dataset.mv===name));
   if (save) { try { localStorage.setItem(MV_KEY,name); } catch {} }
   if (!mq.matches) return;
-  if (name==="portfolio" || name==="trades" || name==="futures") setTab(name,false);
+  if (name==="portfolio" || name==="trades") setTab(name,false);
   window.scrollTo(0,0);
   if (name==="chart") loadTermChart(true);
   else if (name==="portfolio") setTimeout(()=>{ drawChart(); drawAllocation(); },0);
@@ -2219,13 +2030,13 @@ mq.addEventListener("change",()=>{
 function startApp(){
   { let t = "portfolio"; try { t = localStorage.getItem(TAB_KEY)||"portfolio"; } catch {} setTab(t,false); }
   setMView(mview,false);
-  render();
-  loadTermChart(); loadDetail();
   if (!Array.isArray(state.watchlist)) state.watchlist = [];
   if (!Array.isArray(state.alerts)) state.alerts = [];
   if (!state.changes || typeof state.changes !== "object") state.changes = {};
-  if (!Array.isArray(state.futures)) state.futures = [];
   if (!state.sources || typeof state.sources !== "object") state.sources = {};
+  fixSources();
+  render();
+  loadTermChart(); loadDetail();
   if (allSymbols().length) { setStatus(false,"Loading prices…"); fetchPrices().finally(()=>connectLivePrices()); }
   else setStatus(true,"Add assets to begin");
   clearInterval(sparkTimer); sparkTimer = setInterval(()=>loadDetail(),300000);
@@ -2318,8 +2129,8 @@ onAuthStateChanged(auth,async user=>{
         watchlist: Array.isArray(cloud.watchlist) ? cloud.watchlist.filter(x=>/^[A-Z0-9]{1,20}$/.test(x)) : [],
         changes: {}, stats: {}, cash: num(cloud.cash),
         trades: Array.isArray(cloud.trades) ? cloud.trades : [],
-        alerts: Array.isArray(cloud.alerts) ? cloud.alerts : [],
-        futures: Array.isArray(cloud.futures) ? cloud.futures : []};
+        alerts: Array.isArray(cloud.alerts) ? cloud.alerts : []};
+      fixSources();
       persist();
       if (started) { render(); fetchPrices(); connectLivePrices(); }
     } else {
