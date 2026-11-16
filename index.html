@@ -540,8 +540,8 @@ button:focus-visible{outline:2px solid var(--accent)}
       </div>
       <div class="stat-foot" id="mNetEgp" style="margin:-4px 0 12px">—</div>
       <div class="tstats" id="tStats"></div>
-      <div class="section-head" style="margin:14px 0 8px"><div><h3>Daily results</h3></div></div>
-      <div class="trade-list" id="dayList" style="max-height:220px;margin-bottom:14px"></div>
+      <div class="section-head" style="margin:14px 0 8px"><div><h3>Daily log <span class="muted" style="font-weight:500;font-size:12px">(UTC)</span></h3></div></div>
+      <div class="trade-list" id="dayList" style="max-height:260px;margin-bottom:14px"></div>
       <div class="trade-list" id="tradeList"></div>
     </section>
   </div>
@@ -734,7 +734,7 @@ function normalizeAsset(raw) {
 }
 
 /* ===== state ===== */
-const defaultState = () => ({portfolio:[],prices:{},cash:0,usdEgp:0,history:[],watchlist:[],changes:{},stats:{},trades:[],alerts:[],sources:{},updatedAt:null});
+const defaultState = () => ({portfolio:[],prices:{},cash:0,usdEgp:0,history:[],watchlist:[],changes:{},stats:{},trades:[],alerts:[],daily:[],sources:{},updatedAt:null});
 let state = defaultState();
 let currentUser = null, cloudReady = false, socket = null, reconnectTimer = null, rateTimer = null, sparkTimer = null, mkTimer = null;
 let activeStorageKey = STORAGE_KEY, cloudSaveTimer = null;
@@ -749,7 +749,7 @@ function saveCloudPortfolio() {
   if (!currentUser || !cloudReady) return;
   clearTimeout(cloudSaveTimer);
   const id = currentUser.uid;
-  const snapshot = {portfolio:state.portfolio,cash:num(state.cash),usdEgp:state.usdEgp,watchlist:state.watchlist,history:state.history,trades:state.trades||[],alerts:state.alerts||[],sources:state.sources||{}};
+  const snapshot = {portfolio:state.portfolio,cash:num(state.cash),usdEgp:state.usdEgp,watchlist:state.watchlist,history:state.history,trades:state.trades||[],alerts:state.alerts||[],daily:state.daily||[],sources:state.sources||{}};
   cloudSaveTimer = setTimeout(async () => {
     if (!currentUser || currentUser.uid !== id || !cloudReady) return;
     try { await setDoc(doc(db,"users",id),{...snapshot,updatedAt:serverTimestamp()},{merge:true}); }
@@ -876,6 +876,72 @@ function fixSources(){
   });
 }
 
+/* ===== daily open (00:00 UTC) per asset, used for daily P/L ===== */
+const dayOpen = {}, dayOpenTry = {};
+let dayOpenBusy = false, dayOpenReady = 0, lastDailyCloud = 0;
+const utc0Now = () => { const d = new Date(); return Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()); };
+async function getDayOpen(sym,u0){
+  const gs = srcOf(sym), ex = exOf(sym);
+  try {
+    if (gs) {
+      const r = await fetch(`https://api.coingecko.com/api/v3/coins/${encodeURIComponent(gs.id)}/ohlc?vs_currency=usd&days=1`);
+      if (!r.ok) return 0;
+      const d = (await r.json()).filter(x=>x[0]>=u0);
+      return d.length ? num(d[0][1]) : 0;
+    }
+    if (ex === "okx") {
+      const r = await fetch(`https://www.okx.com/api/v5/market/candles?instId=${sym}-USDT&bar=1Dutc&limit=1`);
+      if (!r.ok) return 0;
+      const x = ((await r.json()).data||[])[0];
+      return x && +x[0]>=u0 ? num(x[1]) : 0;
+    }
+    if (ex === "bybit") {
+      const r = await fetch(`https://api.bybit.com/v5/market/kline?category=spot&symbol=${sym}USDT&interval=D&limit=1`);
+      if (!r.ok) return 0;
+      const x = (((await r.json()).result||{}).list||[])[0];
+      return x && +x[0]>=u0 ? num(x[1]) : 0;
+    }
+    const r = await fetch(`https://api.binance.com/api/v3/klines?symbol=${sym}USDT&interval=1d&limit=1`);
+    if (!r.ok) return 0;
+    const x = (await r.json())[0];
+    return x && +x[0]>=u0 ? num(x[1]) : 0;
+  } catch { return 0; }
+}
+async function fetchDayOpens(){
+  if (dayOpenBusy) return;
+  dayOpenBusy = true;
+  try {
+    fixSources();
+    const u0 = utc0Now();
+    const syms = [...new Set(state.portfolio.map(a=>a.symbol))].filter(s=>{
+      const c = dayOpen[s];
+      return !(c && c.u0===u0) && Date.now()-(dayOpenTry[s]||0) > 60000;
+    });
+    let got = false;
+    for (const s of syms) {
+      dayOpenTry[s] = Date.now();
+      const o = await getDayOpen(s,u0);
+      if (o > 0) { dayOpen[s] = {u0,o}; got = true; }
+    }
+    dayOpenReady = u0; render();
+  } finally { dayOpenBusy = false; }
+}
+
+/* ===== daily P/L log: one record per UTC day, locked when the day ends ===== */
+function mergeDaily(a,b){
+  const m = {};
+  [...(Array.isArray(a)?a:[]),...(Array.isArray(b)?b:[])].forEach(x=>{ if (x && /^\d{4}-\d{2}-\d{2}$/.test(x.day) && (!m[x.day] || num(x.t)>=num(m[x.day].t))) m[x.day] = x; });
+  return Object.values(m).sort((p,q)=>p.day<q.day?-1:1).slice(-400);
+}
+function logDaily(key,pnl,pct){
+  if (!Array.isArray(state.daily)) state.daily = [];
+  let e = state.daily.find(x=>x.day===key);
+  if (!e) { e = {day:key,pnl:0,pct:0}; state.daily.push(e); state.daily.sort((p,q)=>p.day<q.day?-1:1); state.daily = state.daily.slice(-400); }
+  e.pnl = Math.round(pnl*100)/100; e.pct = Math.round(pct*100)/100; e.t = Date.now();
+  state.daily.forEach(x=>{ if (x.day<key) x.final = true; });
+  if (Date.now()-lastDailyCloud > 300000) { lastDailyCloud = Date.now(); saveCloudPortfolio(); }
+}
+
 /* ===== render ===== */
 function render() {
   fixSources();
@@ -893,14 +959,23 @@ function render() {
   $("realizedLine").innerHTML = (state.trades||[]).length
     ? `Realized: <b class="${rl>0?"green":rl<0?"red":""}">${rl>0?"+":""}${usd2(rl)}</b> · Total P/L: <b class="${tot>0?"green":tot<0?"red":""}">${tot>0?"+":""}${usd2(tot)}</b>` : "";
   $("usdEgp").textContent = state.usdEgp > 0 ? new Intl.NumberFormat("en-US",{maximumFractionDigits:3}).format(state.usdEgp) : "—";
-  /* daily profit / loss: 24h change of holdings + trades closed today */
-  { let d24=0,base=0;
-    for (const a of state.portfolio){ const p=priceOf(a), ch=num((state.changes||{})[a.symbol] ?? a.change24h); if(!(p>0)) continue; const prev=p/(1+ch/100); d24+=a.amount*(p-prev); base+=a.amount*prev; }
-    const k=new Date().toLocaleDateString("en-GB");
-    const rt=(state.trades||[]).filter(x=>new Date(x.time).toLocaleDateString("en-GB")===k).reduce((s,x)=>s+num(x.pnl),0), dt=d24+rt;
+  /* daily profit / loss: since 00:00 UTC (daily open) + trades closed today (UTC day) */
+  { const u0 = utc0Now(); let d=0,base=0,approx=false;
+    for (const a of state.portfolio){
+      const p=priceOf(a); if(!(p>0)) continue;
+      const dd = dayOpen[a.symbol], o = dd && dd.u0===u0 ? dd.o : 0;
+      if (o>0) {
+        for (const l of ensureLots(a)) { const ref = (l.time>=u0 && l.price>0) ? l.price : o; d += l.qty*(p-ref); base += l.qty*ref; }
+      } else {
+        approx = true;
+        const ch=num((state.changes||{})[a.symbol] ?? a.change24h), prev=p/(1+ch/100); d+=a.amount*(p-prev); base+=a.amount*prev;
+      }
+    }
+    const rt=(state.trades||[]).filter(x=>x.time>=u0&&x.time<u0+864e5).reduce((s,x)=>s+num(x.pnl),0), dt=d+rt;
+    if (dayOpenReady===u0 && state.portfolio.every(a=>priceOf(a)>0) && (base>0||rt!==0)) logDaily(new Date(u0).toISOString().slice(0,10),dt,base>0?d/base*100:0);
     $("dayPnl").textContent=(dt>0?"+":"")+usd2(dt);
     $("dayPnl").className="stat-value "+(dt>0?"green":dt<0?"red":"");
-    $("dayPnlFoot").textContent=`${base>0?(d24>=0?"+":"")+(d24/base*100).toFixed(2)+"% (24h)":"—"} · Realized today: ${rt>0?"+":""}${usd2(rt)}${state.usdEgp>0?" · "+egpSigned(dt):""}`; }
+    $("dayPnlFoot").textContent=`${base>0?(d>=0?"+":"")+(d/base*100).toFixed(2)+"% since 00:00 UTC"+(approx?" (~)":""):"—"} · Realized today: ${rt>0?"+":""}${usd2(rt)}${state.usdEgp>0?" · "+egpSigned(dt):""}`; }
   $("assetBadge").textContent = `${state.portfolio.length} asset${state.portfolio.length===1?"":"s"}`;
 
   const rh = perfRange>0 ? state.history.filter(p=>p.time>=Date.now()-perfRange*864e5) : state.history;
@@ -1387,6 +1462,7 @@ function applyTicker(sym,price,pct,hi,lo,vol){
 }
 async function fetchPrices(){
   fixSources();
+  fetchDayOpens();
   const all = allSymbols();
   if (!all.length) { setStatus(true,"Add assets to begin"); return; }
   const symbols = all.filter(s=>!(state.sources||{})[s]);
@@ -1569,11 +1645,12 @@ function renderTrades(){
     <div class="trade-pnl ${t.pnl>0?"green":t.pnl<0?"red":""}">${t.pnl>0?"+":""}${usd2(t.pnl)}</div>
     <button class="small-action" data-trade-del="${escapeHtml(t.id)}" aria-label="Delete trade">✕</button></div>`).join("")
     : `<div class="empty" style="padding:22px 10px">No closed positions this month.</div>`;
-  const days = {};
-  for (const t of list) { const k = new Date(t.time).toLocaleDateString("en-GB"); (days[k] = days[k] || {n:0,p:0}); days[k].n++; days[k].p += t.pnl; }
-  $("dayList").innerHTML = Object.keys(days).length
-    ? Object.entries(days).map(([d,v])=>`<div class="trade-row" style="grid-template-columns:minmax(0,1fr) auto"><div><strong>${d}</strong><span class="trade-date">${v.n} trade${v.n===1?"":"s"}</span></div><div class="trade-pnl ${v.p>0?"green":v.p<0?"red":""}">${v.p>0?"+":""}${usd2(v.p)}</div></div>`).join("")
-    : `<div class="empty" style="padding:14px 10px">No results this month.</div>`;
+  const todayKey = new Date(utc0Now()).toISOString().slice(0,10);
+  const log = (state.daily||[]).filter(x=>x.day.startsWith(viewMonth)).sort((p,q)=>p.day<q.day?1:-1);
+  $("dayList").innerHTML = log.length ? log.map(x=>{
+    const live = x.day===todayKey, end = Date.parse(x.day+"T00:00:00Z")+864e5, approx = !live && end-num(x.t) > 30*60000, c = x.pnl>0?"green":x.pnl<0?"red":"";
+    return `<div class="trade-row"><div><strong>${escapeHtml(x.day)}</strong><span class="trade-date">${live?"live · closes 00:00 UTC":approx?"closed (~)":"closed"}</span></div><div class="trade-pnl ${c}">${x.pnl>0?"+":""}${usd2(x.pnl)} <span class="muted" style="font-weight:500">${num(x.pct)>=0?"+":""}${num(x.pct).toFixed(2)}%</span></div><button class="small-action" data-day-del="${escapeHtml(x.day)}" aria-label="Delete day">✕</button></div>`;
+  }).join("") : `<div class="empty" style="padding:14px 10px">No daily records this month. Each day is saved automatically and locked at 00:00 UTC.</div>`;
 }
 function openClose(id){
   const a = state.portfolio.find(x=>x.id===id); if (!a) return;
@@ -1760,7 +1837,7 @@ function download(name,text,type){
   const a = document.createElement("a"); a.href = url; a.download = name; a.click(); URL.revokeObjectURL(url);
 }
 $("backupBtn").addEventListener("click",()=>{
-  const d = {app:"memox",version:3,exportedAt:new Date().toISOString(),portfolio:state.portfolio,cash:num(state.cash),watchlist:state.watchlist,trades:state.trades||[],alerts:state.alerts||[],sources:state.sources||{},history:state.history};
+  const d = {app:"memox",version:3,exportedAt:new Date().toISOString(),portfolio:state.portfolio,cash:num(state.cash),watchlist:state.watchlist,trades:state.trades||[],alerts:state.alerts||[],daily:state.daily||[],sources:state.sources||{},history:state.history};
   download("memox-backup-"+new Date().toISOString().slice(0,10)+".json",JSON.stringify(d,null,1),"application/json");
 });
 const parseCsv = t => t.replace(/^\uFEFF/,"").split(/\r?\n/).filter(l=>l.trim()).map(l=>{
@@ -1784,7 +1861,7 @@ $("importFile").addEventListener("change",async e=>{
       state = {...state,
         portfolio:d.portfolio.map(normalizeAsset).filter(Boolean), cash:num(d.cash),
         watchlist:Array.isArray(d.watchlist)?d.watchlist.filter(x=>/^[A-Z0-9]{1,20}$/.test(x)):[],
-        trades:Array.isArray(d.trades)?d.trades:[], alerts:Array.isArray(d.alerts)?d.alerts:[],
+        trades:Array.isArray(d.trades)?d.trades:[], alerts:Array.isArray(d.alerts)?d.alerts:[], daily:Array.isArray(d.daily)?d.daily:[],
         sources:d.sources&&typeof d.sources==="object"?d.sources:{}, history:Array.isArray(d.history)?d.history:state.history};
       markPortfolioChanged(); render(); fetchPrices(); connectLivePrices();
       toast("Backup restored."); return;
@@ -1836,7 +1913,7 @@ const AR = {
   "Quantity sold *":"الكمية المباعة *","Sell price (USD) *":"سعر البيع (USD) *","Date":"التاريخ","Add asset ":"إضافة أصل","Memox · Personal portfolio tracker":"Memox · متتبع محفظتك الشخصية"
 };
 AR["Daily profit / loss"] = "الربح / الخسارة اليومية";
-AR["Daily results"] = "النتائج اليومية";
+AR["Daily log"] = "سجل الأرباح اليومي";
 const EN = Object.fromEntries(Object.entries(AR).map(([k,v])=>[v,k]));
 let langQueued = false;
 function schedLang(){ if (langQueued) return; langQueued = true; requestAnimationFrame(()=>{ langQueued = false; applyLang(); }); }
@@ -1891,6 +1968,7 @@ document.addEventListener("click",e=>{
       markPortfolioChanged(); render(); connectLivePrices();
     }
   }
+  if ((el = pick("[data-day-del]")) && confirm("Delete this day from the log?")) { state.daily = (state.daily||[]).filter(x=>x.day!==el.dataset.dayDel); markPortfolioChanged(); renderTrades(); }
   if ((el = pick("[data-al-add]"))) openAlert(el.dataset.alAdd);
   if ((el = pick("[data-al-del]"))) { state.alerts = (state.alerts||[]).filter(x=>x.id!==el.dataset.alDel); markPortfolioChanged(); renderDetail(); }
   if ((el = pick("[data-watch-add]"))) { openModal(); $("coinSymbol").value = el.dataset.watchAdd; setTimeout(()=>$("coinAmount").focus(),80); }
@@ -2129,7 +2207,8 @@ onAuthStateChanged(auth,async user=>{
         watchlist: Array.isArray(cloud.watchlist) ? cloud.watchlist.filter(x=>/^[A-Z0-9]{1,20}$/.test(x)) : [],
         changes: {}, stats: {}, cash: num(cloud.cash),
         trades: Array.isArray(cloud.trades) ? cloud.trades : [],
-        alerts: Array.isArray(cloud.alerts) ? cloud.alerts : []};
+        alerts: Array.isArray(cloud.alerts) ? cloud.alerts : [],
+        daily: mergeDaily(cloud.daily,local&&local.daily)};
       fixSources();
       persist();
       if (started) { render(); fetchPrices(); connectLivePrices(); }
