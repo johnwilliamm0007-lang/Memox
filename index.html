@@ -451,6 +451,23 @@ button:focus-visible{outline:2px solid var(--accent)}
 .lot{grid-template-columns:52px 1fr auto auto}
 .lot-pl{font-weight:700;font-size:12px;text-align:right;white-space:nowrap}
 .lot-pl small{font-weight:600;opacity:.8;margin-inline-start:4px}
+
+/* ===== Asset cards v3 ===== */
+:root{--muted:#9aa0ad}
+.pnl-line.big{margin-top:16px;font-size:26px;font-weight:800;line-height:1;align-items:center;flex-wrap:wrap}
+.pnl-line.big small{font-size:13px;padding:4px 9px}
+.pnl-line.big em{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);margin-inline-start:auto}
+.card-value{font-size:17px;font-weight:700;margin-top:10px;line-height:1.2;color:var(--text);width:fit-content;padding:2px 6px;margin-inline-start:-6px}
+.card-sub{font-size:13px;color:var(--muted);margin-top:2px}
+.chg-chip .tf{font-style:normal;font-weight:600;opacity:.6;margin-inline-start:3px}
+.asset-buttons .btn.primary{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.asset-buttons .btn.primary:hover{background:var(--accent);color:var(--ink)}
+.share-bar{height:6px}
+.share small{font-size:12px}
+.asset-card.deep-loss{border-color:rgba(255,107,107,.45);box-shadow:inset 0 3px 0 rgba(255,107,107,.7)}
+@media(min-width:1400px){.asset-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.card-details .tgt{margin:0 0 6px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.mini-stats small{font-size:11px}
 </style>
 </head>
 <body data-mview="watch">
@@ -1058,10 +1075,10 @@ function renderCards() {
     const id = escapeHtml(a.id), lots = ensureLots(a), cls = p.pnl>0?"green":p.pnl<0?"red":"";
     const share = Math.max(0,Math.min(100,value/total*100)), open = openDetails.has(a.id);
     const dateOf = t => new Date(t).toLocaleDateString("en-GB",{day:"numeric",month:"short"});
-    return `<article class="panel asset-card">
+    return `<article class="panel asset-card${hasBuy&&p.pct<=-20?" deep-loss":""}">
       <div class="asset-top">${logoMarkup(a)}
         <div style="min-width:0;flex:1"><div class="coin-name">${escapeHtml(a.name)}</div><div class="coin-symbol">${escapeHtml(a.symbol)} · ${quantity(a.amount)}</div></div>
-        <span class="chg-chip ${ch>0?"up":ch<0?"down":""}">${ch>0?"▲":ch<0?"▼":""} ${Math.abs(ch).toFixed(2)}%</span>
+        <span class="chg-chip ${ch>0?"up":ch<0?"down":""}" title="24h">${ch>0?"▲":ch<0?"▼":""} ${Math.abs(ch).toFixed(2)}% <i class="tf">24h</i></span>
         <div class="menu-wrap"><button class="icon-btn" data-menu="${id}" aria-label="More actions">⋯</button>
           <div class="menu ${openMenuId===a.id?"open":""}">
             <button data-transfer="${id}">Transfer</button>
@@ -1071,18 +1088,20 @@ function renderCards() {
           </div>
         </div>
       </div>
+      ${hasBuy?`<div class="pnl-line big ${cls}"><span>${p.pnl>0?"+":""}${usd2(p.pnl)}</span><small>${p.pct>=0?"+":""}${p.pct.toFixed(1)}%</small><em>Total</em></div>`:`<div class="pnl-line big muted"><span>No buy price</span></div>`}
       <div class="card-value ${flash("c:"+a.symbol,price)}">${usd2(value)}</div>
       <div class="card-sub">${state.usdEgp>0?money(currentEgp(value),"EGP"):"—"}</div>
-      ${hasBuy?`<div class="pnl-line ${cls}"><span>${p.pnl>0?"+":""}${usd2(p.pnl)}</span><small>${p.pct>=0?"+":""}${p.pct.toFixed(1)}%</small></div>`:`<div class="pnl-line muted"><span>No buy price</span></div>`}
+      
       <div class="mini-stats">
         <div><small>Price</small><b>${priceFmt(price)}</b></div>
         <div><small>Avg buy</small><b>${hasBuy?priceFmt(a.buyPrice):"—"}</b></div>
         <div><small>Invested</small><b>${hasBuy?moneyRound(p.cost):"—"}</b></div>
       </div>
       <div class="share"><div class="share-bar"><i style="width:${share.toFixed(1)}%"></i></div><small>${share.toFixed(1)}% of portfolio</small></div>
-      ${(mcap[a.symbol]&&mcap[a.symbol].cap>0)?`<div class="tgt">Market cap <b style="color:var(--text)">${capFmt(mcap[a.symbol].cap)}</b>${mcap[a.symbol].rank?` · #${mcap[a.symbol].rank}`:""}</div>`:""}
+      
       ${tgtHtml(a,price)}
       <div class="card-details ${open?"open":""}">
+        ${(mcap[a.symbol]&&mcap[a.symbol].cap>0)?`<div class="tgt">Market cap <b style="color:var(--text)">${capFmt(mcap[a.symbol].cap)}</b>${mcap[a.symbol].rank?` · #${mcap[a.symbol].rank}`:""}</div>`:""}
         ${lots.map(l=>{
   const lc=l.qty*l.price+num(l.fee), lp=l.qty*price-lc, lpc=lc>0?lp/lc*100:0, c=l.price>0?(lp>0?"green":lp<0?"red":""):"muted";
   return `<div class="lot"><span class="lot-d">${dateOf(l.time)}</span><span class="lot-q">${quantity(l.qty)} <em>@ ${l.price>0?priceFmt(l.price):"—"}</em></span><span class="lot-pl ${c}">${l.price>0?`${lp>0?"+":""}${usd2(lp)}<small>${lpc>=0?"+":""}${lpc.toFixed(1)}%</small>`:"—"}</span><button class="lot-x" data-lot-del="${id}|${escapeHtml(l.id)}" aria-label="Delete purchase">✕</button></div>`;
