@@ -563,7 +563,7 @@ button:focus-visible{outline:2px solid var(--accent)}
     </section>
   </div>
 
-<footer class="footer"><span>Memox · Personal portfolio tracker</span><span>Prices are indicative. The USD/EGP rate comes from CoinGecko and may differ from P2P prices.</span></footer>
+<footer class="footer"><span>Memox · Personal portfolio tracker</span><span>Prices are indicative. The USD/EGP rate comes from Bybit P2P (CoinGecko is used if P2P is unavailable).</span></footer>
 
   <nav class="mnav" id="mnav" aria-label="Main navigation">
     <button type="button" data-mv="watch" class="active"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Watchlist</button>
@@ -1579,7 +1579,28 @@ function connectLivePrices(){
 
 /* ===== USD/EGP from CoinGecko (USDT/EGP); keeps the last saved rate if a refresh fails ===== */
 let rateUpdatedAt = 0;
+/* ===== USD/EGP from Bybit P2P via Cloudflare Worker (falls back to CoinGecko) ===== */
+const P2P_URL = "https://p2p-rate.johnwilliamm0007.workers.dev/";
+async function tryP2P(){
+  if (num(state.usdEgpManual) > 0) return false;
+  const pill = document.querySelector(".rate-pill");
+  const ctrl = new AbortController(), t = setTimeout(()=>ctrl.abort(),8000);
+  try {
+    const r = await fetch(P2P_URL,{cache:"no-store",signal:ctrl.signal});
+    if (!r.ok) throw new Error("HTTP "+r.status);
+    const p = num((await r.json()).price);
+    if (!(p > 1)) throw new Error("No rate");
+    state.usdEgp = p; rateUpdatedAt = Date.now();
+    if (pill) pill.title = "USD / EGP · Bybit P2P (auto)";
+    persist(); render(); return true;
+  } catch (e) {
+    console.warn("P2P rate failed, using CoinGecko:",e);
+    if (pill) pill.title = "USD / EGP · CoinGecko (P2P unavailable)";
+    return false;
+  } finally { clearTimeout(t); }
+}
 async function fetchUsdEgpRate(){
+  if (await tryP2P()) return;
   const ctrl = new AbortController(), t = setTimeout(()=>ctrl.abort(),8000);
   try {
     const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=egp",{cache:"no-store",signal:ctrl.signal});
