@@ -1289,12 +1289,12 @@ function renderDetail(){
     .map(([l,v])=>`<div class="pf ${v==null?"":v>0?"up":"down"}"><b>${v==null?"—":(v>0?"+":"")+v.toFixed(2)+"%"}</b><small>${l}</small></div>`).join("");
   let pos = "";
   if (held) {
-    const p = pnlFor(held), has = held.buyPrice>0, pc = p.pnl>0?"green":p.pnl<0?"red":"";
+    const p = pnlFor(held), has = held.buyPrice>0, pc = p.pnl>0?"green":p.pnl<0?"red":""; const hiV = dHi>0 ? held.amount*dHi : 0, hiP = hiV-p.cost, hiPc = p.cost>0 ? hiP/p.cost*100 : 0, hc = hiP>0?"green":hiP<0?"red":"";
     pos = `<h4>Your position</h4><div class="dt-pos">
       <div>Holding<strong>${quantity(held.amount)} ${e}</strong></div>
       <div>Value<strong>${usd2(held.amount*price)}</strong></div>
       <div>Average buy<strong>${has?money(held.buyPrice):"—"}</strong></div>
-      <div>Profit / loss<strong class="${pc}">${has?(p.pnl>0?"+":"")+usd2(p.pnl)+" ("+(p.pct>=0?"+":"")+p.pct.toFixed(1)+"%)":"—"}</strong></div></div>`;
+      <div>Profit / loss<strong class="${pc}">${has?(p.pnl>0?"+":"")+usd2(p.pnl)+" ("+(p.pct>=0?"+":"")+p.pct.toFixed(1)+"%)":"—"}</strong></div>${has&&hiV>0?`<div>Profit at day high<strong class="${hc}">${(hiP>0?"+":"")+usd2(hiP)+" ("+(hiPc>=0?"+":"")+hiPc.toFixed(1)+"%)"}</strong></div><div>Missed vs now<strong>${usd2(Math.max(0,hiV-p.value))}</strong></div>`:""}</div>`;
   } else {
     pos = `<button class="btn primary" data-watch-add="${e}" type="button" style="width:100%;margin-top:16px">＋ Add to portfolio</button>`;
   }
