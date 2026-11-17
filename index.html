@@ -556,7 +556,7 @@ button:focus-visible{outline:2px solid var(--accent)}
         <div class="panel stat"><div class="stat-label">Net result</div><div class="stat-value" id="mNet">$0.00</div></div>
       </div>
       <div class="stat-foot" id="mNetEgp" style="margin:-4px 0 12px">—</div>
-      <div class="tstats" id="tStats"></div>
+      <div class="mstats"><div class="panel stat"><div class="stat-label">Expenses</div><div class="stat-value red" id="mExp">$0.00</div></div><div class="panel stat" style="grid-column:span 2"><div class="stat-label">Net after expenses</div><div class="stat-value" id="mNetAfter">$0.00</div></div></div><div class="section-head" style="margin:6px 0 8px"><div><h3>Expenses</h3></div><button class="btn" id="expAdd" type="button">＋ Add expense</button></div><div class="trade-list" id="expList" style="max-height:200px;margin-bottom:14px"></div><div class="tstats" id="tStats"></div>
       <div class="section-head" style="margin:14px 0 8px"><div><h3>Daily log <span class="muted" style="font-weight:500;font-size:12px">(UTC)</span></h3></div></div>
       <div class="trade-list" id="dayList" style="max-height:260px;margin-bottom:14px"></div>
       <div class="trade-list" id="tradeList"></div>
@@ -766,7 +766,7 @@ function saveCloudPortfolio() {
   if (!currentUser || !cloudReady) return;
   clearTimeout(cloudSaveTimer);
   const id = currentUser.uid;
-  const snapshot = {portfolio:state.portfolio,cash:num(state.cash),usdEgp:state.usdEgp,watchlist:state.watchlist,history:state.history,trades:state.trades||[],alerts:state.alerts||[],daily:state.daily||[],sources:state.sources||{}};
+  const snapshot = {portfolio:state.portfolio,cash:num(state.cash),usdEgp:state.usdEgp,watchlist:state.watchlist,history:state.history,trades:state.trades||[],alerts:state.alerts||[],daily:state.daily||[],sources:state.sources||{},expenses:state.expenses||[]};
   cloudSaveTimer = setTimeout(async () => {
     if (!currentUser || currentUser.uid !== id || !cloudReady) return;
     try { await setDoc(doc(db,"users",id),{...snapshot,updatedAt:serverTimestamp()},{merge:true}); }
@@ -1711,7 +1711,7 @@ function renderTrades(){
   $("mProfit").textContent = (profit>0?"+":"")+usd2(profit);
   $("mLoss").textContent = usd2(loss);
   $("mNet").textContent = (net>0?"+":"")+usd2(net);
-  $("mNet").className = "stat-value "+(net>0?"green":net<0?"red":"");
+  $("mNet").className = "stat-value "+(net>0?"green":net<0?"red":""); { const ex = (Array.isArray(state.expenses)?state.expenses:[]).filter(x=>monthKey(x.time)===viewMonth).sort((a,b)=>b.time-a.time), et = ex.reduce((s,x)=>s+num(x.amount),0), na = net-et; $("mExp").textContent = et>0 ? "−"+usd2(et) : usd2(0); $("mNetAfter").textContent = (na>0?"+":"")+usd2(na)+(state.usdEgp>0?" · "+egpSigned(na):""); $("mNetAfter").className = "stat-value "+(na>0?"green":na<0?"red":""); $("expList").innerHTML = ex.length ? ex.map(x=>`<div class="trade-row"><div style="min-width:0"><div><strong>${escapeHtml(x.note||"Expense")}</strong><span class="trade-date">${new Date(x.time).toLocaleDateString("en-GB")}</span></div></div><div class="trade-pnl red">−${usd2(x.amount)}</div><button class="small-action" data-exp-del="${escapeHtml(x.id)}" aria-label="Delete expense">✕</button></div>`).join("") : `<div class="empty" style="padding:14px 10px">No expenses this month.</div>`; }
   const fees = list.reduce((x,t)=>x+num(t.buyFee)+num(t.sellFee),0);
   $("mNetEgp").textContent = (state.usdEgp>0 ? egpSigned(net)+" · " : "") + "Fees paid: " + usd2(fees);
   {
@@ -2013,6 +2013,24 @@ function applyLang(){
 }
 $("langBtn").addEventListener("click",()=>{ lang = lang==="ar" ? "en" : "ar"; try { localStorage.setItem("memox_lang",lang); } catch {} applyLang(); });
 if (lang==="ar") applyLang();
+
+/* ===== expenses (Trades tab) ===== */
+$("expAdd").addEventListener("click",()=>{
+  const raw = prompt("Expense amount in USD (type egp after it for pounds, e.g. 500 egp):"); if (raw===null) return;
+  const isE = /egp|ج/i.test(raw); let v = parseFloat(String(raw).replace(/[^0-9.,]/g,"").replace(",","."));
+  if (!(v>0)) { alert("Enter a valid amount."); return; }
+  if (isE) { if (!(state.usdEgp>0)) { alert("EGP rate unavailable."); return; } v = v/state.usdEgp; }
+  const note = (prompt("Note (optional):")||"").trim().slice(0,80);
+  const nowM = monthKey(Date.now()), [y,m] = viewMonth.split("-").map(Number);
+  const time = viewMonth===nowM ? Date.now() : new Date(y,m-1,15,12).getTime();
+  if (!Array.isArray(state.expenses)) state.expenses = [];
+  state.expenses.push({id:uid(),amount:Math.round(v*100)/100,note,time});
+  markPortfolioChanged(); renderTrades();
+});
+document.addEventListener("click",e=>{
+  const el = e.target.closest("[data-exp-del]");
+  if (el && confirm("Delete this expense?")) { state.expenses = (state.expenses||[]).filter(x=>x.id!==el.dataset.expDel); markPortfolioChanged(); renderTrades(); }
+});
 
 /* ===== pull to refresh (mobile) ===== */
 (function(){
