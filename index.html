@@ -863,6 +863,45 @@ const venue = sym => ({okx:"OKX",bybit:"BYBIT"})[exOf(sym)] || "BINANCE";
 const pairOf = sym => sym + (srcOf(sym) ? "USD" : "USDT");
 const heldLogo = sym => (state.portfolio.find(a=>a.symbol===sym)||{}).logo || (rawSrc(sym)||{}).logo;
 
+/* ===== market cap (CoinGecko, top 500 + coins added via CoinGecko) ===== */
+const MC_LS = "memox_mcap_v1";
+let mcap = {}, mcapAt = 0, mcapBusy = false;
+try { const m = JSON.parse(localStorage.getItem(MC_LS)||"null"); if (m && m.d) { mcap = m.d; mcapAt = m.t||0; } } catch {}
+const capFmt = v => {
+  v = num(v); if (!(v>0)) return "—";
+  for (const [k,s] of [[1e12,"T"],[1e9,"B"],[1e6,"M"],[1e3,"K"]]) if (v>=k) return "$"+(v/k).toFixed(2)+s;
+  return "$"+v.toFixed(0);
+};
+async function fetchMarketCaps(){
+  if (mcapBusy || Date.now()-mcapAt < 600000) return;
+  mcapBusy = true;
+  try {
+    const out = {};
+    for (const p of [1,2]) {
+      const r = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=${p}`);
+      if (!r.ok) throw new Error("HTTP "+r.status);
+      for (const c of await r.json()) {
+        const s = String(c.symbol).toUpperCase();
+        if (!out[s]) out[s] = {cap:num(c.market_cap),fdv:num(c.fully_diluted_valuation),rank:c.market_cap_rank||0};
+      }
+    }
+    /* coins added through CoinGecko (outside the top 500) */
+    const src = state.sources||{}, syms = allSymbols().filter(s=>src[s]&&src[s].id);
+    const ids = [...new Set(syms.map(s=>src[s].id))];
+    if (ids.length) {
+      const r = await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=250&ids="+encodeURIComponent(ids.join(",")));
+      if (r.ok) for (const c of await r.json())
+        for (const s of syms) if (src[s].id===c.id) out[s] = {cap:num(c.market_cap),fdv:num(c.fully_diluted_valuation),rank:c.market_cap_rank||0};
+    }
+    mcap = out; mcapAt = Date.now();
+    try { localStorage.setItem(MC_LS,JSON.stringify({t:mcapAt,d:mcap})); } catch {}
+    render();
+  } catch (e) {
+    console.warn("Market cap failed:",e);
+    mcapAt = Date.now()-540000; /* retry in ~1 min */
+  } finally { mcapBusy = false; }
+}
+
 /* coins forced to use Bybit (price + chart) instead of CoinGecko */
 const FORCE_BYBIT = ["AZTEC"];
 function fixSources(){
@@ -1041,6 +1080,7 @@ function renderCards() {
         <div><small>Invested</small><b>${hasBuy?moneyRound(p.cost):"—"}</b></div>
       </div>
       <div class="share"><div class="share-bar"><i style="width:${share.toFixed(1)}%"></i></div><small>${share.toFixed(1)}% of portfolio</small></div>
+      ${(mcap[a.symbol]&&mcap[a.symbol].cap>0)?`<div class="tgt">Market cap <b style="color:var(--text)">${capFmt(mcap[a.symbol].cap)}</b>${mcap[a.symbol].rank?` · #${mcap[a.symbol].rank}`:""}</div>`:""}
       ${tgtHtml(a,price)}
       <div class="card-details ${open?"open":""}">
         ${lots.map(l=>{
@@ -1175,7 +1215,7 @@ function renderWatchlist(){
     const nm = (held && held.name && held.name!==sym) ? held.name : ((srcOf(sym)||{}).name || sym);
     return `<div class="tv-row ${sym===active?"active":""}" data-sym="${e}">
       <button type="button" class="drag-handle" aria-label="Drag to reorder ${e}" title="Drag to reorder">⋮⋮</button>
-      <span class="tv-sym"><span class="coin-logo">${coinImg(sym,heldLogo(sym))}</span><span class="tv-txt"><span class="tv-name">${escapeHtml(pairOf(sym))}</span><span class="tv-sub">${escapeHtml(nm)} / ${srcOf(sym)?"USD":"TetherUS"}</span></span></span>
+      <span class="tv-sym"><span class="coin-logo">${coinImg(sym,heldLogo(sym))}</span><span class="tv-txt"><span class="tv-name">${escapeHtml(pairOf(sym))}</span><span class="tv-sub">${escapeHtml(nm)}${(mcap[sym]&&mcap[sym].cap>0)?" · MC "+capFmt(mcap[sym].cap):""}</span></span></span>
       <span class="num ${flash("w:"+sym,price)}">${price>0?numFmt(price):"—"}</span>
       <span class="num ${cls}">${abs>0?"+":abs<0?"−":""}${abs?numFmt(abs):"0.00"}</span>
       <span class="num ${cls}">${pct>0?"+":pct<0?"−":""}${Math.abs(pct).toFixed(2)}%</span>
@@ -1247,6 +1287,7 @@ function renderDetail(){
     <div class="dt-price ${cls}"><span>${price>0?numFmt(price):"—"}</span><small>${srcOf(sym)?"USD":"USDT"}</small><span class="dt-chg">${abs>0?"+":abs<0?"−":""}${abs?numFmt(abs):"0.00"} ${pct>0?"+":pct<0?"−":""}${Math.abs(pct).toFixed(2)}%</span></div>
     ${rangeBar(dLo,dHi,price,"Day's range")}
     ${rangeBar(wLo,wHi,price,"52wk range")}
+    ${(mcap[sym]&&mcap[sym].cap>0)?`<div class="dt-pos" style="margin-top:16px"><div>Market cap<strong>${capFmt(mcap[sym].cap)}</strong></div><div>Rank<strong>${mcap[sym].rank?"#"+mcap[sym].rank:"—"}</strong></div>${mcap[sym].fdv>0?`<div>FDV<strong>${capFmt(mcap[sym].fdv)}</strong></div>`:""}</div>`:""}
     <h4>Performance</h4><div class="perf-grid">${tiles}</div>
     ${pos}${alertsHtml(sym)}${rem}
   </div>`;
@@ -1463,6 +1504,7 @@ function applyTicker(sym,price,pct,hi,lo,vol){
 async function fetchPrices(){
   fixSources();
   fetchDayOpens();
+  fetchMarketCaps();
   const all = allSymbols();
   if (!all.length) { setStatus(true,"Add assets to begin"); return; }
   const symbols = all.filter(s=>!(state.sources||{})[s]);
@@ -1914,6 +1956,8 @@ const AR = {
 };
 AR["Daily profit / loss"] = "الربح / الخسارة اليومية";
 AR["Daily log"] = "سجل الأرباح اليومي";
+AR["Market cap"] = "القيمة السوقية";
+AR["Rank"] = "الترتيب";
 const EN = Object.fromEntries(Object.entries(AR).map(([k,v])=>[v,k]));
 let langQueued = false;
 function schedLang(){ if (langQueued) return; langQueued = true; requestAnimationFrame(()=>{ langQueued = false; applyLang(); }); }
