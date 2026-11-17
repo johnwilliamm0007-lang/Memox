@@ -556,7 +556,7 @@ button:focus-visible{outline:2px solid var(--accent)}
         <div class="panel stat"><div class="stat-label">Net result</div><div class="stat-value" id="mNet">$0.00</div></div>
       </div>
       <div class="stat-foot" id="mNetEgp" style="margin:-4px 0 12px">—</div>
-      <div class="mstats"><div class="panel stat"><div class="stat-label">Expenses</div><div class="stat-value red" id="mExp">$0.00</div></div><div class="panel stat" style="grid-column:span 2"><div class="stat-label">Net after expenses</div><div class="stat-value" id="mNetAfter">$0.00</div></div></div><div class="section-head" style="margin:6px 0 8px"><div><h3>Expenses</h3></div><button class="btn" id="expAdd" type="button">＋ Add expense</button></div><div class="trade-list" id="expList" style="max-height:200px;margin-bottom:14px"></div><div class="tstats" id="tStats"></div>
+      <div class="mstats"><div class="panel stat"><div class="stat-label">Expenses</div><div class="stat-value red" id="mExp">$0.00</div></div><div class="panel stat" style="grid-column:span 2"><div class="stat-label">Net after expenses</div><div class="stat-value" id="mNetAfter">$0.00</div></div></div><div class="section-head" style="margin:6px 0 8px"><div><h3>Expenses</h3></div><button class="btn" id="expAdd" type="button">＋ Add expense</button></div><div class="trade-list" id="expList" style="max-height:200px;margin-bottom:14px"></div><div style="margin:0 0 10px"><button class="btn" id="manAdd" type="button">＋ Add manual profit / loss</button></div><div class="tstats" id="tStats"></div>
       <div class="section-head" style="margin:14px 0 8px"><div><h3>Daily log <span class="muted" style="font-weight:500;font-size:12px">(UTC)</span></h3></div></div>
       <div class="trade-list" id="dayList" style="max-height:260px;margin-bottom:14px"></div>
       <div class="trade-list" id="tradeList"></div>
@@ -1212,7 +1212,7 @@ async function loadGeckoChart(sym){
     const lp = data[data.length-1].close, prec = lp>=100?2:lp>=1?4:lp>=0.01?6:8;
     lwChart = LightweightCharts.createChart(host,{width:host.clientWidth||600,height:host.clientHeight||400,layout:{background:{color:"#000000"},textColor:"#8a8a8a"},grid:{vertLines:{color:"#0e0e0e"},horzLines:{color:"#0e0e0e"}},rightPriceScale:{borderColor:"#161616"},timeScale:{borderColor:"#161616",timeVisible:gDays<=30}});
     const ser = lwChart.addCandlestickSeries({upColor:"#089981",downColor:"#f23645",borderVisible:false,wickUpColor:"#089981",wickDownColor:"#f23645",priceFormat:{type:"price",precision:prec,minMove:Math.pow(10,-prec)}});
-    ser.setData(data); { const cl = data.map(d=>d.close), up = [], lo = [], mid = []; for (let i=19;i<data.length;i++) { const w = cl.slice(i-19,i+1), m = w.reduce((a,b)=>a+b,0)/20, sd = Math.sqrt(w.reduce((a,b)=>a+(b-m)*(b-m),0)/20); mid.push({time:data[i].time,value:m}); up.push({time:data[i].time,value:m+2*sd}); lo.push({time:data[i].time,value:m-2*sd}); } [[up,"#26a69a"],[lo,"#26a69a"],[mid,"#ef5350"]].forEach(([arr,col])=>{ const s = lwChart.addLineSeries({color:col,lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false}); s.setData(arr); }); }
+    ser.setData(data);
     lwChart.timeScale().fitContent();
     lwRO = new ResizeObserver(()=>{ if (lwChart) lwChart.applyOptions({width:host.clientWidth,height:host.clientHeight}); });
     lwRO.observe(host);
@@ -1723,7 +1723,7 @@ function renderTrades(){
   }
   $("tradeList").innerHTML = list.length ? list.map(t=>`<div class="trade-row">
     <div style="min-width:0"><div><strong>${escapeHtml(t.symbol)}${t.futures?" ⚡":""}</strong><span class="trade-date">${new Date(t.time).toLocaleDateString("en-GB")}</span></div>
-    <div class="trade-meta">${t.futures?`${escapeHtml(String(t.side).toUpperCase())} ${t.lev}x · `:""}${quantity(t.qty)} · ${priceFmt(t.buy)} → ${priceFmt(t.sell)}</div></div>
+    <div class="trade-meta">${t.futures?`${escapeHtml(String(t.side).toUpperCase())} ${t.lev}x · `:""}${t.manual?"Manual entry":`${quantity(t.qty)} · ${priceFmt(t.buy)} → ${priceFmt(t.sell)}`}</div></div>
     <div class="trade-pnl ${t.pnl>0?"green":t.pnl<0?"red":""}">${t.pnl>0?"+":""}${usd2(t.pnl)}</div>
     <button class="small-action" data-trade-del="${escapeHtml(t.id)}" aria-label="Delete trade">✕</button></div>`).join("")
     : `<div class="empty" style="padding:22px 10px">No closed positions this month.</div>`;
@@ -2030,6 +2030,20 @@ $("expAdd").addEventListener("click",()=>{
 document.addEventListener("click",e=>{
   const el = e.target.closest("[data-exp-del]");
   if (el && confirm("Delete this expense?")) { state.expenses = (state.expenses||[]).filter(x=>x.id!==el.dataset.expDel); markPortfolioChanged(); renderTrades(); }
+});
+
+/* ===== manual profit / loss entries (Trades tab) ===== */
+$("manAdd").addEventListener("click",()=>{
+  const raw = prompt("Profit amount in USD (use a minus for a loss; type egp after it for pounds, e.g. 500 egp or -200):"); if (raw===null) return;
+  const isE = /egp|ج/i.test(raw); let v = parseFloat(String(raw).replace(/[^0-9.,-]/g,"").replace(",","."));
+  if (!Number.isFinite(v) || v===0) { alert("Enter a valid amount."); return; }
+  if (isE) { if (!(state.usdEgp>0)) { alert("EGP rate unavailable."); return; } v = v/state.usdEgp; }
+  const note = (prompt("Note (optional):")||"").trim().slice(0,60);
+  const nowM = monthKey(Date.now()), [y,m] = viewMonth.split("-").map(Number);
+  const time = viewMonth===nowM ? Date.now() : new Date(y,m-1,15,12).getTime();
+  if (!Array.isArray(state.trades)) state.trades = [];
+  state.trades.push({id:uid(),symbol:note||"Manual",name:note||"Manual",qty:0,buy:0,sell:0,buyFee:0,sellFee:0,pnl:Math.round(v*100)/100,time,manual:true});
+  markPortfolioChanged(); viewMonth = monthKey(time); render();
 });
 
 /* ===== pull to refresh (mobile) ===== */
