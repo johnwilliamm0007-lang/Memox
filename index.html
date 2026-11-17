@@ -1212,7 +1212,7 @@ async function loadGeckoChart(sym){
     const lp = data[data.length-1].close, prec = lp>=100?2:lp>=1?4:lp>=0.01?6:8;
     lwChart = LightweightCharts.createChart(host,{width:host.clientWidth||600,height:host.clientHeight||400,layout:{background:{color:"#000000"},textColor:"#8a8a8a"},grid:{vertLines:{color:"#0e0e0e"},horzLines:{color:"#0e0e0e"}},rightPriceScale:{borderColor:"#161616"},timeScale:{borderColor:"#161616",timeVisible:gDays<=30}});
     const ser = lwChart.addCandlestickSeries({upColor:"#089981",downColor:"#f23645",borderVisible:false,wickUpColor:"#089981",wickDownColor:"#f23645",priceFormat:{type:"price",precision:prec,minMove:Math.pow(10,-prec)}});
-    ser.setData(data);
+    ser.setData(data); { const cl = data.map(d=>d.close), up = [], lo = [], mid = []; for (let i=19;i<data.length;i++) { const w = cl.slice(i-19,i+1), m = w.reduce((a,b)=>a+b,0)/20, sd = Math.sqrt(w.reduce((a,b)=>a+(b-m)*(b-m),0)/20); mid.push({time:data[i].time,value:m}); up.push({time:data[i].time,value:m+2*sd}); lo.push({time:data[i].time,value:m-2*sd}); } [[up,"#26a69a"],[lo,"#26a69a"],[mid,"#ef5350"]].forEach(([arr,col])=>{ const s = lwChart.addLineSeries({color:col,lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false}); s.setData(arr); }); }
     lwChart.timeScale().fitContent();
     lwRO = new ResizeObserver(()=>{ if (lwChart) lwChart.applyOptions({width:host.clientWidth,height:host.clientHeight}); });
     lwRO.observe(host);
