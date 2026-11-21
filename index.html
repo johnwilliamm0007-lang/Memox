@@ -1307,11 +1307,18 @@ function renderDetail(){
   }
   const inWl = (state.watchlist||[]).includes(sym);
   const rem = inWl ? `<button class="btn" data-watch-remove="${e}" type="button" style="width:100%;margin-top:10px">Remove from watchlist</button>` : "";
+  let dayMoves = "";
+  if (dLo>0 && dHi>dLo && price>0) {
+    const mv = (to,label) => { const p = (to/dLo-1)*100, d = held ? held.amount*(to-dLo) : 0, c = p>0?"green":p<0?"red":"";
+      return `<div>${label}<strong class="${c}">${p>0?"+":""}${p.toFixed(2)}%${held?" · "+(d>0?"+":"")+usd2(d):""}</strong></div>`; };
+    dayMoves = `<div class="dt-pos" style="margin-top:14px">${mv(dHi,"Day low → day high")}${mv(price,"Day low → now")}</div>`;
+  }
   box.innerHTML = `<div class="dt">
     <div class="dt-head"><span class="coin-logo">${coinImg(sym,heldLogo(sym))}</span><div class="dt-title">${escapeHtml(pairOf(sym))}</div></div>
     <div class="dt-sub">${escapeHtml(nm)} / ${srcOf(sym)?"USD · CoinGecko":"TetherUS · "+venue(sym)}</div>
     <div class="dt-price ${cls}"><span>${price>0?numFmt(price):"—"}</span><small>${srcOf(sym)?"USD":"USDT"}</small><span class="dt-chg">${abs>0?"+":abs<0?"−":""}${abs?numFmt(abs):"0.00"} ${pct>0?"+":pct<0?"−":""}${Math.abs(pct).toFixed(2)}%</span></div>
     ${rangeBar(dLo,dHi,price,"Day's range")}
+    ${dayMoves}
     ${rangeBar(wLo,wHi,price,"52wk range")}
     ${(mcap[sym]&&mcap[sym].cap>0)?`<div class="dt-pos" style="margin-top:16px"><div>Market cap<strong>${capFmt(mcap[sym].cap)}</strong></div><div>Rank<strong>${mcap[sym].rank?"#"+mcap[sym].rank:"—"}</strong></div>${mcap[sym].fdv>0?`<div>FDV<strong>${capFmt(mcap[sym].fdv)}</strong></div>`:""}</div>`:""}
     <h4>Performance</h4><div class="perf-grid">${tiles}</div>
