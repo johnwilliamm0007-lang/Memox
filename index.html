@@ -591,6 +591,7 @@ button:focus-visible{outline:2px solid var(--accent)}
         <div class="field"><label for="coinTp">Take profit (USD)</label><input id="coinTp" type="number" min="0" step="any" placeholder="Optional"></div>
         <div class="field"><label for="coinSl">Stop loss (USD)</label><input id="coinSl" type="number" min="0" step="any" placeholder="Optional"></div>
         <div class="field full"><label for="coinNote">Note</label><input id="coinNote" maxlength="200" placeholder="Why did you buy it? (optional)"></div>
+        <div class="field full"><label class="check"><input type="checkbox" id="coinNoPnl"> Exclude from profit / loss totals</label></div>
         <div class="field full"><label for="coinLogo">Logo URL (optional)</label><input id="coinLogo" type="url" placeholder="Found automatically if empty"></div>
       </div>
       <div class="modal-actions"><button class="btn" type="button" id="cancelBtn">Cancel</button><button class="btn primary" type="submit">Save asset</button></div>
@@ -744,6 +745,7 @@ function normalizeAsset(raw) {
     buyFee: Math.max(0, num(raw.buyFee)),
     logo: safe(raw.logo || raw.image || raw.imageUrl || raw.logoUrl || ""),
     tp: Math.max(0, num(raw.tp)), sl: Math.max(0, num(raw.sl)), note: safe(raw.note || "").slice(0,200),
+    noPnl: raw.noPnl === undefined ? symbol === "LINEA" : !!raw.noPnl,
     price: num(raw.price || raw.currentPrice),
     change24h: num(raw.change24h || raw.priceChangePercent || 0),
     lots: Array.isArray(raw.lots) ? raw.lots.map(l=>({id:safe(l.id||uid()),qty:num(l.qty),price:num(l.price),fee:num(l.fee),time:num(l.time)||Date.now()})) : []
@@ -778,12 +780,15 @@ function markPortfolioChanged(){ persist(); saveCloudPortfolio(); }
 const allSymbols = () => [...new Set([...state.portfolio.map(a=>a.symbol),...(state.watchlist||[])])];
 const priceOf = a => num(state.prices[a.symbol] ?? a.price);
 function totals() {
-  let assets=0,cost=0,hasBuy=false;
+  let assets=0,cost=0,pnlAssets=0,hasBuy=false;
   for (const a of state.portfolio) {
-    assets += a.amount * priceOf(a);
+    const v = a.amount * priceOf(a);
+    assets += v;
+    if (a.noPnl) continue;
+    pnlAssets += v;
     if (a.buyPrice > 0) { cost += a.amount*a.buyPrice + num(a.buyFee); hasBuy = true; }
   }
-  const cash = num(state.cash), value = assets + cash, pnl = assets - cost;
+  const cash = num(state.cash), value = assets + cash, pnl = pnlAssets - cost;
   return {value,assets,cash,cost,pnl,pnlPct:cost?pnl/cost*100:0,hasBuy};
 }
 const adjustCash = d => { state.cash = Math.round((num(state.cash)+d)*1e8)/1e8; };
@@ -923,6 +928,7 @@ async function fetchMarketCaps(){
 const FORCE_BYBIT = ["AZTEC"];
 function fixSources(){
   state.sources = state.sources || {};
+  state.portfolio.forEach(a=>{ if (a.symbol==="LINEA" && a.noPnl===undefined) a.noPnl = true; });
   const all = allSymbols();
   FORCE_BYBIT.forEach(s=>{
     if (!all.includes(s)) return;
@@ -1018,6 +1024,7 @@ function render() {
   /* daily profit / loss: since 00:00 UTC (daily open) + trades closed today (UTC day) */
   { const u0 = utc0Now(); let d=0,base=0,approx=false;
     for (const a of state.portfolio){
+      if (a.noPnl) continue;
       const p=priceOf(a); if(!(p>0)) continue;
       const dd = dayOpen[a.symbol], o = dd && dd.u0===u0 ? dd.o : 0;
       if (o>0) {
@@ -1028,7 +1035,7 @@ function render() {
       }
     }
     const rt=(state.trades||[]).filter(x=>x.time>=u0&&x.time<u0+864e5).reduce((s,x)=>s+num(x.pnl),0), dt=d+rt;
-    if (dayOpenReady===u0 && state.portfolio.every(a=>priceOf(a)>0) && (base>0||rt!==0)) logDaily(new Date(u0).toISOString().slice(0,10),dt,base>0?d/base*100:0);
+    if (dayOpenReady===u0 && state.portfolio.every(a=>a.noPnl||priceOf(a)>0) && (base>0||rt!==0)) logDaily(new Date(u0).toISOString().slice(0,10),dt,base>0?d/base*100:0);
     $("dayPnl").textContent=(dt>0?"+":"")+usd2(dt);
     $("dayPnl").className="stat-value "+(dt>0?"green":dt<0?"red":"");
     $("dayPnlFoot").textContent=`${base>0?(d>=0?"+":"")+(d/base*100).toFixed(2)+"% since 00:00 UTC"+(approx?" (~)":""):"—"} · Realized today: ${rt>0?"+":""}${usd2(rt)}${state.usdEgp>0?" · "+egpSigned(dt):""}`; }
@@ -1088,7 +1095,7 @@ function renderCards() {
           </div>
         </div>
       </div>
-      ${hasBuy?`<div class="pnl-line big ${cls}"><span>${p.pnl>0?"+":""}${usd2(p.pnl)}</span><small>${p.pct>=0?"+":""}${p.pct.toFixed(1)}%</small><em>Total</em></div>`:`<div class="pnl-line big muted"><span>No buy price</span></div>`}
+      ${hasBuy?`<div class="pnl-line big ${cls}"><span>${p.pnl>0?"+":""}${usd2(p.pnl)}</span><small>${p.pct>=0?"+":""}${p.pct.toFixed(1)}%</small><em>${a.noPnl?"Not in totals":"Total"}</em></div>`:`<div class="pnl-line big muted"><span>No buy price</span></div>`}
       <div class="card-value ${flash("c:"+a.symbol,price)}">${usd2(value)}</div>
       <div class="card-sub">${state.usdEgp>0?money(currentEgp(value),"EGP"):"—"}</div>
       
@@ -1624,7 +1631,7 @@ function openModal(asset=null){
   $("coinAmount").value = asset ? asset.amount : "";
   $("coinBuy").value = asset?.buyPrice||"";
   $("coinLogo").value = asset?.logo||"";
-  $("coinTp").value = asset?.tp||""; $("coinSl").value = asset?.sl||""; $("coinNote").value = asset?.note||"";
+  $("coinTp").value = asset?.tp||""; $("coinSl").value = asset?.sl||""; $("coinNote").value = asset?.note||""; $("coinNoPnl").checked = !!asset?.noPnl;
   $("coinFee").value = asset?.buyFee||""; $("coinFeeUnit").value = asset ? "usd" : "pct";
   $("coinDeduct").checked = true; $("coinDeductRow").style.display = asset ? "none" : "";
   previewBuy();
@@ -1670,10 +1677,10 @@ async function saveAsset(event){
     if (logo) duplicate.logo = logo;
     if (tp) duplicate.tp = tp; if (sl) duplicate.sl = sl; if (note) duplicate.note = note;
   } else if (existing) {
-    Object.assign(existing,{symbol,name:$("coinName").value.trim()||resolvedName||symbol,amount,buyPrice,buyFee:fee,logo,tp,sl,note});
+    Object.assign(existing,{symbol,name:$("coinName").value.trim()||resolvedName||symbol,amount,buyPrice,buyFee:fee,logo,tp,sl,note,noPnl:$("coinNoPnl").checked});
     existing.lots = amount>0 ? [{id:uid(),qty:amount,price:buyPrice,fee,time:Date.now()}] : [];
   } else {
-    state.portfolio.push({id:uid(),symbol,name:$("coinName").value.trim()||resolvedName||symbol,amount,buyPrice,buyFee:fee,logo,tp,sl,note,price:0,change24h:0,
+    state.portfolio.push({id:uid(),symbol,name:$("coinName").value.trim()||resolvedName||symbol,amount,buyPrice,buyFee:fee,logo,tp,sl,note,noPnl:$("coinNoPnl").checked,price:0,change24h:0,
       lots: amount>0 ? [{id:uid(),qty:amount,price:buyPrice,fee,time:Date.now()}] : []});
   }
   if (deduct) adjustCash(-spend);
